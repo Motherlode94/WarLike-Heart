@@ -91,7 +91,7 @@
       } finally {clearTimeout(timeout);}
     }
     append("assistant",answer);
-    if(window.WarLikeHeart3D){const l=answer.toLowerCase();window.WarLikeHeart3D.setMood(/heureuse|content|bonjour|plaisir|♥|❤️/.test(l)?"happy":/désol|erreur|impossible/.test(l)?"sad":/pourquoi|comment|?/.test(l)?"curious":"neutral");}
+    if(window.WarLikeHeart3D){const l=answer.toLowerCase();window.WarLikeHeart3D.setMood(/heureuse|content|bonjour|plaisir|♥|❤️/.test(l)?"happy":/désol|erreur|impossible/.test(l)?"sad":/pourquoi|comment|\\?/.test(l)?"curious":"neutral");}
     // Do not speak technical error messages.
     if($("apiStatus").textContent==="Connectée au moteur IA pour cette réponse." || !token) speak(answer);
     busy=false;sendButton.disabled=false;field.disabled=false;field.focus();
