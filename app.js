@@ -129,6 +129,7 @@
   if(officialPortrait){
     const portraitReady=()=>{
       if(!officialPortrait.naturalWidth)return;
+      if($("portrait").querySelector("img:not(#officialPortrait)"))return;
       officialPortrait.hidden=false;
       $("portrait").classList.add("has-image");
       $("portrait").classList.remove("is3d");
