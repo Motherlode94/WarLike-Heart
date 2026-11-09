@@ -37,3 +37,15 @@ Ouvrir `index.html` dans un navigateur moderne ou déployer les fichiers statiqu
 **Restrictions importantes :** reconnaissance vocale potentiellement gérée par le fournisseur du navigateur ; ne pas y dicter de données sensibles. Le code ne comporte pas de clés API et n'envoie pas les messages de chat à un serveur applicatif. La dictée vocale peut dépendre de services distants du navigateur. Aucun test sur Raspberry Pi ou déploiement Cloudflare n'a été effectué.
 
 **Prochaines étapes :** ajouter un portrait officiel sous licence/autorisation adéquate, intégrer un moteur IA derrière un backend sécurisé, connecter WarLike Server avec authentification, puis tester les périphériques sur Raspberry Pi 5.
+
+
+## Version v0.3 — connexion IA optionnelle
+
+- Interface conservée et enrichie d'un portrait personnalisable chargé localement.
+- Animation visuelle simple de l'avatar pendant la lecture vocale (ce n'est pas un véritable rig facial ni un lipsync phonétique).
+- Endpoint `functions/api/chat.js` pour Cloudflare Pages, connecté à l'API Responses d'OpenAI lorsque les secrets sont configurés.
+- Accès à l'IA protégé par un jeton distinct de la clé API; pas de secret dans le code navigateur.
+- Mode démonstration accessible sans clé; messages d'erreur explicites si l'IA n'est pas disponible.
+- Conservation de l'export/import et du stockage local facultatif.
+
+**Configuration requise :** voir [DEPLOIEMENT.md](DEPLOIEMENT.md). Le code a été publié, mais les secrets de production, l'hébergement et les tests de bout en bout ne sont pas confirmés. Le projet n'est pas encore prêt pour un usage public sans contrôles d'accès et quotas supplémentaires.
