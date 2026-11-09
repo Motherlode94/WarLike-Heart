@@ -2,6 +2,7 @@
    No placeholder cartoon is presented as the canonical 3D avatar. */
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { inspectAvatar, VISEME_PATTERNS, visemeForText } from "./avatar-rig.mjs";
 
 const holder=document.getElementById("heart3d");
 const canvas=document.getElementById("heartCanvas");
@@ -15,6 +16,8 @@ const key=new THREE.DirectionalLight(0xffeadb,2.0);key.position.set(-3,5,7);scen
 const rim=new THREE.DirectionalLight(0xb88ccf,1.4);rim.position.set(4,3,-2);scene.add(rim);
 const clock=new THREE.Clock();
 let current=null,mixer=null,speaking=false, mood="neutral", glbUrl=null;
+let speechPose="neutral", speechBoundaryAt=0;
+let readyReport=null;
 const morphs=[];
 function resize(){
  const {width,height}=holder.getBoundingClientRect();
@@ -28,11 +31,19 @@ function setMorph(pattern,value){
  }
 }
 function resetExpressions(){
- for(const {mesh,index,name} of morphs)if(/smile|happy|sad|blink|mouthopen|jawopen|viseme|aa|oh/i.test(name))mesh.morphTargetInfluences[index]=0;
+ for(const {mesh,index,name} of morphs)
+  if(Object.values(VISEME_PATTERNS).some(pattern=>pattern.test(name)))
+   mesh.morphTargetInfluences[index]=0;
+}
+function applyViseme(pose,value){
+ const pattern=VISEME_PATTERNS[pose];
+ if(pattern)setMorph(pattern,value);
 }
 const api={
  setMood(value){mood=value;},
- setSpeaking(value){speaking=!!value;},
+ setSpeaking(value){speaking=!!value;if(!speaking)speechPose="neutral";},
+ setSpeechPosition(text,charIndex){speechPose=visemeForText(text,charIndex);speechBoundaryAt=performance.now();},
+ inspect(){return readyReport;},
  setListening(){},
  async loadGLB(file){
   if(!file || !/\.glb$/i.test(file.name) || file.size>30*1024*1024)throw Error("Un fichier .glb de 30 Mo maximum est requis.");
@@ -40,10 +51,11 @@ const api={
   glbUrl=URL.createObjectURL(file);
   try{
    const gltf=await new GLTFLoader().loadAsync(glbUrl);
+   const box=new THREE.Box3().setFromObject(gltf.scene);
+   if(box.isEmpty())throw Error("Le GLB ne contient aucune géométrie visible.");
+   // Validate the incoming model before removing the previously displayed avatar.
    if(current){scene.remove(current);current.traverse(o=>{if(o.isMesh){o.geometry?.dispose();const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m?.dispose());}});}
    mixer=null;morphs.length=0;current=gltf.scene;scene.add(current);
-   const box=new THREE.Box3().setFromObject(current);
-   if(box.isEmpty())throw Error("Le GLB ne contient aucune géométrie visible.");
    const size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
    const max=Math.max(size.x,size.y,size.z,0.01);
    current.position.sub(center);
@@ -51,14 +63,21 @@ const api={
    const scale=2.9/max;current.scale.setScalar(scale);
    camera.position.set(0,size.y*scale*.18,Math.max(2.5,max*scale*1.25));
    camera.lookAt(0,0,0);
+   const bones=[],shapes=[];let skinnedMeshes=0,meshes=0;
    current.traverse(object=>{
+    if(object.isBone)bones.push(object.name);
+    if(object.isMesh)meshes++;
+    if(object.isSkinnedMesh)skinnedMeshes++;
     if(object.isMesh && object.morphTargetDictionary && object.morphTargetInfluences){
-      for(const [name,index] of Object.entries(object.morphTargetDictionary))morphs.push({mesh:object,index,name:name.toLowerCase()});
+      for(const [name,index] of Object.entries(object.morphTargetDictionary)){
+       morphs.push({mesh:object,index,name:name.toLowerCase()});shapes.push(name);
+      }
     }
    });
    if(gltf.animations.length){mixer=new THREE.AnimationMixer(current);const idle=gltf.animations.find(a=>/idle|breath/i.test(a.name))||gltf.animations[0];mixer.clipAction(idle).play();}
+   readyReport=inspectAvatar({bones,shapes,animations:gltf.animations.length,skinnedMeshes,meshes});
    resize();
-   return {animations:gltf.animations.length,morphTargets:morphs.length};
+   return readyReport;
   }finally{if(glbUrl){URL.revokeObjectURL(glbUrl);glbUrl=null;}}
  }
 };
@@ -74,7 +93,9 @@ function animate(t){
    resetExpressions();
    if(mood==="happy")setMorph(/smile|happy/,0.65);
    if(mood==="sad")setMorph(/sad/,0.4);
-   if(speaking)setMorph(/mouthopen|jawopen|viseme_aa|viseme_ah|^aa$/,0.3+Math.abs(Math.sin(t/110))*.42);
+   // Boundary events give word/character alignment, not true audio phoneme timings.
+   // Hold a pose briefly after each boundary; if no events arrive, keep mouth neutral.
+   if(speaking && performance.now()-speechBoundaryAt<360)applyViseme(speechPose,0.72);
    const blink=(t-lastBlink<160)?1:0;
    setMorph(/blink/,blink);
    if(t-lastBlink>3700)lastBlink=t;
