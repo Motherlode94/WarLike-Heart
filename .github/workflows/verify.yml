@@ -16,6 +16,7 @@ jobs:
         run: |
           node --check app.js
           node --check avatar3d.js
+          node --check avatar-rig.mjs
           node --check functions/api/chat.js
           node --check functions/api/server-status.js
       - name: Run backend API regression tests
