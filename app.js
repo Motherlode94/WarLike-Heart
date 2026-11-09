@@ -124,6 +124,21 @@
   document.addEventListener("warlike-heart-3d-ready",()=>{
     status("Visionneuse GLB disponible. Aucun modèle officiel n'est encore importé.");
   });
+  // The original portrait is the canonical fallback if the asset is in this repository.
+  const officialPortrait=$("officialPortrait");
+  if(officialPortrait){
+    const portraitReady=()=>{
+      if(!officialPortrait.naturalWidth)return;
+      officialPortrait.hidden=false;
+      $("portrait").classList.add("has-image");
+      $("portrait").classList.remove("is3d");
+      $("heart3d").classList.remove("active");
+      status("Portrait officiel affiché.");
+    };
+    officialPortrait.addEventListener("load",portraitReady);
+    officialPortrait.addEventListener("error",()=>status("Image officielle absente du dépôt : charge le portrait validé ou ajoute assets/portrait-officiel.webp sur GitHub."));
+    if(officialPortrait.complete && officialPortrait.naturalWidth)portraitReady();
+  }
   $("pickPortrait").addEventListener("click",()=> $("portraitFile").click());
   $("portraitFile").addEventListener("change",ev=>{
     const file=ev.target.files?.[0];ev.target.value="";
@@ -136,10 +151,11 @@
     const area=$("portrait");
     let img=area.querySelector("img");
     if(!img){img=document.createElement("img");img.alt="Portrait personnalisé de WarLike Heart";area.appendChild(img);}
+    if(officialPortrait)officialPortrait.hidden=true;
     img.src=portraitObjectUrl;
     area.classList.add("has-image");
     area.classList.remove("is3d");$("heart3d").classList.remove("active");
-    status("Portrait chargé pour cette session. Image non envoyée au serveur. Tu peux maintenant utiliser le portrait officiel.");
+    status("Portrait chargé pour cette session. Cette image reste sur ton appareil, sans envoi au serveur.");
   });
   $("accessToken").addEventListener("input",()=>{
     const connected=Boolean($("accessToken").value.trim());
