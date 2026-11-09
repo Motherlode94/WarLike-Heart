@@ -58,3 +58,11 @@ Ouvrir `index.html` dans un navigateur moderne ou déployer les fichiers statiqu
 **WarLike Server :** `functions/api/server-status.js` sonde uniquement la route de santé publique de `warlike-server.pages.dev` ; il n'effectue aucune connexion, ne récupère aucun profil et ne fournit **pas de SSO**. Selon la documentation actuelle de WarLike Server, le déploiement Pages est une vitrine de statut distincte de l'application authentifiée. L'intégration de session devra utiliser une API d'identité fiable et un protocole validé avant activation.
 
 **Production :** présence des fichiers sur GitHub vérifiable, mais accès au domaine public, secrets OpenAI configurés, tests HTTP authentifiés, réponses IA réelles et tests 3D sur navigateur/Raspberry Pi restent **non validés**. Ne pas déclarer ces tests réussis sans retours d'exécution probants.
+
+
+### Vérification Cloudflare du 9 novembre 2026
+
+- Projet `warlike-heart` : déploiement Cloudflare Pages de la branche `main` au commit `cbce1d992acbe0fde4b56896a7457196c775d216`, statut de déploiement **success**.
+- Projet `warlike-server` : déploiement Cloudflare Pages marqué **success**, mais cette cible n'est documentée que comme page de statut.
+- Aucune variable ou secret d'environnement déclaré dans la configuration de production `warlike-heart` consultée : l'appel authentifié à OpenAI ne peut donc pas être considéré comme opérationnel.
+- Les tests de requêtes HTTP depuis cette session n'ont pas abouti (résolution réseau indisponible) : **aucune réussite fonctionnelle en production** n'est revendiquée.
