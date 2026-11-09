@@ -71,4 +71,4 @@ export async function onRequestPost({request,env}) {
   if(!text) return respond({error:"Le modèle n'a pas retourné de texte."},502);
   return respond({reply:text.slice(0,4000),mode:"ai"});
 }
-export function onRequestGet() {return respond({error:"Méthode non autorisée."},405);}
+export function onRequestGet({env}) {return respond({aiConfigured:Boolean(env.OPENAI_API_KEY && env.HEART_ACCESS_TOKEN && env.HEART_ACCESS_TOKEN.length>=20),authenticationRequired:true,mode:"server-status"});}
