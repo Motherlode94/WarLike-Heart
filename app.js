@@ -157,6 +157,24 @@
     area.classList.remove("is3d");$("heart3d").classList.remove("active");
     status("Portrait chargé pour cette session. Cette image reste sur ton appareil, sans envoi au serveur.");
   });
+  // Public readiness checks return only booleans; no API key or token is exposed.
+  (async()=>{
+    try{
+      const response=await fetch("/api/chat",{method:"GET",cache:"no-store"});
+      if(!response.ok)throw Error("endpoint unavailable");
+      const data=await response.json();
+      if(data.aiConfigured===true){
+        $("aiMode").textContent="Service IA prêt — identification privée requise";
+        $("apiStatus").textContent="Serveur IA configuré. Saisis ton jeton privé pour discuter.";
+      }else{
+        $("aiMode").textContent="Service IA non configuré — mode démonstration";
+        $("apiStatus").textContent="Les secrets de production Cloudflare sont absents. Voir DEPLOIEMENT.md.";
+      }
+    }catch{
+      $("aiMode").textContent="État IA inconnu — mode démonstration";
+      $("apiStatus").textContent="La vérification de l'API n'est pas disponible.";
+    }
+  })();
   $("accessToken").addEventListener("input",()=>{
     const connected=Boolean($("accessToken").value.trim());
     $("aiMode").textContent=connected?"Mode IA demandé · vérifier la connexion":"Mode démo · réponses prédéfinies";
