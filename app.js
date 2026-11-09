@@ -1,12 +1,14 @@
-/* WarLike Heart · browser-only prototype — no external AI calls */
+/* WarLike Heart · local demo + optional authenticated Cloudflare AI */
 "use strict";
 (() => {
   const $ = id => document.getElementById(id);
-  const KEY = "warlike-heart-demo-v1";
+  const KEY = "warlike-heart-demo-v1"; // keep compatibility with v0.2 history
   const MAX = 100;
   const welcome = {role:"assistant",text:"Bonjour ! Je suis le prototype local de WarLike Heart. Tu peux écrire, essayer la voix ou exporter notre conversation. Les réponses sont des démonstrations : aucun modèle IA n'est encore connecté."};
   let history = [welcome];
   let recognition = null;
+  let busy = false;
+  let portraitObjectUrl = null;
   const state = {voiceEnabled:false,remember:false};
   const status = (text) => { $("status").textContent = text; };
   const safeHistory = (value) => Array.isArray(value) ? value.filter(x => x && ["user","assistant"].includes(x.role) && typeof x.text === "string" && x.text.length <= 4000).slice(-MAX) : null;
@@ -50,14 +52,72 @@
   function append(role,text) {
     history.push({role,text}); history=history.slice(-MAX); render(); persist();
   }
-  $("chatForm").addEventListener("submit",ev => {
-    ev.preventDefault(); const field=$("message"); const text=field.value.trim(); if(!text) return;
-    stopVoice(); append("user",text); field.value="";
-    const answer=reply(text); append("assistant",answer); speak(answer);
+  $("chatForm").addEventListener("submit",async ev => {
+    ev.preventDefault();
+    const field=$("message"); const text=field.value.trim();
+    if (!text || busy) return;
+    busy=true; const sendButton=$("chatForm").querySelector("button[type=submit]");
+    sendButton.disabled=true; field.disabled=true;
+    stopVoice();append("user",text);field.value="";
+    const token=$("accessToken").value.trim();
+    let answer;
+    if (!token) {
+      answer=reply(text);
+      $("apiStatus").textContent="Mode démo : aucun jeton saisi.";
+      $("aiMode").textContent="Mode démo · réponses prédéfinies";
+    } else {
+      $("apiStatus").textContent="Connexion au modèle IA…";
+      $("aiMode").textContent="Mode IA · connexion privée";
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),30000);
+      try {
+        const result=await fetch("/api/chat", {
+          method:"POST",
+          credentials:"same-origin",
+          headers:{"content-type":"application/json","authorization":"Bearer "+token},
+          body:JSON.stringify({messages:history.filter(m=>["user","assistant"].includes(m.role)).slice(-20)}),
+          signal:controller.signal,
+          cache:"no-store"
+        });
+        const data=await result.json().catch(()=>({}));
+        if(!result.ok||typeof data.reply!=="string") throw Error(data.error||"Serveur indisponible.");
+        answer=data.reply;
+        $("apiStatus").textContent="Connectée au moteur IA pour cette réponse.";
+      } catch(error) {
+        answer="La réponse IA n'a pas pu être obtenue : "+(error.name==="AbortError"?"délai dépassé.":error.message)+" Tu peux réessayer ou retirer le jeton pour utiliser le mode démo.";
+        $("apiStatus").textContent="Connexion IA en erreur.";
+        status("Le serveur IA n'a pas répondu.");
+      } finally {clearTimeout(timeout);}
+    }
+    append("assistant",answer);
+    // Do not speak technical error messages.
+    if($("apiStatus").textContent==="Connectée au moteur IA pour cette réponse." || !token) speak(answer);
+    busy=false;sendButton.disabled=false;field.disabled=false;field.focus();
+  });
+  $("pickPortrait").addEventListener("click",()=> $("portraitFile").click());
+  $("portraitFile").addEventListener("change",ev=>{
+    const file=ev.target.files?.[0];ev.target.value="";
+    if(!file)return;
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type) || file.size>5*1024*1024){
+      status("Portrait refusé : utilise JPG, PNG ou WebP, 5 Mo maximum.");return;
+    }
+    if(portraitObjectUrl) URL.revokeObjectURL(portraitObjectUrl);
+    portraitObjectUrl=URL.createObjectURL(file);
+    const area=$("portrait");
+    let img=area.querySelector("img");
+    if(!img){img=document.createElement("img");img.alt="Portrait personnalisé de WarLike Heart";area.appendChild(img);}
+    img.src=portraitObjectUrl;
+    area.classList.add("has-image");
+    status("Portrait chargé pour cette session. Image non envoyée au serveur.");
+  });
+  $("accessToken").addEventListener("input",()=>{
+    const connected=Boolean($("accessToken").value.trim());
+    $("aiMode").textContent=connected?"Mode IA demandé · vérifier la connexion":"Mode démo · réponses prédéfinies";
+    $("apiStatus").textContent=connected?"Jeton présent en mémoire ; une requête sera envoyée au prochain message.":"Le mode démo reste accessible sans jeton.";
   });
   $("voiceEnabled").addEventListener("change",ev => {state.voiceEnabled=ev.target.checked; if(!state.voiceEnabled) stopVoice();persist();});
   $("remember").addEventListener("change",ev => {state.remember=ev.target.checked;persist();status(state.remember?"Stockage local activé.":"Stockage local désactivé et ancienne copie supprimée.");});
-  $("stop").addEventListener("click",() => {stopVoice();if(recognition){recognition.abort();recognition=null;}status("Voix arrêtée.");});
+  $("stop").addEventListener("click",() => {stopVoice();if(recognition){recognition.abort();recognition=null;}$("portrait").classList.remove("listening");status("Voix arrêtée.");});
   $("listen").addEventListener("click",() => {
     const Engine=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(!Engine){status("Reconnaissance vocale non prise en charge par ce navigateur.");return;}
@@ -65,8 +125,8 @@
     const rec=new Engine(); recognition=rec;rec.lang="fr-FR";rec.interimResults=false;rec.maxAlternatives=1;
     rec.onresult=ev=>{if(ev.results?.[0]?.[0]?.transcript){$("message").value=ev.results[0][0].transcript;$("message").focus();status("Dictée insérée. Appuie sur Envoyer pour confirmer.");}};
     rec.onerror=ev=>status("Microphone : "+ev.error+". Vérifie l'autorisation et la connexion.");
-    rec.onend=()=>{if(recognition===rec)recognition=null;};
-    try{rec.start();status("Écoute en cours…");}catch{status("Impossible de démarrer la dictée.");}
+    rec.onend=()=>{if(recognition===rec)recognition=null;$("portrait").classList.remove("listening");};
+    try{rec.start();$("portrait").classList.add("listening");status("Écoute en cours…");}catch{status("Impossible de démarrer la dictée.");}
   });
   $("export").addEventListener("click",()=>{
     const json=JSON.stringify({format:"warlike-heart-conversation",version:1,exportedAt:new Date().toISOString(),history,settings:{voiceEnabled:state.voiceEnabled}},null,2);
