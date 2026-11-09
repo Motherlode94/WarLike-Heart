@@ -101,3 +101,14 @@ Le workflow [.github/workflows/verify.yml](.github/workflows/verify.yml) vérifi
 - La miniature **publique** embarquée dans GitHub demeure une image peu définie. Pour une qualité réellement HD sur tous les appareils, le propriétaire doit publier une image source haute résolution dans `assets/` et modifier son chemin ; l'amélioration de CSS seule ne peut pas restaurer les détails perdus.
 
 La version HD a été préparée dans les fichiers du chat à partir du portrait original de 1199 × 1312 px. Sa publication binaire dans GitHub n'a pas encore été réalisée ; ne pas présenter le site public comme automatiquement HD.
+
+
+## Version v0.8 — inspection du squelette et visèmes événementiels
+
+- `avatar-rig.mjs` inspecte les os humanoïdes principaux et les morph targets présents dans le GLB importé.
+- Le chargement affiche un diagnostic : maillages, nombre d'os, animations, os manquants et disponibilité des visèmes de base.
+- Les expressions utilisent les morph targets existants du modèle. Aucun visage ni squelette n'est inventé si le fichier ne les contient pas.
+- `SpeechSynthesisUtterance.onboundary` aligne approximativement les poses buccales sur la position du texte prononcé lorsque le navigateur fournit des événements. Sans ces événements, la bouche reste neutre au lieu d'afficher une oscillation arbitraire.
+- Tests automatisés : `tests/avatar-rig.test.mjs`, exécutés dans GitHub Actions.
+
+**Limites explicites :** les frontières de mots/caractères ne sont ni des timestamps de phonèmes ni une mesure audio. Ce module n'est **pas** un véritable lipsync phonétique avec alignement audio. Il faudra un moteur TTS retournant l'audio accompagné de visèmes horodatés, ou une analyse vocale appropriée. Un modèle GLB est toujours requis pour disposer d'un corps et d'un rig réels ; aucun GLB canonique complet n'est fourni. La validation de ressemblance au portrait officiel reste visuelle et manuelle. Tests WebGL en navigateur et sur Raspberry Pi encore non réalisés.
