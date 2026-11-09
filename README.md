@@ -49,3 +49,12 @@ Ouvrir `index.html` dans un navigateur moderne ou déployer les fichiers statiqu
 - Conservation de l'export/import et du stockage local facultatif.
 
 **Configuration requise :** voir [DEPLOIEMENT.md](DEPLOIEMENT.md). Le code a été publié, mais les secrets de production, l'hébergement et les tests de bout en bout ne sont pas confirmés. Le projet n'est pas encore prêt pour un usage public sans contrôles d'accès et quotas supplémentaires.
+
+
+## Version v0.4 — 3D + diagnostic WarLike Server
+
+**Avatar 3D :** `avatar3d.js` utilise Three.js via CDN, avec géométrie 3D procédurale (visage stylisé), clignements, rotation légère de la tête, expression souriante, curieuse, triste, et animation d'ouverture de bouche pendant la synthèse vocale. WebGL et une connexion au CDN sont requis. Si le module est indisponible, le cœur ou le portrait local peut rester affiché. Ce prototype **n'est pas** une reproduction 3D fidèle du visage canonique et n'inclut pas de rig facial avancé, blendshapes calibrés ni visèmes audio.
+
+**WarLike Server :** `functions/api/server-status.js` sonde uniquement la route de santé publique de `warlike-server.pages.dev` ; il n'effectue aucune connexion, ne récupère aucun profil et ne fournit **pas de SSO**. Selon la documentation actuelle de WarLike Server, le déploiement Pages est une vitrine de statut distincte de l'application authentifiée. L'intégration de session devra utiliser une API d'identité fiable et un protocole validé avant activation.
+
+**Production :** présence des fichiers sur GitHub vérifiable, mais accès au domaine public, secrets OpenAI configurés, tests HTTP authentifiés, réponses IA réelles et tests 3D sur navigateur/Raspberry Pi restent **non validés**. Ne pas déclarer ces tests réussis sans retours d'exécution probants.
