@@ -1,91 +1,85 @@
-/* Procedural WebGL avatar, independently animated expressions.
-   This is an original stylized 3D prototype, NOT the approved realistic likeness. */
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js";
+/* WarLike Heart — viewer for a real user-supplied GLB.
+   No placeholder cartoon is presented as the canonical 3D avatar. */
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const holder = document.getElementById("heart3d");
-const canvas = document.getElementById("heartCanvas");
-if (!holder || !canvas) throw new Error("Missing avatar mount");
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(35, 1, .1, 100);
-camera.position.set(0, .0, 5.8);
-const renderer = new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:"low-power"});
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1,2));
+const holder=document.getElementById("heart3d");
+const canvas=document.getElementById("heartCanvas");
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:"low-power"});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer.outputColorSpace=THREE.SRGBColorSpace;
-const light = new THREE.HemisphereLight(0xffddeb,0x382232,2.3);scene.add(light);
-const key=new THREE.DirectionalLight(0xfff3e8,2.8);key.position.set(-3,4,5);scene.add(key);
-const fill=new THREE.DirectionalLight(0xbd8bdf,1.7);fill.position.set(3,1,3);scene.add(fill);
-const root=new THREE.Group();scene.add(root);
-const mat=(color,roughness=.8)=>new THREE.MeshStandardMaterial({color,roughness,metalness:0});
-const skin=mat(0x663b2b), skinLight=mat(0x84513a), hair=mat(0x151016), white=mat(0xf4e5d9), iris=mat(0x42251a), black=mat(0x100b10), lip=mat(0x8b4250), gold=new THREE.MeshStandardMaterial({color:0xc89d58,metalness:.75,roughness:.22}),cloth=mat(0x17141d);
-function sphere(r,x,y,z,material,sx=1,sy=1,sz=1,segments=24){
- const mesh=new THREE.Mesh(new THREE.SphereGeometry(r,segments,16),material);
- mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);root.add(mesh);return mesh;
-}
-sphere(1.0,0,-1.6,-.12,cloth,1.3,.65,.52);
-sphere(.32,0,-.97,.08,skin, .95,1.2,.92);
-sphere(.86,0,.09,0,skin, .76,1.10,.68,40);
-sphere(.80,0,.14,-.28,hair,.94,1.17,.92,36);
-// Voluminous dark curls
-for(let row=0;row<5;row++)for(let i=0;i<12;i++){
- const a=(i/12)*Math.PI*2+row*.3;
- const radius=.60+row*.035;
- const x=Math.cos(a)*radius, z=Math.sin(a)*.48-.10;
- const y=1.08-row*.15+(Math.sin(i*3+row)*.04);
- if(z>.2 && row>1 && Math.abs(x)<.39)continue;
- sphere(.19,x,y,z,hair,1,1,1,12);
-}
-for(const side of [-1,1]){
- for(let i=0;i<5;i++)sphere(.22,side*(.66+Math.sin(i)*.05),.42-i*.31,-.05,hair,.9,1.2,1,12);
- sphere(.12,side*.78,-.07,.02,skin);
- const hoop=new THREE.Mesh(new THREE.TorusGeometry(.13,.018,9,24),gold);hoop.position.set(side*.80,-.31,.1);root.add(hoop);
-}
-const leftEye=sphere(.118,-.285,.23,.637,white,1.5,.72,.35);
-const rightEye=sphere(.118,.285,.23,.637,white,1.5,.72,.35);
-const eyelids=[leftEye,rightEye];
-for(const side of [-1,1]){
- sphere(.075,side*.285,.23,.737,iris,.85,1,.32);
- sphere(.041,side*.285,.23,.766,black,.85,1,.3);
- sphere(.025,side*.265,.26,.786,white,.6,.6,.3);
-}
-const browL=sphere(.065,-.285,.43,.665,hair,1.7,.40,.30);
-const browR=sphere(.065,.285,.43,.665,hair,1.7,.40,.30);
-sphere(.16,0,-.06,.67,skinLight,.57,1.0,.65);
-sphere(.10,0,-.24,.72,skinLight,1.4,.54,.65);
-const mouth=sphere(.11,0,-.43,.679,lip,1.6,.28,.29);
-sphere(.07,0,-.69,.56,skinLight,1.9,.34,.75);
-// Heart pendant
-const pendant=new THREE.Mesh(new THREE.SphereGeometry(.056,16,12),gold);pendant.position.set(0,-1.03,.48);pendant.scale.set(1.2,1,.42);root.add(pendant);
-const collar=new THREE.Mesh(new THREE.TorusGeometry(.40,.012,8,48,Math.PI),gold);collar.rotation.z=Math.PI;collar.position.set(0,-.78,.34);root.add(collar);
-let mood="neutral",speaking=false,listening=false,blink=0;
-const moods={neutral:[.28,0],happy:[.12,-.05],curious:[.24,.1],sad:[.1,-.15],thinking:[.2,.06]};
-function setMood(next){mood=moods[next]?next:"neutral";}
-const api={setMood,setSpeaking(v){speaking=!!v;},setListening(v){listening=!!v;}};
-window.WarLikeHeart3D=api;
-document.dispatchEvent(new CustomEvent("warlike-heart-3d-ready"));
-let start=performance.now(),last=0;
-function tick(now){
- requestAnimationFrame(tick);
- const t=(now-start)/1000;
- if(now-last>2400+Math.random()*50){blink=1;last=now;}
- blink=Math.max(0,blink-.09);
- const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
- root.rotation.y=reduced?0:Math.sin(t*.5)*.09+(listening?.075:0);
- root.rotation.x=reduced?0:Math.sin(t*.7)*.025;
- root.position.y=reduced?0:Math.sin(t*1.2)*.025;
- const [smile,brow]=moods[mood];
- mouth.scale.y=speaking&&!reduced?.3+Math.abs(Math.sin(t*16))*.95:smile;
- mouth.scale.x=speaking?1.1:1.6;
- mouth.position.y=-.43+(mood==="happy"?.025:0);
- browL.position.y=.43+brow; browR.position.y=.43+brow;
- eyelids.forEach(e=>e.scale.y=Math.max(.06,(mood==="happy"?.54:.72)*(1-blink)));
- renderer.render(scene,camera);
-}
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,1,.01,200);
+camera.position.set(0,1.6,4);
+scene.add(new THREE.HemisphereLight(0xffffff,0x4b3144,2.1));
+const key=new THREE.DirectionalLight(0xffeadb,2.0);key.position.set(-3,5,7);scene.add(key);
+const rim=new THREE.DirectionalLight(0xb88ccf,1.4);rim.position.set(4,3,-2);scene.add(rim);
+const clock=new THREE.Clock();
+let current=null,mixer=null,speaking=false, mood="neutral", glbUrl=null;
+const morphs=[];
 function resize(){
  const {width,height}=holder.getBoundingClientRect();
  if(!width||!height)return;
- renderer.setSize(width,height,false);
- camera.aspect=width/height;
- camera.updateProjectionMatrix();
+ renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();
 }
-const observer=new ResizeObserver(resize);observer.observe(holder);resize();
-requestAnimationFrame(tick);
+new ResizeObserver(resize).observe(holder);
+function setMorph(pattern,value){
+ for(const {mesh,index,name} of morphs){
+  if(pattern.test(name)) mesh.morphTargetInfluences[index]=Math.max(0,Math.min(1,value));
+ }
+}
+function resetExpressions(){
+ for(const {mesh,index,name} of morphs)if(/smile|happy|sad|blink|mouthopen|jawopen|viseme|aa|oh/i.test(name))mesh.morphTargetInfluences[index]=0;
+}
+const api={
+ setMood(value){mood=value;},
+ setSpeaking(value){speaking=!!value;},
+ setListening(){},
+ async loadGLB(file){
+  if(!file || !/\.glb$/i.test(file.name) || file.size>30*1024*1024)throw Error("Un fichier .glb de 30 Mo maximum est requis.");
+  if(glbUrl)URL.revokeObjectURL(glbUrl);
+  glbUrl=URL.createObjectURL(file);
+  try{
+   const gltf=await new GLTFLoader().loadAsync(glbUrl);
+   if(current){scene.remove(current);current.traverse(o=>{if(o.isMesh){o.geometry?.dispose();const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m?.dispose());}});}
+   mixer=null;morphs.length=0;current=gltf.scene;scene.add(current);
+   const box=new THREE.Box3().setFromObject(current);
+   if(box.isEmpty())throw Error("Le GLB ne contient aucune géométrie visible.");
+   const size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
+   const max=Math.max(size.x,size.y,size.z,0.01);
+   current.position.sub(center);
+   current.position.y+=size.y*.12;
+   const scale=2.9/max;current.scale.setScalar(scale);
+   camera.position.set(0,size.y*scale*.18,Math.max(2.5,max*scale*1.25));
+   camera.lookAt(0,0,0);
+   current.traverse(object=>{
+    if(object.isMesh && object.morphTargetDictionary && object.morphTargetInfluences){
+      for(const [name,index] of Object.entries(object.morphTargetDictionary))morphs.push({mesh:object,index,name:name.toLowerCase()});
+    }
+   });
+   if(gltf.animations.length){mixer=new THREE.AnimationMixer(current);const idle=gltf.animations.find(a=>/idle|breath/i.test(a.name))||gltf.animations[0];mixer.clipAction(idle).play();}
+   resize();
+   return {animations:gltf.animations.length,morphTargets:morphs.length};
+  }finally{if(glbUrl){URL.revokeObjectURL(glbUrl);glbUrl=null;}}
+ }
+};
+window.WarLikeHeart3D=api;
+document.dispatchEvent(new Event("warlike-heart-3d-ready"));
+let lastBlink=0;
+function animate(t){
+ requestAnimationFrame(animate);
+ const delta=Math.min(clock.getDelta(),.1);
+ mixer?.update(delta);
+ if(current){
+  if(morphs.length){
+   resetExpressions();
+   if(mood==="happy")setMorph(/smile|happy/,0.65);
+   if(mood==="sad")setMorph(/sad/,0.4);
+   if(speaking)setMorph(/mouthopen|jawopen|viseme_aa|viseme_ah|^aa$/,0.3+Math.abs(Math.sin(t/110))*.42);
+   const blink=(t-lastBlink<160)?1:0;
+   setMorph(/blink/,blink);
+   if(t-lastBlink>3700)lastBlink=t;
+  }
+ }
+ renderer.render(scene,camera);
+}
+resize();requestAnimationFrame(animate);
