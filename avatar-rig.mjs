@@ -8,8 +8,8 @@ export const REQUIRED_BONES = {
   hips: /(?:^|[_ .-])(hips|pelvis)(?:$|[_ .-])/i,
   leftArm: /(?:left[_ .-]?(upper)?arm|upperarm[_ .-]?l|mixamorigleftarm)/i,
   rightArm: /(?:right[_ .-]?(upper)?arm|upperarm[_ .-]?r|mixamorigrightarm)/i,
-  leftLeg: /(?:left[_ .-]?(upper)?leg|left[_ .-]?thigh|upperleg[_ .-]?l|mixamorigleftupleg)/i,
-  rightLeg: /(?:right[_ .-]?(upper)?leg|right[_ .-]?thigh|upperleg[_ .-]?r|mixamorigrightupleg)/i
+  leftLeg: /(?:left[_ .-]?(upper)?leg|left[_ .-]?(?:up|upper)leg|left[_ .-]?thigh|upperleg[_ .-]?l|mixamorigleftupleg)/i,
+  rightLeg: /(?:right[_ .-]?(upper)?leg|right[_ .-]?(?:up|upper)leg|right[_ .-]?thigh|upperleg[_ .-]?r|mixamorigrightupleg)/i
 };
 export const VISEME_PATTERNS = {
   closed: /viseme[_ .-]?(pp|bmp)|mouthclose|mouth_press|^pp$/i,
