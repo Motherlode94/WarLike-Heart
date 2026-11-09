@@ -21,3 +21,19 @@ Ce dépôt est public. **Ne jamais y déposer** de mots de passe, clés API, jet
 
 ---
 Configuration portable, non exécutable.
+
+## Prototype web v0.2
+
+Ouvrir `index.html` dans un navigateur moderne ou déployer les fichiers statiques sur un hébergeur HTTPS (par exemple Cloudflare Pages).
+
+**Fonctions implémentées :**
+- Interface responsive et emblème temporaire (ce n'est pas le portrait officiel).
+- Chat de démonstration à réponses prédéfinies ; **aucun modèle IA connecté**.
+- Synthèse vocale `speechSynthesis` si disponible.
+- Dictée avec `SpeechRecognition` ou `webkitSpeechRecognition` si disponible ; l'autorisation du microphone peut être demandée par le navigateur.
+- Export/import local des conversations au format JSON.
+- Conservation locale optionnelle via `localStorage`, désactivée par défaut, avec suppression manuelle.
+
+**Restrictions importantes :** reconnaissance vocale potentiellement gérée par le fournisseur du navigateur ; ne pas y dicter de données sensibles. Le code ne comporte pas de clés API et n'envoie pas les messages de chat à un serveur applicatif. La dictée vocale peut dépendre de services distants du navigateur. Aucun test sur Raspberry Pi ou déploiement Cloudflare n'a été effectué.
+
+**Prochaines étapes :** ajouter un portrait officiel sous licence/autorisation adéquate, intégrer un moteur IA derrière un backend sécurisé, connecter WarLike Server avec authentification, puis tester les périphériques sur Raspberry Pi 5.
