@@ -30,14 +30,15 @@
   const stopVoice = () => {
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     $("portrait").classList.remove("speaking");
+    window.WarLikeHeart3D?.setSpeaking(false);
   };
   const speak = (text) => {
     if (!state.voiceEnabled) return;
     if (!("speechSynthesis" in window)) { status("Synthèse vocale non prise en charge ici."); return; }
     stopVoice();
     const utterance = new SpeechSynthesisUtterance(text); utterance.lang = "fr-FR"; utterance.rate = 1; utterance.pitch = 1;
-    utterance.onstart = () => $("portrait").classList.add("speaking");
-    utterance.onend = utterance.onerror = () => $("portrait").classList.remove("speaking");
+    utterance.onstart = () => {$("portrait").classList.add("speaking");window.WarLikeHeart3D?.setSpeaking(true);};
+    utterance.onend = utterance.onerror = () => {$("portrait").classList.remove("speaking");window.WarLikeHeart3D?.setSpeaking(false);};
     window.speechSynthesis.speak(utterance);
   };
   function reply(text) {
@@ -90,9 +91,29 @@
       } finally {clearTimeout(timeout);}
     }
     append("assistant",answer);
+    if(window.WarLikeHeart3D){const l=answer.toLowerCase();window.WarLikeHeart3D.setMood(/heureuse|content|bonjour|plaisir|♥|❤️/.test(l)?"happy":/désol|erreur|impossible/.test(l)?"sad":/pourquoi|comment|?/.test(l)?"curious":"neutral");}
     // Do not speak technical error messages.
     if($("apiStatus").textContent==="Connectée au moteur IA pour cette réponse." || !token) speak(answer);
     busy=false;sendButton.disabled=false;field.disabled=false;field.focus();
+  });
+  $("threeMode").addEventListener("click",()=>{
+    if(!window.WarLikeHeart3D){status("Le module 3D est indisponible (vérifie WebGL et l'accès au module Three.js).");return;}
+    $("portrait").classList.add("is3d");$("heart3d").classList.add("active");
+    status("Avatar 3D stylisé actif. Ce n'est pas encore le visage canonique riggé.");
+  });
+  $("checkServer").addEventListener("click",async()=>{
+    const btn=$("checkServer");btn.disabled=true;$("serverStatus").textContent="Vérification de la disponibilité…";
+    try{
+      const r=await fetch("/api/server-status",{cache:"no-store"});
+      if(!r.ok)throw Error("Diagnostic indisponible");
+      const data=await r.json();
+      $("serverStatus").textContent=(data.serverHealthy?"API de santé accessible. ":"Serveur non opérationnel ou indisponible. ")+"Aucun compte authentifié.";
+    }catch{$("serverStatus").textContent="Diagnostic non disponible : déployer les fonctions Cloudflare Pages. Aucun compte connecté.";}
+    finally{btn.disabled=false;}
+  });
+  document.addEventListener("warlike-heart-3d-ready",()=>{
+    $("portrait").classList.add("is3d");$("heart3d").classList.add("active");
+    status("Avatar 3D stylisé actif.");
   });
   $("pickPortrait").addEventListener("click",()=> $("portraitFile").click());
   $("portraitFile").addEventListener("change",ev=>{
@@ -108,6 +129,7 @@
     if(!img){img=document.createElement("img");img.alt="Portrait personnalisé de WarLike Heart";area.appendChild(img);}
     img.src=portraitObjectUrl;
     area.classList.add("has-image");
+    area.classList.remove("is3d");$("heart3d").classList.remove("active");
     status("Portrait chargé pour cette session. Image non envoyée au serveur.");
   });
   $("accessToken").addEventListener("input",()=>{
@@ -125,8 +147,8 @@
     const rec=new Engine(); recognition=rec;rec.lang="fr-FR";rec.interimResults=false;rec.maxAlternatives=1;
     rec.onresult=ev=>{if(ev.results?.[0]?.[0]?.transcript){$("message").value=ev.results[0][0].transcript;$("message").focus();status("Dictée insérée. Appuie sur Envoyer pour confirmer.");}};
     rec.onerror=ev=>status("Microphone : "+ev.error+". Vérifie l'autorisation et la connexion.");
-    rec.onend=()=>{if(recognition===rec)recognition=null;$("portrait").classList.remove("listening");};
-    try{rec.start();$("portrait").classList.add("listening");status("Écoute en cours…");}catch{status("Impossible de démarrer la dictée.");}
+    rec.onend=()=>{if(recognition===rec)recognition=null;$("portrait").classList.remove("listening");window.WarLikeHeart3D?.setListening(false);};
+    try{rec.start();window.WarLikeHeart3D?.setListening(true);$("portrait").classList.add("listening");status("Écoute en cours…");}catch{status("Impossible de démarrer la dictée.");}
   });
   $("export").addEventListener("click",()=>{
     const json=JSON.stringify({format:"warlike-heart-conversation",version:1,exportedAt:new Date().toISOString(),history,settings:{voiceEnabled:state.voiceEnabled}},null,2);
