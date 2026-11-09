@@ -28,7 +28,7 @@ jobs:
             import assert from "node:assert/strict";
             const html=fs.readFileSync("index.html","utf8");
             const readme=fs.readFileSync("README.md","utf8");
-            const versions=[...readme.matchAll(/## Version v(\\d+\\.\\d+)/g)].map(x=>x[1]);
+            const versions=[...readme.matchAll(/## Version v(\d+\.\d+)/g)].map(x=>x[1]);
             assert.ok(versions.length,"No documented release version found");
             const expected=versions.at(-1);
             assert.ok(html.includes("<title>WarLike Heart · v"+expected+"</title>"),"Page title must match README");
