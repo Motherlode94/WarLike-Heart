@@ -65,7 +65,7 @@
     if (!token) {
       answer=reply(text);
       $("apiStatus").textContent="Mode démo : aucun jeton saisi.";
-      $("aiMode").textContent="Mode démo · réponses prédéfinies";
+      $("aiMode").textContent="Mode démo · IA non configurée";
     } else {
       $("apiStatus").textContent="Connexion au modèle IA…";
       $("aiMode").textContent="Mode IA · connexion privée";
@@ -96,10 +96,20 @@
     if($("apiStatus").textContent==="Connectée au moteur IA pour cette réponse." || !token) speak(answer);
     busy=false;sendButton.disabled=false;field.disabled=false;field.focus();
   });
-  $("threeMode").addEventListener("click",()=>{
-    if(!window.WarLikeHeart3D){status("Le module 3D est indisponible (vérifie WebGL et l'accès au module Three.js).");return;}
-    $("portrait").classList.add("is3d");$("heart3d").classList.add("active");
-    status("Avatar 3D stylisé actif. Ce n'est pas encore le visage canonique riggé.");
+  $("threeMode").addEventListener("click",()=> $("modelFile").click());
+  $("modelFile").addEventListener("change",async ev=>{
+    const file=ev.target.files?.[0];ev.target.value="";
+    if(!file)return;
+    if(!window.WarLikeHeart3D){status("La visionneuse 3D n'est pas disponible. Vérifie WebGL et l'accès au module Three.js.");return;}
+    status("Chargement et vérification du véritable modèle GLB…");
+    try{
+      const result=await window.WarLikeHeart3D.loadGLB(file);
+      $("portrait").classList.add("is3d");
+      $("heart3d").classList.add("active");
+      status("Modèle GLB chargé : "+result.animations+" animations, "+result.morphTargets+" cibles d'expressions. Le rendu n'est pas une validation de ressemblance.");
+    }catch(error){
+      status("Modèle 3D non chargé : "+error.message);
+    }
   });
   $("checkServer").addEventListener("click",async()=>{
     const btn=$("checkServer");btn.disabled=true;$("serverStatus").textContent="Vérification de la disponibilité…";
@@ -112,8 +122,7 @@
     finally{btn.disabled=false;}
   });
   document.addEventListener("warlike-heart-3d-ready",()=>{
-    $("portrait").classList.add("is3d");$("heart3d").classList.add("active");
-    status("Avatar 3D stylisé actif.");
+    status("Visionneuse GLB disponible. Aucun modèle officiel n'est encore importé.");
   });
   $("pickPortrait").addEventListener("click",()=> $("portraitFile").click());
   $("portraitFile").addEventListener("change",ev=>{
@@ -130,7 +139,7 @@
     img.src=portraitObjectUrl;
     area.classList.add("has-image");
     area.classList.remove("is3d");$("heart3d").classList.remove("active");
-    status("Portrait chargé pour cette session. Image non envoyée au serveur.");
+    status("Portrait chargé pour cette session. Image non envoyée au serveur. Tu peux maintenant utiliser le portrait officiel.");
   });
   $("accessToken").addEventListener("input",()=>{
     const connected=Boolean($("accessToken").value.trim());
