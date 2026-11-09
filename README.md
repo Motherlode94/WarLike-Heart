@@ -90,3 +90,14 @@ La planche illustrée retrouvée est une **référence visuelle** : elle n'est p
 Un diagnostic `GET /api/chat` fournit `aiConfigured` sans révéler les secrets. Il ne remplace pas le test de conversation réelle : les secrets Cloudflare et l'authentification restent nécessaires.
 
 Le workflow [.github/workflows/verify.yml](.github/workflows/verify.yml) vérifie la syntaxe du code et les éléments attendus, lorsqu'il est exécuté par GitHub Actions. Aucun résultat de workflow réussi n'est confirmé ici.
+
+
+## Version v0.7 — portrait HD local
+
+- Correction de l'agrandissement excessif du portrait miniature public : largeur plafonnée à 320 px et proportion native conservée.
+- Bouton `Charger un portrait HD` : affiche une image PNG/JPEG/WebP de 5 Mo maximum sans transfert au serveur.
+- Sauvegarde locale du portrait chargé dans IndexedDB avec restauration automatique sur ce même navigateur.
+- Bouton `Retirer le portrait HD` : efface cette sauvegarde locale et revient au portrait de secours.
+- La miniature **publique** embarquée dans GitHub demeure une image peu définie. Pour une qualité réellement HD sur tous les appareils, le propriétaire doit publier une image source haute résolution dans `assets/` et modifier son chemin ; l'amélioration de CSS seule ne peut pas restaurer les détails perdus.
+
+La version HD a été préparée dans les fichiers du chat à partir du portrait original de 1199 × 1312 px. Sa publication binaire dans GitHub n'a pas encore été réalisée ; ne pas présenter le site public comme automatiquement HD.
