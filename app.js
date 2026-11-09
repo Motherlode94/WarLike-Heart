@@ -139,23 +139,64 @@
     officialPortrait.addEventListener("error",()=>status("Image officielle absente du dépôt : charge le portrait validé ou ajoute assets/portrait-officiel.webp sur GitHub."));
     if(officialPortrait.complete && officialPortrait.naturalWidth)portraitReady();
   }
+  // High-resolution image stays in this browser's IndexedDB, never on the API.
+  const portraitDB=()=>new Promise((resolve,reject)=>{
+    if(!("indexedDB" in window))return reject(Error("IndexedDB indisponible"));
+    const request=indexedDB.open("warlike-heart-portrait",1);
+    request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains("assets"))request.result.createObjectStore("assets");};
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error);
+  });
+  const portraitStore=async(mode,value)=>{
+    const db=await portraitDB();
+    try{
+      return await new Promise((resolve,reject)=>{
+        const tx=db.transaction("assets",mode==="read"?"readonly":"readwrite");
+        const store=tx.objectStore("assets");
+        const request=mode==="read"?store.get("official"):mode==="delete"?store.delete("official"):store.put(value,"official");
+        request.onsuccess=()=>resolve(request.result);
+        request.onerror=()=>reject(request.error);
+      });
+    }finally{db.close();}
+  };
+  const applyHDPortrait=(blob,note)=>{
+    if(portraitObjectUrl)URL.revokeObjectURL(portraitObjectUrl);
+    portraitObjectUrl=URL.createObjectURL(blob);
+    const img=$("portrait").querySelector("img:not(#officialPortrait)")||document.createElement("img");
+    img.alt="Portrait HD local de WarLike Heart";
+    img.onload=()=>{
+      status(note+" · "+img.naturalWidth+" × "+img.naturalHeight+" pixels.");
+    };
+    img.src=portraitObjectUrl;
+    if(!img.isConnected)$("portrait").appendChild(img);
+    if(officialPortrait)officialPortrait.hidden=true;
+    $("portrait").classList.add("has-image");
+    $("portrait").classList.remove("is3d");$("heart3d").classList.remove("active");
+  };
+  // Restore user-selected high-resolution photo before the embedded thumbnail can override it.
+  portraitStore("read").then(blob=>{if(blob instanceof Blob)applyHDPortrait(blob,"Portrait HD local restauré");}).catch(()=>{});
+  $("clearPortrait").addEventListener("click",async()=>{
+    try{await portraitStore("delete");}catch{}
+    if(portraitObjectUrl){URL.revokeObjectURL(portraitObjectUrl);portraitObjectUrl=null;}
+    const custom=$("portrait").querySelector("img:not(#officialPortrait)");custom?.remove();
+    if(officialPortrait&&officialPortrait.naturalWidth){officialPortrait.hidden=false;$("portrait").classList.add("has-image");}
+    status("Portrait HD local supprimé. La miniature publique reste disponible.");
+  });
   $("pickPortrait").addEventListener("click",()=> $("portraitFile").click());
-  $("portraitFile").addEventListener("change",ev=>{
+  $("portraitFile").addEventListener("change",async ev=>{
     const file=ev.target.files?.[0];ev.target.value="";
     if(!file)return;
     if(!["image/jpeg","image/png","image/webp"].includes(file.type) || file.size>5*1024*1024){
       status("Portrait refusé : utilise JPG, PNG ou WebP, 5 Mo maximum.");return;
     }
-    if(portraitObjectUrl) URL.revokeObjectURL(portraitObjectUrl);
-    portraitObjectUrl=URL.createObjectURL(file);
-    const area=$("portrait");
-    let img=area.querySelector("img");
-    if(!img){img=document.createElement("img");img.alt="Portrait personnalisé de WarLike Heart";area.appendChild(img);}
-    if(officialPortrait)officialPortrait.hidden=true;
-    img.src=portraitObjectUrl;
-    area.classList.add("has-image");
-    area.classList.remove("is3d");$("heart3d").classList.remove("active");
-    status("Portrait chargé pour cette session. Cette image reste sur ton appareil, sans envoi au serveur.");
+    try{
+      const bitmap=await createImageBitmap(file);
+      const width=bitmap.width,height=bitmap.height;bitmap.close();
+      if(width<600||height<650)status("Attention : cette image est trop petite pour une présentation HD ("+width+" × "+height+").");
+      applyHDPortrait(file,"Portrait sélectionné");
+      try{await portraitStore("write",file);}catch{status("Portrait affiché, mais la sauvegarde locale a échoué.");}
+    }catch{status("Fichier image invalide ou non pris en charge.");}
+
   });
   // Public readiness checks return only booleans; no API key or token is exposed.
   (async()=>{
