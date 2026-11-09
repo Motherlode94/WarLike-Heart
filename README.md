@@ -79,3 +79,14 @@ Ouvrir `index.html` dans un navigateur moderne ou déployer les fichiers statiqu
 - Limites de test : présence des fichiers sur GitHub contrôlée, exécution WebGL/GLB en navigateur et test final sur le site **non validés**.
 
 L'objectif officiel reste un modèle 3D fidèle au portrait canonique, doté d'un véritable rig facial et d'une synchronisation labiale contrôlée. Un GLB quelconque n'est **pas** considéré comme la version finale de WarLike Heart.
+
+
+## Mise à jour v0.6 — identité canonique et transparence
+
+Le portrait officiel a été retrouvé dans les fichiers personnels de l'utilisateur et optimisé pour le web, mais **il n'a pas encore été transféré dans le dépôt GitHub**. La page charge automatiquement `assets/portrait-officiel.webp` lorsqu'il est disponible ; sinon elle affiche un emblème provisoire avec option d'import local. Voir [ASSETS_OFFICIELS.md](ASSETS_OFFICIELS.md).
+
+La planche illustrée retrouvée est une **référence visuelle** : elle n'est pas un véritable modèle 3D. L'import GLB reste disponible, mais aucun avatar 3D canonique fidèle n'est encore livré.
+
+Un diagnostic `GET /api/chat` fournit `aiConfigured` sans révéler les secrets. Il ne remplace pas le test de conversation réelle : les secrets Cloudflare et l'authentification restent nécessaires.
+
+Le workflow [.github/workflows/verify.yml](.github/workflows/verify.yml) vérifie la syntaxe du code et les éléments attendus, lorsqu'il est exécuté par GitHub Actions. Aucun résultat de workflow réussi n'est confirmé ici.
