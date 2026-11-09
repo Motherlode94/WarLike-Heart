@@ -66,3 +66,16 @@ Ouvrir `index.html` dans un navigateur moderne ou déployer les fichiers statiqu
 - Projet `warlike-server` : déploiement Cloudflare Pages marqué **success**, mais cette cible n'est documentée que comme page de statut.
 - Aucune variable ou secret d'environnement déclaré dans la configuration de production `warlike-heart` consultée : l'appel authentifié à OpenAI ne peut donc pas être considéré comme opérationnel.
 - Les tests de requêtes HTTP depuis cette session n'ont pas abouti (résolution réseau indisponible) : **aucune réussite fonctionnelle en production** n'est revendiquée.
+
+
+## Correctif v0.5 — fidélité et présentation
+
+- Retrait de la tête 3D procédurale comme avatar affiché par défaut : elle ne ressemblait pas au portrait officiellement choisi.
+- Affichage par défaut d'un emblème neutre jusqu'à chargement du portrait officiel.
+- Import local d'un **véritable modèle riggé `.glb`** (jusqu'à 30 Mo) avec visionneuse Three.js : lecture d'un clip d'animation si présent, prise en charge des morph targets d'expressions si le fichier en contient. **Le dépôt ne fournit pas encore un modèle 3D officiel**.
+- L'utilisateur peut charger un portrait JPG/PNG/WebP sans transférer ce fichier au serveur. Il doit recharger ce portrait à chaque session.
+- Barre de version corrigée, panneaux de diagnostic/connexion repliables, interface agrandie.
+- L'IA n'est toujours pas confirmée en production : les secrets requis restent à configurer. Aucun faux résultat n'est affiché comme réussi.
+- Limites de test : présence des fichiers sur GitHub contrôlée, exécution WebGL/GLB en navigateur et test final sur le site **non validés**.
+
+L'objectif officiel reste un modèle 3D fidèle au portrait canonique, doté d'un véritable rig facial et d'une synchronisation labiale contrôlée. Un GLB quelconque n'est **pas** considéré comme la version finale de WarLike Heart.
