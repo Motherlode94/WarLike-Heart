@@ -1,0 +1,30 @@
+name: Verify WarLike Heart
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: |
+          node --check app.js
+          node --check avatar3d.js
+          node --check functions/api/chat.js
+          node --check functions/api/server-status.js
+      - name: Check required UI and endpoints
+        run: |
+          test -f index.html
+          test -f app.js
+          test -f avatar3d.js
+          test -f functions/api/chat.js
+          test -f functions/api/server-status.js
+          grep -q 'id="officialPortrait"' index.html
+          grep -q 'id="modelFile"' index.html
+          grep -q 'id="accessToken"' index.html
