@@ -38,6 +38,7 @@
     stopVoice();
     const utterance = new SpeechSynthesisUtterance(text); utterance.lang = "fr-FR"; utterance.rate = 1; utterance.pitch = 1;
     utterance.onstart = () => {$("portrait").classList.add("speaking");window.WarLikeHeart3D?.setSpeaking(true);};
+    utterance.onboundary = event => { if(Number.isFinite(event.charIndex)) window.WarLikeHeart3D?.setSpeechPosition(text,event.charIndex); };
     utterance.onend = utterance.onerror = () => {$("portrait").classList.remove("speaking");window.WarLikeHeart3D?.setSpeaking(false);};
     window.speechSynthesis.speak(utterance);
   };
@@ -106,7 +107,9 @@
       const result=await window.WarLikeHeart3D.loadGLB(file);
       $("portrait").classList.add("is3d");
       $("heart3d").classList.add("active");
-      status("Modèle GLB chargé : "+result.animations+" animations, "+result.morphTargets+" cibles d'expressions. Le rendu n'est pas une validation de ressemblance.");
+      const rig=result.fullBodyRigCandidate?"squelette humanoïde candidat détecté":"squelette incomplet ("+result.missingBones.join(", ")+")";
+      const lips=result.speechReady?"visèmes de base détectés":"visèmes insuffisants";
+      status("GLB : "+result.meshes+" maillages, "+result.boneCount+" os, "+result.animations+" animations — "+rig+" ; "+lips+". Ressemblance officielle non validée.");
     }catch(error){
       status("Modèle 3D non chargé : "+error.message);
     }
