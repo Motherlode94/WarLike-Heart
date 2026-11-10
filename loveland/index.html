@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WarLike LoveLand · Prototype 3D</title>
+<style>
+:root{font-family:system-ui,Segoe UI,sans-serif;color:#fff;background:#100d22}*{box-sizing:border-box}body{margin:0;overflow:hidden}canvas{display:block}
+#hud{position:fixed;inset:0;pointer-events:none}header{position:absolute;left:20px;top:16px;background:#151126d9;border:1px solid #986a9b;border-radius:16px;padding:14px 18px;box-shadow:0 12px 30px #0006}h1{font-size:19px;margin:0 0 5px}small{color:#ecd0e9}.meta{font-size:13px;color:#ffc8e0}
+#help{position:absolute;left:20px;bottom:18px;background:#151126dd;padding:13px 16px;border:1px solid #795c86;border-radius:14px;font-size:13px;line-height:1.6}
+#toast{position:absolute;bottom:110px;left:50%;transform:translateX(-50%);padding:12px 20px;background:#1b142eea;border:1px solid #ffc2d8;border-radius:18px;min-width:220px;text-align:center;opacity:0;transition:opacity .2s}
+#dialog{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);width:min(530px,93vw);background:#1b142ef5;border:1px solid #f9a4c6;border-radius:18px;padding:19px;pointer-events:auto;display:none;box-shadow:0 18px 60px #0009}
+#dialog.show{display:block}#dialog h2{margin:0 0 8px;font-size:19px}#dialog p{color:#f5dce8;line-height:1.55;margin:7px 0 14px}button{background:#a93f81;color:white;border:1px solid #f5a3d1;border-radius:11px;padding:11px 15px;cursor:pointer;font:inherit}button:hover,button:focus-visible{background:#d6539f;outline:2px solid #fff}button.secondary{background:#36304d}#dialog .buttons{display:flex;gap:8px;flex-wrap:wrap}
+#touch{display:none;position:absolute;bottom:20px;right:20px;pointer-events:auto;gap:8px;align-items:end}.pad{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px);gap:4px}.pad button{padding:0;touch-action:none}.pad button:first-child{grid-column:2}.pad button:nth-child(2){grid-column:1;grid-row:2}.pad button:nth-child(3){grid-column:2;grid-row:2}.pad button:nth-child(4){grid-column:3;grid-row:2}
+#fallback{position:fixed;inset:0;display:none;place-items:center;background:#100d22;text-align:center;padding:24px}#fallback p{max-width:580px}
+@media(max-width:850px){#touch{display:flex}#help{display:none}header{top:8px;left:8px;padding:10px}h1{font-size:15px}#dialog{bottom:126px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js"}}</script></head><body>
+<div id="hud"><header><h1>♥ WARLIKE LOVELAND</h1><small>Prototype 3D · Parc romantique interactif · 18+</small><div class="meta" id="score">Cœurs trouvés : 0 / 8</div><div class="meta" id="place">Place des Lumières</div></header>
+<div id="help">ZQSD / WASD : marcher · Souris : orienter la caméra<br>Maj : courir · E : interagir · Échap : fermer<br>Approche-toi des attractions et de l'avatar ♥</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="dialog" role="dialog" aria-modal="false" aria-labelledby="dialogTitle"><h2 id="dialogTitle"></h2><p id="dialogText"></p><div class="buttons" id="dialogButtons"></div></div>
+<div id="touch"><div class="pad"><button data-key="w" aria-label="Avancer">▲</button><button data-key="a" aria-label="Gauche">◀</button><button data-key="s" aria-label="Reculer">▼</button><button data-key="d" aria-label="Droite">▶</button></div><button id="touchInteract">Parler / Jouer</button></div></div>
+<div id="fallback"><div><h1>WebGL indisponible</h1><p>LoveLand nécessite un navigateur compatible WebGL et le chargement du module Three.js. Vérifie la connexion Internet et l'accélération graphique.</p></div></div>
+<script type="module">
+import * as THREE from 'three';
+const $=id=>document.getElementById(id);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x15112d);scene.fog=new THREE.FogExp2(0x24132e,.012);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,500);
+let renderer;try{renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.prepend(renderer.domElement)}catch(e){$('fallback').style.display='grid';throw e}
+scene.add(new THREE.HemisphereLight(0xd4c8ff,0x50334a,2.2));const sun=new THREE.DirectionalLight(0xffc0d8,2.7);sun.position.set(-25,40,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-85;sun.shadow.camera.right=85;sun.shadow.camera.top=85;sun.shadow.camera.bottom=-85;scene.add(sun);
+const mat=(c,opts={})=>new THREE.MeshStandardMaterial({color:c,roughness:.7,...opts});
+const pink=mat(0xff79b1),gold=mat(0xffd78a,{metalness:.35}),lavender=mat(0x8666d3),dark=mat(0x352b5d),white=mat(0xfff0eb),skin=mat(0x6e3d2f),hair=mat(0x161020),green=mat(0x343c45);
+const mesh=(geo,material,parent=scene)=>{const o=new THREE.Mesh(geo,material);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o};
+const box=(w,h,d,x,y,z,m,parent=scene)=>{const o=mesh(new THREE.BoxGeometry(w,h,d),m,parent);o.position.set(x,y,z);return o};
+const ball=(r,x,y,z,m,parent=scene)=>{const o=mesh(new THREE.SphereGeometry(r,14,10),m,parent);o.position.set(x,y,z);return o};
+const cyl=(r1,r2,h,x,y,z,m,parent=scene)=>{const o=mesh(new THREE.CylinderGeometry(r1,r2,h,14),m,parent);o.position.set(x,y,z);return o};
+box(170,2,170,0,-1.1,0,green);
+const walk=mat(0x77617d);box(10,.11,135,0,.02,0,walk);box(130,.11,10,0,.023,0,walk);
+const attractions=[];const addPoint=(name,x,z,description,action)=>attractions.push({name,pos:new THREE.Vector3(x,0,z),description,action});
+function tree(x,z){cyl(.32,.5,3,x,1.5,z,mat(0x6b4b4c));ball(2.2,x,4,z,mat(0x744c86));ball(1.7,x+1,4.5,z,pink)}
+for(let i=-72;i<=72;i+=14){tree(-13,i);tree(13,i);if(Math.abs(i)>14){tree(i,-13);tree(i,13)}}
+const bulbs=[];for(let i=-60;i<=60;i+=12){for(const s of [-1,1]){cyl(.11,.16,4,s*5,2,i,gold);const l=ball(.28,s*5,4.2,i,pink);bulbs.push(l)}} 
+// Romantic ferris wheel: physical-looking ring, spokes, gondolas and continuous slow rotation
+const wheel=new THREE.Group();wheel.position.set(-33,12,-28);scene.add(wheel);const radius=10;
+for(let i=0;i<16;i++){const a=i*Math.PI/8;const g=box(.19,.23,10,0,0,0,gold,wheel);g.rotation.z=a;g.rotation.y=Math.PI/2}
+const rim=mesh(new THREE.TorusGeometry(radius,.24,10,72),pink,wheel);
+for(let i=0;i<12;i++){const a=i*Math.PI/6;const spoke=box(radius*2,.13,.14,0,0,0,white,wheel);spoke.rotation.z=a;const cabin=box(2,1.4,1.7,Math.cos(a)*radius,Math.sin(a)*radius,0,lavender,wheel);cabin.userData.baseAngle=a}
+for(const x of [-36,-30]){const support=box(.6,18,.6,x,8,-28,gold);support.rotation.z=x===-36?-.19:.19}
+addPoint('Grande Roue',-33,-28,'Une vue lumineuse sur LoveLand.',()=>openDialog('Grande Roue','La grande roue tourne doucement. Tu remportes un cœur pour cette visite !',[['Monter virtuellement',()=>award('wheel')],['Fermer',closeDialog]]));
+const castle=new THREE.Group();castle.position.set(32,0,-33);scene.add(castle);box(16,9,12,0,4.5,0,lavender,castle);
+for(const x of [-7,7])for(const z of [-5,5]){cyl(2,2.2,13,x,6.5,z,dark,castle);const roof=mesh(new THREE.ConeGeometry(2.8,5,4),pink,castle);roof.position.set(x,15,z);roof.rotation.y=Math.PI/4}
+box(3.2,5,.4,0,2.5,6.25,gold,castle);box(2,2,.5,0,7,6.4,pink,castle);
+addPoint('Château des Secrets',32,-25,'Des salles mystérieuses et des surprises à découvrir.',()=>openDialog('Château des Secrets','Une porte dorée s’illumine. Le château t’offre un cœur de découverte.',[['Explorer',()=>award('castle')],['Fermer',closeDialog]]));
+const spa=new THREE.Group();spa.position.set(33,0,32);scene.add(spa);box(19,.3,15,0,.05,0,white,spa);box(14,.1,10,0,.25,0,mat(0x56a0c0,{metalness:.2,roughness:.25}),spa);
+for(const x of [-9,9])for(const z of [-6,6]){cyl(.35,.35,6,x,3,z,gold,spa)}box(20,.35,16,0,6.2,0,lavender,spa);
+addPoint('Spa des Étoiles',33,25,'Un espace paisible pour se détendre.',()=>openDialog('Spa des Étoiles','L’eau scintille sous la verrière. Une bulle de calme dans le parc.',[['Se détendre',()=>award('spa')],['Fermer',closeDialog]]));
+const stage=new THREE.Group();stage.position.set(-30,0,31);scene.add(stage);cyl(11,11,.8,0,.4,0,dark,stage);for(let i=0;i<10;i++){let a=i*Math.PI/5;const ob=box(1.1,3,1.1,Math.sin(a)*7,1.8,Math.cos(a)*7,i%2?pink:lavender,stage);ob.rotation.y=a}
+addPoint('Piste des Rêves',-30,30,'Une petite scène festive pour danser.',()=>openDialog('Piste des Rêves','Les lumières changent au rythme de la fête. Tu peux danser ici !',[['Danser',()=>award('dance')],['Fermer',closeDialog]]));
+function character(color){const group=new THREE.Group();cyl(.65,.65,1.9,0,1.45,0,color,group);ball(.55,0,2.77,0,skin,group);ball(.62,0,3.16,-.08,hair,group);for(const s of [-1,1]){box(.25,1,.28,s*.35,.55,0,dark,group);const arm=box(.22,1,.25,s*.8,1.8,0,skin,group);arm.rotation.z=s*.22}return group}
+const player=character(mat(0x44afbc));player.position.set(0,0,13);scene.add(player);
+const companion=character(pink);companion.position.set(2,0,-4);companion.rotation.y=Math.PI;scene.add(companion);
+addPoint('Compagne virtuelle',2,-4,'Dialoguer, apprendre à se connaître et choisir un moment romantique.',()=>openDialog('Compagne virtuelle','Bienvenue dans notre parc. On peut discuter, danser ou partager un moment de tendresse. Chaque interaction reste un choix.',[['Discuter',()=>openDialog('Conversation','J’aime découvrir ce parc avec toi. Quelle attraction veux-tu essayer ?', [['C’est gentil',()=>award('talk')],['Retour',closeDialog]])],['Proposer une danse',()=>openDialog('Invitation','Elle accepte une danse tranquille sur la place.',[['Danser ensemble',()=>award('together')],['Retour',closeDialog]])],['Demander un câlin',()=>openDialog('Un moment tendre','Elle accepte un câlin virtuel, puis te sourit.',[['Merci',()=>award('hug')],['Retour',closeDialog]])],['Respecter son espace',closeDialog]]));
+for(let i=0;i<8;i++){const x=Math.sin(i*2.4)*48,z=Math.cos(i*2.4)*48;ball(.55,x,1,z,mat(i%2?0xffe5a7:0xff73a7));addPoint('Cœur caché '+(i+1),x,z,'Un souvenir à récupérer.',()=>award('collect'+i))}
+let progress;try{progress=JSON.parse(localStorage.getItem('warlike-loveland-progress')||'[]')}catch{progress=[]}if(!Array.isArray(progress))progress=[];const collected=new Set(progress);
+function updateScore(){$('score').textContent='Souvenirs découverts : '+collected.size+' / 16'}updateScore();
+let toastTimer;function toast(msg){$('toast').textContent=msg;$('toast').style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.opacity=0,2400)}
+function award(id){if(!collected.has(id)){collected.add(id);try{localStorage.setItem('warlike-loveland-progress',JSON.stringify([...collected]))}catch{}updateScore();toast('♥ Nouveau souvenir !')}else toast('♥ Souvenir déjà découvert');closeDialog()}
+function openDialog(title,body,options){$('dialogTitle').textContent=title;$('dialogText').textContent=body;const el=$('dialogButtons');el.replaceChildren();for(const [label,fn] of options){const b=document.createElement('button');b.textContent=label;b.addEventListener('click',fn);el.append(b)}$('dialog').classList.add('show')}
+function closeDialog(){$('dialog').classList.remove('show')}
+const keys={};let yaw=0,drag=false,lastX=0,near=null;const direction=new THREE.Vector3();
+addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e'&&!e.repeat)interact();if(e.key==='Escape')closeDialog()});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+renderer.domElement.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX});addEventListener('pointerup',()=>drag=false);addEventListener('pointermove',e=>{if(!drag)return;yaw-=(e.clientX-lastX)*.005;lastX=e.clientX});
+for(const b of document.querySelectorAll('[data-key]')){for(const [event,val] of [['pointerdown',true],['pointerup',false],['pointercancel',false],['pointerleave',false]])b.addEventListener(event,e=>{e.preventDefault();keys[b.dataset.key]=val})}
+$('touchInteract').addEventListener('click',interact);
+function interact(){if($('dialog').classList.contains('show'))return;if(near)near.action();else toast('Approche-toi d’un lieu ou d’un personnage puis appuie sur E')}
+const clock=new THREE.Clock();let t=0;
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);t+=dt;wheel.rotation.z+=dt*.075;for(const child of wheel.children)if(child.userData.baseAngle!==undefined)child.rotation.z=-wheel.rotation.z;
+const blocked=$('dialog').classList.contains('show');let x=0,z=0;if(!blocked){if(keys.w||keys.z||keys.arrowup)z-=1;if(keys.s||keys.arrowdown)z+=1;if(keys.a||keys.q||keys.arrowleft)x-=1;if(keys.d||keys.arrowright)x+=1}
+const len=Math.hypot(x,z);if(len){x/=len;z/=len;const speed=keys.shift?11:6;const dx=(x*Math.cos(yaw)+z*Math.sin(yaw))*speed*dt;const dz=(-x*Math.sin(yaw)+z*Math.cos(yaw))*speed*dt;player.position.x=THREE.MathUtils.clamp(player.position.x+dx,-78,78);player.position.z=THREE.MathUtils.clamp(player.position.z+dz,-78,78);player.rotation.y=Math.atan2(dx,dz);player.position.y=Math.sin(t*13)*.08}else player.position.y=0;
+companion.position.y=Math.sin(t*2)*.055;companion.rotation.y=.25*Math.sin(t*.8);
+camera.position.lerp(new THREE.Vector3(player.position.x+Math.sin(yaw)*9,7,player.position.z+Math.cos(yaw)*9),.11);camera.lookAt(player.position.x,2,player.position.z);
+near=null;let best=4.5;for(const a of attractions){const dist=a.pos.distanceTo(new THREE.Vector3(player.position.x,0,player.position.z));if(dist<best){near=a;best=dist}}$('place').textContent=near?'E — '+near.name:'Explore le parc pour découvrir les attractions';
+for(let i=0;i<bulbs.length;i++)bulbs[i].scale.setScalar(.88+Math.sin(t*2+i)*.12);
+renderer.render(scene,camera)}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});animate();
+</script></body></html>
