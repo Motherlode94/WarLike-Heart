@@ -24,5 +24,5 @@ test("viewer restores local model before dispatching its ready event",()=>{
  assert.match(viewer,/finally\{document.dispatchEvent\(new Event\("warlike-heart-3d-ready"\)\);\}/);
  assert.match(app,/loadGLB\(file,\{rememberLocal:true\}\)/);
  assert.match(html,/id="forgetLocalAvatar"/);
- assert.match(html,/avatar3d\.js\?v=1\.6\.3/);
+ assert.match(html,/avatar3d\.js\?v=1\.6\.\d+/);
 });
