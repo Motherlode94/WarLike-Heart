@@ -175,7 +175,8 @@
       const r=await fetch("/api/server-status",{cache:"no-store"});
       if(!r.ok)throw Error("Diagnostic indisponible");
       const data=await r.json();
-      $("serverStatus").textContent=(data.serverHealthy?"API de santé accessible. ":"Serveur non opérationnel ou indisponible. ")+"Aucun compte authentifié.";
+      $("serverStatus").textContent=(typeof data.note==="string" && data.note.length<260)
+        ?data.note:"État du serveur non déterminé. Aucun compte authentifié.";
     }catch{$("serverStatus").textContent="Diagnostic non disponible : déployer les fonctions Cloudflare Pages. Aucun compte connecté.";}
     finally{btn.disabled=false;}
   });
