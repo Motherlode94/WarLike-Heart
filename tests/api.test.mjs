@@ -78,7 +78,7 @@ test("WarLike Server diagnostic never reports an authenticated account", async t
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response(JSON.stringify({service:"warlike-server",ready:true}), { status: 200 });
   t.after(() => { globalThis.fetch = originalFetch; });
-  const r = await serverStatus();
+  const r = await serverStatus({env:{WARLIKE_SERVER:{fetch:globalThis.fetch}}});
   const data = await r.json();
   assert.equal(data.serverHealthy, true);
   assert.equal(data.accountConnected, false);
@@ -95,9 +95,15 @@ test("WarLike Server health distinguishes absent API, not-ready and healthy",asy
   ];
   for(const s of scenarios){
     globalThis.fetch=async()=>new Response(s.body,{status:s.code});
-    const data=await (await serverStatus()).json();
+    const data=await (await serverStatus({env:{WARLIKE_SERVER:{fetch:globalThis.fetch}}})).json();
     assert.equal(data.status,s.status);
     assert.equal(data.serverHealthy,s.healthy);
     assert.equal(data.accountConnected,false);
   }
+});
+
+test("WarLike health refuses missing internal binding",async()=>{
+ const data=await (await serverStatus({env:{}})).json();
+ assert.equal(data.status,"binding_missing");
+ assert.equal(data.accountConnected,false);
 });
