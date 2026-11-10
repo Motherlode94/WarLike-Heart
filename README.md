@@ -118,3 +118,17 @@ La version HD a été préparée dans les fichiers du chat à partir du portrait
 Le fichier `heart-initiatives.js` ajoute un panneau dans les paramètres de l'interface existante. L'utilisateur peut activer explicitement des invitations virtuelles spontanées (bisou, câlin, danse, discussion), choisir une fréquence de 2, 5 ou 10 minutes, accepter ou refuser chaque proposition et interrompre immédiatement le mode. Par défaut, **le mode est désactivé**.
 
 Les propositions sont des scripts locaux et non des désirs autonomes de l'IA. Aucun mouvement de robot, appareil tactile, moteur ou capteur n'est commandé. Il n'y a pas de mémoire durable du réglage : le mode repart désactivé au rechargement. Le code ne déclenche pas de conversation distante. Test de structure et de sécurité : `tests/heart-initiatives.test.mjs`. Le comportement en vrai navigateur reste à vérifier.
+
+## Moteur conversationnel local — première implémentation (PR #6)
+
+Le script `local-brain.js` est exécuté dans le navigateur avant `app.js`. **Sans jeton d'accès à l'API**, il remplace les anciennes réponses génériques par des intentions reconnues (salutations, projets WarLike, affection fictive, voix, identité, mémoire) et un message explicite lorsqu'il ignore la réponse. Il ne nécessite pas de connexion IA pour **générer une réponse locale**, même s'il faut encore charger le site ou le conserver localement pour une utilisation hors ligne complète.
+
+L'option « Conserver cette conversation et les souvenirs explicites sur cet appareil » est **désactivée par défaut**. Après activation, saisir :
+- `Souviens-toi que je préfère la guitare` pour ajouter un souvenir explicite (40 maximum, 300 caractères chacun).
+- `Que sais-tu de moi ?` pour afficher les souvenirs.
+- `Oublie que je préfère la guitare` pour supprimer un souvenir exact.
+- `Efface tes souvenirs` pour supprimer toute la mémoire explicite.
+
+Ces souvenirs sont stockés dans `localStorage` sur **cet appareil uniquement** : aucun chiffrement n'est garanti, ils sont accessibles au profil local du navigateur, et ils ne sont pas synchronisés avec WarLike Server. Ne pas y enregistrer de secrets. La désactivation de l'option de conservation supprime l'historique et la mémoire explicite. L'export JSON contient désormais les souvenirs et doit être conservé en lieu sûr. L'import ne restaure les souvenirs que si la conservation est préalablement autorisée.
+
+Ce module **n'est ni un LLM, ni un apprentissage neuronal, ni une base sémantique** : il n'invente pas de nouvelles connaissances et n'entraîne aucun modèle. Les réponses locales sont déterministes avec plusieurs variantes. La connexion à l'API distante reste facultative. Les notifications Web Push et le modèle local génératif nécessitent des développements séparés.
