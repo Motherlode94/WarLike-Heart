@@ -4,7 +4,7 @@
   const $ = id => document.getElementById(id);
   const KEY = "warlike-heart-demo-v1"; // keep compatibility with v0.2 history
   const MAX = 100;
-  const welcome = {role:"assistant",text:"Bonjour ! Je suis le prototype local de WarLike Heart. Tu peux écrire, essayer la voix ou exporter notre conversation. Les réponses sont des démonstrations : aucun modèle IA n'est encore connecté."};
+  const welcome = {role:"assistant",text:"Coucou ❤️ Je suis WarLike Heart v0.9. Je réponds localement sans API IA pour les dialogues connus et je peux mémoriser des informations si tu actives la mémoire. Essaie « Salut » ou « Souviens-toi que… »."};
   let history = [welcome];
   let recognition = null;
   let busy = false;
@@ -29,6 +29,13 @@
     readMemory:readMemories,writeMemory:writeMemories,canRemember:()=>state.remember
   });
   const status = (text) => { $("status").textContent = text; };
+  const brainStatus=$("localBrainStatus");
+  if(brainStatus){
+    brainStatus.textContent=localBrain
+      ?"✓ Moteur local v0.9 chargé · réponses sans API · mémoire facultative"
+      :"⚠ Moteur local indisponible : vérifie le chargement de local-brain.js.";
+  }
+  if(localBrain)$("aiMode").textContent="Moteur local v0.9 · prêt sans API";
   const safeHistory = (value) => Array.isArray(value) ? value.filter(x => x && ["user","assistant"].includes(x.role) && typeof x.text === "string" && x.text.length <= 4000).slice(-MAX) : null;
   const render = () => {
     const area = $("messages"); area.replaceChildren();
@@ -246,17 +253,17 @@
         $("aiMode").textContent="Service IA prêt — identification privée requise";
         $("apiStatus").textContent="Serveur IA configuré. Saisis ton jeton privé pour discuter.";
       }else{
-        $("aiMode").textContent="Moteur local actif · service IA distant non configuré";
+        $("aiMode").textContent="Moteur local v0.9 · service distant non configuré";
         $("apiStatus").textContent="Les secrets de production Cloudflare sont absents. Voir DEPLOIEMENT.md.";
       }
     }catch{
-      $("aiMode").textContent="Moteur local actif · état du service distant inconnu";
+      $("aiMode").textContent="Moteur local v0.9 · service distant non vérifié";
       $("apiStatus").textContent="La vérification de l'API n'est pas disponible.";
     }
   })();
   $("accessToken").addEventListener("input",()=>{
     const connected=Boolean($("accessToken").value.trim());
-    $("aiMode").textContent=connected?"Mode IA distant demandé · vérifier la connexion":"Moteur local · indépendant de l’API";
+    $("aiMode").textContent=connected?"Mode IA distant demandé · vérifier la connexion":"Moteur local v0.9 · sans API";
     $("apiStatus").textContent=connected?"Jeton présent en mémoire ; une requête sera envoyée au prochain message.":"Le mode démo reste accessible sans jeton.";
   });
   $("voiceEnabled").addEventListener("change",ev => {state.voiceEnabled=ev.target.checked; if(!state.voiceEnabled) stopVoice();persist();});
