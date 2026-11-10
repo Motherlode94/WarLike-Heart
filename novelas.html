@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WarLike Heart · Novelas</title><style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#15121b;color:#fff}body{max-width:950px;margin:2rem auto;padding:0 1rem}a{color:#eeb6ce}header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}h1{font-size:clamp(1.7rem,4vw,2.6rem)}.muted{color:#cdbac7}main{background:#221d28;border:1px solid #4c3946;border-radius:18px;padding:1.5rem;margin:1.5rem 0}select,button{font:inherit;border-radius:9px;padding:.7rem;border:1px solid #ad7c91;background:#322733;color:white}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}.toolbar{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}label{display:grid;gap:.4rem}blockquote{border-left:3px solid #d790ad;padding:.3rem 1rem;margin:1rem 0;background:#2c2430;border-radius:6px}#scene{white-space:normal;line-height:1.65}.badge{color:#f9d9e5}.note{background:#29222c;padding:1rem;border-radius:10px}footer{margin:2rem 0;color:#bdaab6}</style></head>
+<body><header><div><h1>♥ WarLike Heart · Novelas</h1><p class="muted">350 intrigues · 100 scènes par intrigue · 35 000 scènes accessibles</p></div><a href="./index.html">Retour à WarLike Heart</a></header>
+<main><div class="toolbar"><label>Intrigue<select id="story"></select></label><label>Chapitre<select id="chapter"></select></label></div>
+<p class="badge" id="phase"></p><h2 id="title"></h2><p id="narration"></p><section id="dialogue" aria-label="Dialogues"></section>
+<div class="note"><strong>Initiative du personnage :</strong> <span id="initiative"></span><p id="continuity"></p></div>
+<p class="toolbar"><button id="previous">← Scène précédente</button><button id="next">Scène suivante →</button><button id="export">Exporter cette scène en JSON</button></p></main>
+<footer>Fiction adulte relationnelle, non graphique. Personnages adultes, consentement et liberté de choix. Scènes générées par gabarits : ce corpus ne constitue pas 350 romans originaux rédigés à la main. Les choix ne sont pas encore persistés.</footer>
+<script type="module">
+import {TOTAL_ARCS,SCENES_PER_ARC,getStory,getScene} from "./romance/novelas.mjs";
+const $=id=>document.getElementById(id),s=$("story"),c=$("chapter");
+for(let n=1;n<=TOTAL_ARCS;n++){const o=document.createElement("option");o.value=n;o.textContent=n+" · "+getStory(n).title;s.append(o);}
+for(let n=1;n<=SCENES_PER_ARC;n++){const o=document.createElement("option");o.value=n;o.textContent="Chapitre "+n;c.append(o);}
+let current;
+function render(){const story=+s.value,chapter=+c.value;current=getScene(story,chapter);$("title").textContent=current.title;$("phase").textContent=current.phase+" · "+current.id;$("narration").textContent=current.narration;$("initiative").textContent=current.initiative;$("continuity").textContent="Thème : "+current.theme+" · Humeur fictive : "+current.mood;
+$("dialogue").replaceChildren();for(const d of current.dialogue){const q=document.createElement("blockquote");const strong=document.createElement("strong");strong.textContent=d.speaker+" : ";q.append(strong,document.createTextNode("« "+d.text+" »"));$("dialogue").append(q);}
+$("previous").disabled=story===1&&chapter===1;$("next").disabled=story===TOTAL_ARCS&&chapter===SCENES_PER_ARC;
+history.replaceState(null,"","#"+story+"-"+chapter);
+}
+function move(delta){let index=(+s.value-1)*SCENES_PER_ARC+(+c.value-1)+delta;if(index<0||index>=TOTAL_ARCS*SCENES_PER_ARC)return;s.value=Math.floor(index/SCENES_PER_ARC)+1;c.value=index%SCENES_PER_ARC+1;render();}
+s.addEventListener("change",()=>{c.value=1;render()});c.addEventListener("change",render);$("previous").addEventListener("click",()=>move(-1));$("next").addEventListener("click",()=>move(1));
+$("export").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(current,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=current.id+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+const m=/^#(\d+)-(\d+)$/.exec(location.hash);if(m&&+m[1]>=1&&+m[1]<=TOTAL_ARCS&&+m[2]>=1&&+m[2]<=SCENES_PER_ARC){s.value=m[1];c.value=m[2];}render();
+</script></body></html>
