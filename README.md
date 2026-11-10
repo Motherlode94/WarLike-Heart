@@ -141,3 +141,7 @@ Ce module **n'est ni un LLM, ni un apprentissage neuronal, ni une base sémantiq
 - En cas d'échec du chargement du moteur, l'interface affiche un diagnostic au lieu de laisser supposer qu'il fonctionne.
 - Le moteur est à règles prédéfinies ; aucune conversation générative locale, aucune synchronisation cloud et aucun push réel ne sont ajoutés ici.
 - Vérifier manuellement le chargement des scripts, la version et les réponses sur le domaine de production après le prochain déploiement.
+
+## Version v1.0 — Learning Brain (local)
+
+La page comporte un panneau **Cerveau & apprentissage**. Après activation explicite du stockage local, l'utilisateur peut enseigner des associations question/réponse et des fiches sujet/contenu, les consulter, supprimer des entrées, les exporter/importer au format JSON. Le chat consulte ces entrées en priorité avant les règles existantes, avec un rapprochement lexical simple et un rappel limité du dernier sujet. Les réponses inconnues restent signalées comme inconnues. La bibliothèque est limitée à 500 dialogues et 500 fiches, non chiffrée, locale au navigateur et supprimée avec les données personnelles de l'application ou lors de la désactivation du stockage. Ne pas stocker de secrets. Le dialogue local fonctionne sans appel au fournisseur IA, mais cela **n'est pas** un réseau neuronal entraîné, une compréhension sémantique profonde ou une synchronisation entre appareils. Les contenus appris sont saisis et validés volontairement, jamais capturés silencieusement. L'option de connexion distante reste présente.
