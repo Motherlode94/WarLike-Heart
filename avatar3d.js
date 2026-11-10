@@ -77,6 +77,17 @@ const api={
  frame(mode){return framePose(mode);},
  resetView,
  zoom(direction){const factor=direction>0?.8:1.25;camera.position.sub(controls.target).multiplyScalar(factor).add(controls.target);controls.update();},
+ async loadPublishedGLB(){
+  const response=await fetch("/api/avatar",{cache:"no-store"});
+  if(response.status===404)return false;
+  if(!response.ok)throw Error("Impossible de récupérer l'avatar GLB publié.");
+  const size=Number(response.headers.get("content-length")||0);
+  if(size>30*1024*1024)throw Error("Avatar publié trop volumineux.");
+  const buffer=await response.arrayBuffer();
+  if(buffer.byteLength>30*1024*1024)throw Error("Avatar publié trop volumineux.");
+  await api.loadGLB(new File([buffer],"official-avatar.glb",{type:"model/gltf-binary"}));
+  return true;
+ },
  setMood(value){mood=value;},
  setSpeaking(value){speaking=!!value;if(!speaking)speechPose="neutral";},
  setSpeechPosition(text,charIndex){speechPose=visemeForText(text,charIndex);speechBoundaryAt=performance.now();},
