@@ -1,6 +1,6 @@
+import {hasServerBinding,serverFetch} from "../_server-transport.js";
 // WarLike Heart: short-lived, signed, HttpOnly session after explicit PKCE linking.
 // No passwords or WarLike Server cookies are transferred to this domain.
-const UPSTREAM="https://warlike-server.pages.dev/api/heart/exchange";
 const COOKIE="__Host-heart_warlike";
 const h={"content-type":"application/json; charset=utf-8","cache-control":"private, no-store","x-content-type-options":"nosniff"};
 const respond=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{...h,...extra}});
@@ -38,6 +38,7 @@ export async function onRequestGet({request,env}){
 }
 export async function onRequestPost({request,env}){
  if(!configured(env))return respond({error:"Association WarLike désactivée : secret de session absent."},503);
+ if(!hasServerBinding(env))return respond({error:"Liaison interne WarLike Server manquante."},503);
  if(!sameOrigin(request))return respond({error:"Origine refusée."},403);
  if(!request.headers.get("content-type")?.startsWith("application/json"))return respond({error:"JSON requis."},415);
  let input;
@@ -47,7 +48,7 @@ export async function onRequestPost({request,env}){
  }catch{return respond({error:"Demande invalide."},400);}
  if(!valid(input?.code)||!valid(input?.verifier))return respond({error:"Code d'association invalide."},400);
  let upstream;
- try{upstream=await fetch(UPSTREAM,{method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify({code:input.code,verifier:input.verifier}),signal:AbortSignal.timeout(7000),redirect:"error"});}
+ try{upstream=await serverFetch(env,"/api/heart/exchange",{method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify({code:input.code,verifier:input.verifier}),signal:AbortSignal.timeout(7000),redirect:"error"});}
  catch{return respond({error:"WarLike Server ne répond pas à l'association."},502);}
  if(!upstream.ok)return respond({error:"Association refusée ou expirée sur WarLike Server."},401);
  let user;try{user=(await upstream.json()).user;}catch{return respond({error:"Réponse du serveur invalide."},502);}
