@@ -162,3 +162,7 @@ Un nouveau bouton « Associer mon compte WarLike » et un état de connexion tem
 **Prérequis d'activation** : le runtime WarLike Server doit être reconstruit/déployé avec les routes, sa migration D1 doit être appliquée, et le secret `HEART_SESSION_SECRET` de **32 caractères ou plus** doit être ajouté uniquement dans les secrets du projet Cloudflare Pages WarLike Heart. En l'absence du secret, l'endpoint est fermé par défaut et l'interface indique que l'association n'est pas configurée.
 
 Ce premier niveau associe une identité temporaire, **pas** les comptes ChatGPT ni les cookies du serveur, et **ne synchronise pas encore les messages ni les souvenirs**. La révocation d'une session WarLike Server après émission du cookie Heart n'est pas instantanée : le cookie expire au plus tard après 10 minutes. À compléter par une vérification active et un système de révocation pour toute fonctionnalité sensible. Aucun rôle « admin » hérité ne confère de privilèges sur Heart.
+
+## Version v1.1 — association WarLike (préparée)
+
+Le panneau « État de WarLike Server et association de compte » fournit l'association de compte par autorisation sur WarLike Server. Ce flux reste inactif tant que les secrets, migrations et endpoints du serveur ne sont pas disponibles. Il ne synchronise pas encore les souvenirs. Voir ci-dessus les prérequis d'activation et la limite de session de 10 minutes.
