@@ -64,5 +64,6 @@ $("learningClear").addEventListener("click",()=>{
 });
 $("remember").addEventListener("change",()=>{render();show(bridge.enabled()?"Apprentissage local activé.":"Apprentissage local désactivé et bibliothèque supprimée.");});
 $("clear").addEventListener("click",()=>{render();show("Bibliothèque locale effacée avec les données du chat.");});
+document.addEventListener("warlike-heart-learning-restored",render);
 render();
 })();
