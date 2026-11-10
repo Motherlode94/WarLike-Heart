@@ -166,3 +166,9 @@ Ce premier niveau associe une identité temporaire, **pas** les comptes ChatGPT 
 ## Version v1.1 — association WarLike (préparée)
 
 Le panneau « État de WarLike Server et association de compte » fournit l'association de compte par autorisation sur WarLike Server. Ce flux reste inactif tant que les secrets, migrations et endpoints du serveur ne sont pas disponibles. Il ne synchronise pas encore les souvenirs. Voir ci-dessus les prérequis d'activation et la limite de session de 10 minutes.
+
+## Correctif : transport interne Cloudflare WarLike Server
+
+Les fonctions `/api/server-status` et `/api/account` utilisent désormais le **service binding** Cloudflare Pages `WARLIKE_SERVER` pointant sur `warlike-server-runtime`. Cet appel interne remplace le `fetch('https://warlike-server.pages.dev/...')` qui pouvait échouer dans le réseau Worker. L'absence du binding est signalée sans repli externe ; une liste blanche limite les routes à `/api/health` et `/api/heart/exchange`. Le secret `HEART_SESSION_SECRET` reste requis.
+
+Les tests de logique ne remplacent pas une vérification réelle du flux de connexion avec un compte WarLike.

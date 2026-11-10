@@ -23,6 +23,7 @@ jobs:
           node --check avatar-rig.mjs
           node --check functions/api/chat.js
           node --check functions/api/account.js
+          node --check functions/_server-transport.js
           node --check heart-account.js
           node --check functions/api/server-status.js
       - name: Run backend API regression tests

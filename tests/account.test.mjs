@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {onRequestGet,onRequestPost,onRequestDelete} from "../functions/api/account.js";
 const origin="https://heart.example";
-const env={HEART_SESSION_SECRET:"a-long-private-signing-secret-with-at-least-32-characters"};
+const env={HEART_SESSION_SECRET:"a-long-private-signing-secret-with-at-least-32-characters",WARLIKE_SERVER:{fetch:(request)=>globalThis.fetch(request)}};
 const req=(path="",options={})=>new Request(origin+"/api/account"+path,options);
 const code="c".repeat(43),verifier="v".repeat(43);
 test("unconfigured secret fails closed",async()=>{
@@ -30,4 +30,11 @@ test("session cookie is HttpOnly, signed and temporary",async t=>{
  assert.equal((await active.json()).user.name,"Alice");
  const cleared=await onRequestDelete({request:req("",{method:"DELETE",headers:{"origin":origin}})});
  assert.match(cleared.headers.get("set-cookie"),/Max-Age=0/);
+});
+
+test("pairing is unavailable without the internal Cloudflare binding",async()=>{
+ const request=req("",{method:"POST",headers:{"origin":origin,"content-type":"application/json"},body:JSON.stringify({code,verifier})});
+ const response=await onRequestPost({request,env:{HEART_SESSION_SECRET:env.HEART_SESSION_SECRET}});
+ assert.equal(response.status,503);
+ assert.match((await response.json()).error,/liaison/i);
 });
