@@ -33,7 +33,7 @@ function score(query,entry){
  // Candidate relevance outweighs greetings/filler in the user's query.
  const value=coverage*.75+precision*.25;
  // A one-word overlap should not match a multiword subject.
- if(eTokens.length>=2&&coverage<1)return Math.min(value,.72);
+ if(eTokens.length>=2&&coverage<.65)return Math.min(value,.72);
  // One-word subjects must be explicitly included as a whole word.
  if(eTokens.length===1 && qTokens.length>4)return Math.min(value,.73);
  return Math.min(.99,value);
