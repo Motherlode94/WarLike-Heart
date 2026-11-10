@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { inspectAvatar, VISEME_PATTERNS, visemeForText } from "./avatar-rig.mjs";
+import {saveLocalAvatar,readLocalAvatar,deleteLocalAvatar} from "./avatar-store.mjs";
 
 const holder=document.getElementById("heart3d");
 const originalParent=holder.parentElement;
@@ -47,6 +48,8 @@ const clock=new THREE.Clock();
 let current=null,mixer=null,speaking=false, mood="neutral", glbUrl=null;
 let speechPose="neutral", speechBoundaryAt=0;
 let readyReport=null;
+let source="none";
+const announce=(type,detail={})=>document.dispatchEvent(new CustomEvent("warlike-heart-avatar-storage",{detail:{type,...detail}}));
 const morphs=[];
 function resize(){
  const {width,height}=holder.getBoundingClientRect();
@@ -72,6 +75,8 @@ const api={
  mountInto(target){if(target&&holder.parentElement!==target)target.append(holder);resize();},
  restoreMount(){if(originalParent&&holder.parentElement!==originalParent)originalParent.append(holder);resize();},
  isModelLoaded(){return Boolean(current);},
+ currentSource(){return source;},
+ async forgetLocalGLB(){await deleteLocalAvatar();announce("cleared");return true;},
  setAutoRotate(value){autoRotate=Boolean(value);return autoRotate;},
  setAnimationEnabled(value){animationsEnabled=Boolean(value);return animationsEnabled;},
  frame(mode){return framePose(mode);},
@@ -85,7 +90,7 @@ const api={
   if(size>30*1024*1024)throw Error("Avatar publié trop volumineux.");
   const buffer=await response.arrayBuffer();
   if(buffer.byteLength>30*1024*1024)throw Error("Avatar publié trop volumineux.");
-  await api.loadGLB(new File([buffer],"official-avatar.glb",{type:"model/gltf-binary"}));
+  await api.loadGLB(new File([buffer],"official-avatar.glb",{type:"model/gltf-binary"}),{source:"published"});
   return true;
  },
  setMood(value){mood=value;},
@@ -93,7 +98,7 @@ const api={
  setSpeechPosition(text,charIndex){speechPose=visemeForText(text,charIndex);speechBoundaryAt=performance.now();},
  inspect(){return readyReport;},
  setListening(){},
- async loadGLB(file){
+ async loadGLB(file,{rememberLocal=false,source:desiredSource="imported"}={}){
   if(!file || !/\.glb$/i.test(file.name) || file.size>30*1024*1024)throw Error("Un fichier .glb de 30 Mo maximum est requis.");
   if(glbUrl)URL.revokeObjectURL(glbUrl);
   glbUrl=URL.createObjectURL(file);
@@ -125,6 +130,11 @@ const api={
    });
    if(gltf.animations.length){mixer=new THREE.AnimationMixer(current);const idle=gltf.animations.find(a=>/idle|breath/i.test(a.name))||gltf.animations[0];mixer.clipAction(idle).play();}
    readyReport=inspectAvatar({bones,shapes,animations:gltf.animations.length,skinnedMeshes,meshes});
+   api.currentSource=()=>source;
+   if(rememberLocal){
+     try{await saveLocalAvatar(file);source="local";announce("saved",{name:file.name,size:file.size});}
+     catch(error){source="imported";announce("save-error",{message:error?.message||"Stockage local indisponible."});}
+   }else{source=desiredSource;}
    document.dispatchEvent(new CustomEvent("warlike-heart-avatar-loaded",{detail:readyReport}));
    resize();
    return readyReport;
@@ -132,7 +142,19 @@ const api={
  }
 };
 window.WarLikeHeart3D=api;
-document.dispatchEvent(new Event("warlike-heart-3d-ready"));
+// Restore the user's explicitly imported local model before making the viewer
+// ready; a reload must not depend on the owner publishing it publicly in R2.
+async function restoreOnBoot(){
+ try {
+  const file=await readLocalAvatar();
+  if(file){
+   await api.loadGLB(file,{source:"local"});
+   announce("restored",{name:file.name,size:file.size});
+  }
+ }catch(error){announce("restore-error",{message:error?.message||"Restauration locale impossible."});}
+ finally{document.dispatchEvent(new Event("warlike-heart-3d-ready"));}
+}
+void restoreOnBoot();
 let lastBlink=0;
 function animate(t){
  requestAnimationFrame(animate);

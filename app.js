@@ -181,7 +181,7 @@
     if(!window.WarLikeHeart3D){status("La visionneuse 3D n'est pas disponible. Vérifie WebGL et l'accès au module Three.js.");return;}
     status("Chargement et vérification du véritable modèle GLB…");
     try{
-      const result=await window.WarLikeHeart3D.loadGLB(file);
+      const result=await window.WarLikeHeart3D.loadGLB(file,{rememberLocal:true});
       $("portrait").classList.add("is3d");
       $("heart3d").classList.add("active");
       const rig=result.fullBodyRigCandidate?"squelette humanoïde candidat détecté":"squelette incomplet ("+result.missingBones.join(", ")+")";
@@ -203,7 +203,23 @@
     finally{btn.disabled=false;}
   });
   document.addEventListener("warlike-heart-3d-ready",()=>{
-    status("Visionneuse GLB disponible. Aucun modèle officiel n'est encore importé.");
+    if(window.WarLikeHeart3D?.isModelLoaded()){
+      $("portrait").classList.add("is3d");
+      $("heart3d").classList.add("active");
+      status("Avatar 3D restauré depuis ce navigateur. Ouvre Espace 3D pour le visualiser.");
+    }else status("Visionneuse GLB disponible. Aucun modèle officiel n'est encore importé.");
+  });
+  document.addEventListener("warlike-heart-avatar-storage",event=>{
+    const {type,name,message}=event.detail||{};
+    if(type==="saved")status("Avatar GLB sauvegardé sur cet appareil : "+name+". Il sera restauré après rechargement.");
+    if(type==="save-error")status("Avatar visible mais pas sauvegardé : "+message+". Publie-le dans R2 pour l'afficher sur d'autres appareils.");
+    if(type==="restored")status("Avatar GLB restauré automatiquement : "+name+".");
+    if(type==="cleared")status("Copie locale du modèle supprimée. L'avatar public R2, s'il existe, reste disponible.");
+  });
+  const clearLocalAvatar=document.getElementById("forgetLocalAvatar");
+  clearLocalAvatar?.addEventListener("click",async()=>{
+    if(!confirm("Effacer la copie GLB conservée dans ce navigateur ? Cela n'efface pas l'avatar public R2."))return;
+    try{await window.WarLikeHeart3D?.forgetLocalGLB();}catch(error){status("Impossible de retirer la copie locale : "+error.message);}
   });
   // The original portrait is the canonical fallback if the asset is in this repository.
   const officialPortrait=$("officialPortrait");
