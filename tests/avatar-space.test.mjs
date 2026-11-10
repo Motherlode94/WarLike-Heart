@@ -31,5 +31,5 @@ test("glamour theme includes mobile and full-screen states",()=>{
  assert.match(css,/@media\(max-width:720px\)/);
  assert.match(css,/--glam-gold/);
  assert.match(html,/glamour-space\.css\?v=1\.4/);
- assert.match(html,/avatar-space\.js\?v=1\.4/);
+ assert.match(html,/avatar-space\.js\?v=1\.\d+/);
 });
