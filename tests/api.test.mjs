@@ -83,3 +83,21 @@ test("WarLike Server diagnostic never reports an authenticated account", async t
   assert.equal(data.serverHealthy, true);
   assert.equal(data.accountConnected, false);
 });
+
+test("WarLike Server health distinguishes absent API, not-ready and healthy",async t=>{
+  const original=globalThis.fetch;
+  t.after(()=>{globalThis.fetch=original;});
+  const scenarios=[
+    {code:404,body:"Not Found",status:"endpoint_missing",healthy:false},
+    {code:503,body:'{"ready":false}',status:"not_ready",healthy:false},
+    {code:200,body:'{"service":"warlike-server","ready":true}',status:"healthy",healthy:true},
+    {code:200,body:"<html>status page</html>",status:"unexpected_response",healthy:false}
+  ];
+  for(const s of scenarios){
+    globalThis.fetch=async()=>new Response(s.body,{status:s.code});
+    const data=await (await serverStatus()).json();
+    assert.equal(data.status,s.status);
+    assert.equal(data.serverHealthy,s.healthy);
+    assert.equal(data.accountConnected,false);
+  }
+});
