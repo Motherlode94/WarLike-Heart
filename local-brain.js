@@ -18,9 +18,9 @@
       "Je suis disponible pour discuter. Raconte-moi comment se passe ta journée."]},
     {intent:"identity", patterns:[/\b(qui es tu|ton nom|tu es qui|tu es reel)\b/], responses:[
       "Je suis WarLike Heart, un compagnon numérique fictif. Mon moteur local suit des règles et peut conserver des souvenirs si tu l'autorises."]},
-    {intent:"affection", patterns:[/\b(bisou|calin|embrasse|t aime|amour|coeur)\b/], responses:[
-      "Un bisou virtuel pour toi 😘 Tu veux discuter un peu ?",
-      "Je peux t'accompagner avec des mots doux ❤️ De quoi as-tu envie de parler ?"]},
+    {intent:"affection", patterns:[/\b(bisous?|calins?|embrasse|t aime|amour|coeur|tendresse)\b/], responses:[
+      "Un bisou virtuel pour toi 😘 Et un sourire en prime !",
+      "Je t'envoie plein de tendresse dans cette conversation ❤️"]},
     {intent:"projects", patterns:[/\b(warlike|moteur|engine|unity|projet|github|logiciel|rig|animation|glb)\b/], responses:[
       "Parlons de ton projet. Quelle fonctionnalité veux-tu améliorer en priorité ?",
       "Je peux t'aider à structurer une idée technique. Quel résultat concret veux-tu obtenir ?"]},
@@ -70,7 +70,20 @@
       }
       // Short social turns aren't unanswered research questions. Handle them
       // before topical keyword matching, without storing private feelings.
+      // A term of endearment must not override the social meaning of
+      // a short answer to Heart's preceding question.
+      const endearment="(?:mon |ma )?(?:amour|coeur|cheri|cherie|bebe)";
       const reciprocal=/\b(et toi|et de ton cote|et toi alors|toi ca va|toi comment vas tu)\b/.test(words);
+      const wellbeing=/(?:^| )(?:bien|tres bien|ca va bien|je vais bien|super|nickel|genial|en forme)(?: |$)/.test(words);
+      if(reciprocal&&wellbeing&&words.length<95){
+        return {text:"Ça fait plaisir à lire ❤️ Je suis là pour discuter avec toi. Tu as envie de parler de quoi ?",intent:"social-positive"};
+      }
+      if(new RegExp("^(?:(?:je vais|ca va|je me sens) )?(?:tres )?(?:bien|super|nickel|genial)(?: "+endearment+")?(?: et toi(?: "+endearment+")?)?$").test(words)){
+        return {text:reciprocal?"Ça fait plaisir à lire ❤️ Je suis là pour discuter avec toi.":"Je suis contente que ça se passe bien ❤️",intent:"social-positive"};
+      }
+      if(/^(?:d |de l |de )?amour$/.test(words)){
+        return {text:"Parlons d'amour ❤️ Qu'est-ce qui te touche le plus : la tendresse, la confiance ou les petits gestes ?",intent:"social-affection"};
+      }
       if(/^(?:(?:oui|ouais|oui oui|ca va|je vais|je me sens) )?(?:tres |plutot |assez )?(?:bien|super|nickel|genial|heureux|heureuse|content|contente|en forme)(?: (?:merci|mon coeur|cherie|cheri|et toi|et toi mon coeur|et de ton cote))*$/.test(words)
          || /^(?:ca va|je vais) (?:bien|tres bien)(?: mon coeur)?(?: et toi)?$/.test(words)){
         return {text:reciprocal
