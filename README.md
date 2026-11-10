@@ -112,3 +112,9 @@ La version HD a été préparée dans les fichiers du chat à partir du portrait
 - Tests automatisés : `tests/avatar-rig.test.mjs`, exécutés dans GitHub Actions.
 
 **Limites explicites :** les frontières de mots/caractères ne sont ni des timestamps de phonèmes ni une mesure audio. Ce module n'est **pas** un véritable lipsync phonétique avec alignement audio. Il faudra un moteur TTS retournant l'audio accompagné de visèmes horodatés, ou une analyse vocale appropriée. Un modèle GLB est toujours requis pour disposer d'un corps et d'un rig réels ; aucun GLB canonique complet n'est fourni. La validation de ressemblance au portrait officiel reste visuelle et manuelle. Tests WebGL en navigateur et sur Raspberry Pi encore non réalisés.
+
+## Extension facultative — initiatives romantiques (prototype)
+
+Le fichier `heart-initiatives.js` ajoute un panneau dans les paramètres de l'interface existante. L'utilisateur peut activer explicitement des invitations virtuelles spontanées (bisou, câlin, danse, discussion), choisir une fréquence de 2, 5 ou 10 minutes, accepter ou refuser chaque proposition et interrompre immédiatement le mode. Par défaut, **le mode est désactivé**.
+
+Les propositions sont des scripts locaux et non des désirs autonomes de l'IA. Aucun mouvement de robot, appareil tactile, moteur ou capteur n'est commandé. Il n'y a pas de mémoire durable du réglage : le mode repart désactivé au rechargement. Le code ne déclenche pas de conversation distante. Test de structure et de sécurité : `tests/heart-initiatives.test.mjs`. Le comportement en vrai navigateur reste à vérifier.
