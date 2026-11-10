@@ -119,7 +119,7 @@
     const token=$("accessToken").value.trim();
     let answer;
     if (!token) {
-      const explicitWeb=text.match(/^(?:cherche|recherche|renseigne[- ]toi)(?: sur internet| sur le web| en ligne)?(?:\\s*[:,-])?\\s+(.+)$/i);
+      const explicitWeb=text.match(/^(?:cherche|recherche|renseigne[- ]toi)(?: sur internet| sur le web| en ligne)?(?:\s*[:,-])?\s+(.+)$/i);
       const learned=explicitWeb?null:learningEngine?.answer(text);
       const local=explicitWeb?null:learned?null:localBrain?.reply(text);
       const needsWeb=Boolean(explicitWeb||(local?.intent==="unknown"&&window.WarLikeHeartWebResearch?.autoEnabled()));
@@ -129,14 +129,14 @@
         try{
           const result=await window.WarLikeHeartWebResearch.lookup(query,"wikipedia");
           answer=result.sources?.length
-           ?"J'ai trouvé ces pistes sur Wikipédia, à vérifier avant tout apprentissage :\\n"+
-            result.sources.slice(0,3).map((x,i)=>(i+1)+". "+x.title+" — "+x.snippet+"\\n"+x.url).join("\\n\\n")+
-            "\\n\\nJe ne les enregistrerai pas sans ton autorisation. Tu peux ouvrir Cerveau pour vérifier et créer une fiche."
+           ?"J'ai trouvé ces pistes sur Wikipédia, à vérifier avant tout apprentissage :\n"+
+            result.sources.slice(0,3).map((x,i)=>(i+1)+". "+x.title+" — "+x.snippet+"\n"+x.url).join("\n\n")+
+            "\n\nJe ne les enregistrerai pas sans ton autorisation. Tu peux ouvrir Cerveau pour vérifier et créer une fiche."
            :"Aucune source disponible pour cette question. Essaie une formulation plus précise dans le menu Cerveau.";
           $("apiStatus").textContent="Recherche Internet effectuée ; aucune mémoire ajoutée.";
         }catch(error){
           answer=(local?.text||"Je ne peux pas vérifier cette question sur Internet actuellement.")+
-           "\\nRecherche Internet : "+(error?.message||"service indisponible");
+           "\nRecherche Internet : "+(error?.message||"service indisponible");
           $("apiStatus").textContent="Recherche Internet impossible.";
         }
       }else{
