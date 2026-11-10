@@ -26,3 +26,23 @@ test("limited context resolves a follow-up on last topic",()=>{
  assert.equal(b.answer("WarLike Engine").text,"Un moteur de jeux web.");
  assert.equal(b.answer("Et alors ?").text,"Un moteur de jeux web.");
 });
+
+test("questions with polite filler resolve a precisely taught topic",()=>{
+ const data={dialogues:[{question:"Comment fonctionne la sauvegarde WarLike Engine ?",answer:"La sauvegarde conserve le projet."}],
+ knowledge:[{subject:"WarLike Engine",content:"Un moteur Web de jeux."}]};
+ assert.equal(brain.retrieval("Parle-moi de WarLike Engine, s'il te plaît",data)?.text,"Un moteur Web de jeux.");
+ assert.equal(brain.retrieval("Explique la sauvegarde WarLike Engine",data)?.text,"La sauvegarde conserve le projet.");
+});
+test("prevents unrelated false matches and duplicate knowledge entries",()=>{
+ const data={knowledge:[{subject:"WarLike Engine",content:"Moteur Web."},{subject:"warlike engine",content:"Doublon."}]};
+ assert.equal(brain.validated(data).knowledge.length,1);
+ assert.equal(brain.retrieval("Un moteur sans rapport avec mes projets",data),null);
+});
+test("knowledge preview never modifies conversation context",()=>{
+ const data={knowledge:[{subject:"WarLike Engine",content:"Un moteur de jeu Web."}]};
+ const engine=brain.create({enabled:()=>true,read:()=>data});
+ assert.equal(engine.preview("WarLike Engine").source,"knowledge");
+ assert.equal(engine.answer("Et alors ?"),null);
+ assert.equal(engine.answer("WarLike Engine").source,"knowledge");
+ assert.equal(engine.answer("Et alors ?").source,"knowledge");
+});

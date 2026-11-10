@@ -17,6 +17,8 @@ jobs:
           node --check local-brain.js
           node --check learning-brain.js
           node --check learning-panel.js
+          node --check brain-web.js
+          node --check functions/api/research.js
           node --check notifications/scheduler.mjs
           node --check app.js
           node --check avatar3d.js
