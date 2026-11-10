@@ -149,3 +149,20 @@ La page comporte un panneau **Cerveau & apprentissage**. Après activation expli
 ## Diagnostic WarLike Server — état réel des dépendances
 
 Le bouton « Tester le serveur » appelle depuis la fonction Cloudflare Pages de Heart `https://warlike-server.pages.dev/api/health`. Il distingue maintenant route absente (HTTP 404), application non prête (HTTP 503), erreur réseau, réponse inattendue et santé confirmée (JSON `{service:'warlike-server',ready:true}`). Un simple déploiement Cloudflare réussi ou une page HTML publique **ne confirme pas** que les comptes WarLike sont disponibles. Aucun utilisateur n'est authentifié par ce test. Lier réellement Heart aux comptes exige un flux d'identité sécurisé séparé ; aucun jeton ni clé ne doit apparaître dans le code client.
+
+## Association de compte WarLike Server — intégration en préparation
+
+Un nouveau bouton « Associer mon compte WarLike » et un état de connexion temporaire ont été ajoutés dans les paramètres de Heart. L'association suit un flux d'autorisation explicite **PKCE SHA-256**, sans demander de mot de passe dans Heart :
+
+1. Heart crée un vérificateur secret et un défi PKCE dans la session du navigateur, puis ouvre `https://warlike-server.pages.dev/connect/heart`.
+2. Sur WarLike Server, le membre se connecte et accepte explicitement l'association. Un code à usage unique expirant après 2 minutes est enregistré en D1 (`drizzle/0007_heart_pairing.sql`).
+3. Le code revient dans le **fragment** de l'URL de Heart et le navigateur le transmet à l'endpoint Heart `POST /api/account` avec le vérificateur original.
+4. La fonction Heart échange le code via le serveur et émet un cookie signé `HttpOnly; Secure; SameSite=Lax`, limité à **10 minutes**, qui identifie le compte. `GET /api/account` retourne seulement l'identité affichable de session. `DELETE /api/account` déconnecte Heart.
+
+**Prérequis d'activation** : le runtime WarLike Server doit être reconstruit/déployé avec les routes, sa migration D1 doit être appliquée, et le secret `HEART_SESSION_SECRET` de **32 caractères ou plus** doit être ajouté uniquement dans les secrets du projet Cloudflare Pages WarLike Heart. En l'absence du secret, l'endpoint est fermé par défaut et l'interface indique que l'association n'est pas configurée.
+
+Ce premier niveau associe une identité temporaire, **pas** les comptes ChatGPT ni les cookies du serveur, et **ne synchronise pas encore les messages ni les souvenirs**. La révocation d'une session WarLike Server après émission du cookie Heart n'est pas instantanée : le cookie expire au plus tard après 10 minutes. À compléter par une vérification active et un système de révocation pour toute fonctionnalité sensible. Aucun rôle « admin » hérité ne confère de privilèges sur Heart.
+
+## Version v1.1 — association WarLike (préparée)
+
+Le panneau « État de WarLike Server et association de compte » fournit l'association de compte par autorisation sur WarLike Server. Ce flux reste inactif tant que les secrets, migrations et endpoints du serveur ne sont pas disponibles. Il ne synchronise pas encore les souvenirs. Voir ci-dessus les prérequis d'activation et la limite de session de 10 minutes.
