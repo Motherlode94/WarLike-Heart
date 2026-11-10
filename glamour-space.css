@@ -90,3 +90,12 @@ button:not(:disabled):focus-visible{outline-color:#ffe3b5!important}
  .space-portrait-fallback img{width:min(178px,70%)}
  .space-status{left:10px;right:10px;bottom:10px}
 }
+
+/* Owner-only publisher, visually separated from public viewer. */
+.operator-publish{margin-top:18px;padding:18px;border:1px solid #a77e87;border-radius:16px;background:linear-gradient(145deg,#3a2538,#211826)}
+.operator-publish h3{font-size:18px;color:#fbe2ef;margin:0 0 8px}
+.operator-publish p,.operator-publish small{display:block;color:#dbc4d1;font-size:12px;line-height:1.6}
+.operator-publish label{display:block;margin:12px 0 5px;font-weight:700;color:#f4d6e4}
+.operator-publish input[type=file]{display:block;width:100%;max-width:600px;background:#17101e;border:1px solid #956c8a;color:#fcebf5;padding:12px;border-radius:11px}
+.operator-publish .controls{margin:13px 0;justify-content:flex-start}
+@media(max-width:600px){.operator-publish{padding:12px}.operator-publish .controls button{flex:1 1 auto}}
