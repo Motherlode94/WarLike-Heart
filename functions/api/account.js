@@ -61,3 +61,9 @@ export async function onRequestDelete({request}){
  if(!sameOrigin(request))return respond({error:"Origine refusée."},403);
  return respond({connected:false},200,{"set-cookie":COOKIE+"=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax"});
 }
+
+// Server-side only: reusable validation of the short-lived signed Heart session.
+export async function authenticatedHeartUser(request,env){
+ if(!configured(env))return null;
+ return read(request.headers.get('cookie')||'',env.HEART_SESSION_SECRET);
+}
