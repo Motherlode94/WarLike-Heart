@@ -132,3 +132,12 @@ L'option « Conserver cette conversation et les souvenirs explicites sur cet app
 Ces souvenirs sont stockés dans `localStorage` sur **cet appareil uniquement** : aucun chiffrement n'est garanti, ils sont accessibles au profil local du navigateur, et ils ne sont pas synchronisés avec WarLike Server. Ne pas y enregistrer de secrets. La désactivation de l'option de conservation supprime l'historique et la mémoire explicite. L'export JSON contient désormais les souvenirs et doit être conservé en lieu sûr. L'import ne restaure les souvenirs que si la conservation est préalablement autorisée.
 
 Ce module **n'est ni un LLM, ni un apprentissage neuronal, ni une base sémantique** : il n'invente pas de nouvelles connaissances et n'entraîne aucun modèle. Les réponses locales sont déterministes avec plusieurs variantes. La connexion à l'API distante reste facultative. Les notifications Web Push et le modèle local génératif nécessitent des développements séparés.
+
+## Version v0.9 — visibilité du moteur local et actualisation du navigateur
+
+- L'interface affiche explicitement le statut du moteur local et le numéro de version **v0.9** ; la page d'accueil du chat ne prétend plus être une démonstration dépourvue de moteur.
+- Les scripts JS utilisent une URL versionnée (`?v=0.9`) afin d'éviter l'utilisation d'une ancienne version conservée en cache.
+- `_headers` demande aux navigateurs et aux caches de revalider les pages HTML, et autorise un cache court et revalidable pour les scripts.
+- En cas d'échec du chargement du moteur, l'interface affiche un diagnostic au lieu de laisser supposer qu'il fonctionne.
+- Le moteur est à règles prédéfinies ; aucune conversation générative locale, aucune synchronisation cloud et aucun push réel ne sont ajoutés ici.
+- Vérifier manuellement le chargement des scripts, la version et les réponses sur le domaine de production après le prochain déploiement.
