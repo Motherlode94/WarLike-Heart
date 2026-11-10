@@ -44,7 +44,7 @@
 /* WarLike Heart · clavier emoji */
 .emoji-wrap{position:relative;display:flex;align-items:center}.emoji-picker[hidden]{display:none}.emoji-picker{position:absolute;z-index:20;bottom:calc(100% + 12px);left:0;width:min(310px,86vw);max-height:225px;overflow:auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:10px;background:#251b2d;border:1px solid #805e7f;border-radius:14px;box-shadow:0 12px 32px #0009}.emoji-picker button{font-size:23px;line-height:1.3;padding:7px 2px;border:0;background:transparent}.emoji-picker button:hover,.emoji-picker button:focus-visible{background:#67455f;outline:2px solid #f2a8ce}.composer #emojiToggle{font-size:21px;padding:9px 11px}.bubble{font-family:inherit,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 </style>
-<link rel="stylesheet" href="./heart-design.css?v=1.2.1"><link rel="stylesheet" href="./navigation.css?v=1.3"><link rel="stylesheet" href="./compact-layout.css?v=1.3.1"><link rel="stylesheet" href="./glamour-space.css?v=1.4">
+<link rel="stylesheet" href="./heart-design.css?v=1.2.1"><link rel="stylesheet" href="./navigation.css?v=1.3"><link rel="stylesheet" href="./compact-layout.css?v=1.3.1"><link rel="stylesheet" href="./glamour-space.css?v=1.4"><link rel="stylesheet" href="./learning-v2.css?v=2.0">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}</script></head>
 <body>
 <main class="shell">
@@ -102,19 +102,31 @@
 <small id="cloudMemoryStatus" role="status" aria-live="polite">Le stockage Cloud n'est pas chiffré de bout en bout. Exporte ton JSON avant de remplacer une sauvegarde locale.</small>
 </section>
 <section class="panel" data-view="brain" hidden id="learningPanel" style="grid-column:1/-1;padding:24px;margin-top:16px">
-<h2>🧠 Cerveau & apprentissage · v1.0</h2>
-<p>Enseigne des réponses et des connaissances vérifiées. Aucune donnée n'est envoyée à un service IA. Le stockage est local, facultatif et non chiffré. Active d'abord « Conserver cette conversation et les souvenirs explicites » ci-dessus.</p>
+<h2>🧠 Cerveau & apprentissage · v2.0</h2>
+<p>Enseigne, recherche et vérifie les réponses. Les connaissances locales restent privées ; les recherches Internet sont volontaires, visibles et ne sont jamais mémorisées sans ton accord. Active la mémoire dans Mon compte pour apprendre.</p>
+<div class="brain-toolbar">
+ <label for="learningSearch">Filtrer ma bibliothèque</label>
+ <input id="learningSearch" type="search" placeholder="Rechercher un sujet ou un dialogue…" maxlength="100">
+ <small id="learningSearchStats" aria-live="polite">Toutes les entrées sont visibles.</small>
+</div>
 <p id="learningStats" aria-live="polite">0 dialogues · 0 connaissances</p>
 <fieldset id="learningControls" disabled style="border:1px solid #6e4b6e;border-radius:14px;padding:15px">
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px">
 <form id="learningDialogueForm" style="display:grid;gap:9px"><h3>Enseigner un dialogue</h3>
 <label for="learningQuestion">Question ou phrase</label><input id="learningQuestion" maxlength="240" minlength="3" required placeholder="Que penses-tu de WarLike Engine ?">
 <label for="learningAnswer">Réponse souhaitée</label><textarea id="learningAnswer" rows="3" maxlength="700" minlength="3" required placeholder="WarLike Engine est notre projet de moteur web…"></textarea>
-<button type="submit" class="primary">Enregistrer le dialogue</button></form>
+<button id="learningDialogueSubmit" type="submit" class="primary">Enregistrer le dialogue</button></form>
 <form id="learningKnowledgeForm" style="display:grid;gap:9px"><h3>Ajouter une connaissance</h3>
 <label for="learningSubject">Sujet</label><input id="learningSubject" maxlength="100" minlength="3" required placeholder="WarLike Engine">
 <label for="learningContent">Information vérifiée</label><textarea id="learningContent" rows="3" maxlength="700" minlength="3" required placeholder="Description du projet…"></textarea>
-<button type="submit" class="primary">Enregistrer la connaissance</button></form>
+<button id="learningKnowledgeSubmit" type="submit" class="primary">Enregistrer la connaissance</button></form>
+</div>
+<button id="learningCancelEdit" type="button" hidden>Annuler la modification</button>
+<div class="brain-preview">
+ <label for="learningTestInput">Tester une question sans modifier le chat</label>
+ <div class="controls"><input id="learningTestInput" type="text" maxlength="240" placeholder="Que sais-tu de WarLike Engine ?">
+ <button id="learningTest" type="button">Tester le Cerveau</button></div>
+ <p id="learningTestResult" role="status" aria-live="polite">La réponse, sa provenance et sa confiance apparaîtront ici.</p>
 </div>
 <h3>Dialogues enseignés</h3><ul id="learnedDialogues" style="display:grid;gap:8px;list-style:none;padding:0"></ul>
 <h3>Connaissances enregistrées</h3><ul id="learnedKnowledge" style="display:grid;gap:8px;list-style:none;padding:0"></ul>
@@ -122,6 +134,19 @@
 <label style="display:inline-flex;align-items:center;gap:8px">Importer JSON <input id="learningImport" type="file" accept=".json,application/json"></label>
 <button id="learningClear" type="button">Effacer les apprentissages</button></div></fieldset>
 <div id="learningFeedback" role="status" aria-live="polite">Prêt. Les données ajoutées restent dans ce navigateur.</div>
+<section class="brain-web" aria-labelledby="brainWebTitle">
+  <h3 id="brainWebTitle">🌐 Recherche Internet — combler une lacune</h3>
+  <p>Wikipédia fonctionne sans clé API. Le Web général nécessite une clé Brave Search configurée côté serveur. Les recherches sont réservées aux comptes associés, limitées à 12 par jour et **jamais mémorisées automatiquement**.</p>
+  <form id="brainWebForm">
+    <label for="brainWebQuery">Question à rechercher</label>
+    <input id="brainWebQuery" type="search" maxlength="240" minlength="3" required placeholder="Exemple : comment fonctionne le rendu PBR ?">
+    <label for="brainWebProvider">Source</label>
+    <select id="brainWebProvider"><option value="wikipedia">Wikipédia FR (sans clé)</option><option value="brave">Web général — Brave Search (clé requise)</option></select>
+    <button type="submit" id="brainWebSearch">Rechercher sur Internet</button>
+  </form>
+  <small id="brainWebStatus" role="status" aria-live="polite">Aucune recherche lancée. Les questions quittent ton appareil uniquement lorsque tu appuies sur Rechercher.</small>
+  <ul id="brainWebResults" aria-label="Résultats Internet"></ul>
+</section>
 </section>
 <section class="panel private-view" data-view="account" hidden id="accountView">
   <header class="private-heading"><h2>👤 Mon compte</h2><p>Connexion WarLike, préférences, sauvegardes locales et confidentialité.</p></header>
@@ -140,5 +165,5 @@
   </section>
 </section>
 <p class="foot">Confidentialité : en mode IA, jusqu'aux 20 derniers messages sont envoyés à la fonction Cloudflare et au fournisseur IA pour obtenir une réponse ; aucun historique n'est stocké volontairement par cette application côté serveur. En mode démo, aucun message de chat n'est transmis à l'API. La synthèse et la reconnaissance vocales sont des fonctions du navigateur et peuvent être absentes ou utiliser les services de son fournisseur. Ne dicte pas d'informations sensibles. Le stockage local est facultatif. La sauvegarde Cloud manuelle utilise une base D1 européenne liée à ton compte et reste lisible par le serveur ; elle n'est pas chiffrée de bout en bout. Le fichier d'export contient la conversation si tu choisis de l'exporter. <a href="https://github.com/Motherlode94/WarLike-Heart">Code source GitHub</a>.</p>
-</main><script src="./local-brain.js?v=1.2" defer></script><script src="./learning-brain.js?v=1.2" defer></script><script src="./app.js?v=1.2" defer></script><script src="./learning-panel.js?v=1.2" defer></script><script type="module" src="./avatar3d.js?v=1.5"></script><script src="./heart-initiatives.js?v=1.2" defer></script><script src="./heart-account.js?v=1.2" defer></script><script src="./cloud-memory.js?v=1.2" defer></script><script src="./navigation.js?v=1.4" defer></script><script src="./avatar-space.js?v=1.5" defer></script><script src="./avatar-publish.js?v=1.5.1" defer></script>
+</main><script src="./local-brain.js?v=1.2" defer></script><script src="./learning-brain.js?v=2.0" defer></script><script src="./app.js?v=1.2" defer></script><script src="./learning-panel.js?v=2.0" defer></script><script src="./brain-web.js?v=2.0" defer></script><script type="module" src="./avatar3d.js?v=1.5"></script><script src="./heart-initiatives.js?v=1.2" defer></script><script src="./heart-account.js?v=1.2" defer></script><script src="./cloud-memory.js?v=1.2" defer></script><script src="./navigation.js?v=1.4" defer></script><script src="./avatar-space.js?v=1.5" defer></script><script src="./avatar-publish.js?v=1.5.1" defer></script>
 </body></html>
