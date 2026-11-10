@@ -22,7 +22,7 @@
   const advancedConfig=$("accessToken")?.closest("details");
   if(advancedConfig&&studioBody)studioBody.append(advancedConfig);
   function allowed(view){
-    if(["home","account"].includes(view))return true;
+    if(["home","account","space3d"].includes(view))return true;
     if(["brain","cloud"].includes(view))return Boolean(account);
     if(view==="studio")return Boolean(account&&roles.has(account.role));
     return false;
@@ -42,7 +42,8 @@
       b.setAttribute("aria-selected",String(b.dataset.nav===view));
     }
     if(writeHistory)history.replaceState(history.state,"","#"+view);
-    $("pageTitle").textContent=({home:"Conversation",account:"Mon compte",brain:"Cerveau & apprentissage",cloud:"Mémoire Cloud",studio:"Atelier privé"})[view]||"Conversation";
+    $("pageTitle").textContent=({home:"Conversation",space3d:"Espace 3D",account:"Mon compte",brain:"Cerveau & apprentissage",cloud:"Mémoire Cloud",studio:"Atelier privé"})[view]||"Conversation";
+    document.dispatchEvent(new CustomEvent("warlike-heart-view-changed",{detail:{view}}));
     window.scrollTo({top:0,behavior:"instant"});
   }
   function updateAccount(data){
