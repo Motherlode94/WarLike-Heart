@@ -4,13 +4,27 @@
   const $ = id => document.getElementById(id);
   const KEY = "warlike-heart-demo-v1"; // keep compatibility with v0.2 history
   const MAX = 100;
-  const welcome = {role:"assistant",text:"Coucou ❤️ Je suis WarLike Heart v0.9. Je réponds localement sans API IA pour les dialogues connus et je peux mémoriser des informations si tu actives la mémoire. Essaie « Salut » ou « Souviens-toi que… »."};
+  const welcome = {role:"assistant",text:"Coucou ❤️ Bienvenue sur WarLike Heart v1.0 Learning Brain ! Je peux répondre localement, apprendre des réponses que tu approuves dans l'espace Cerveau et conserver des souvenirs avec ton accord."};
   let history = [welcome];
   let recognition = null;
   let busy = false;
   let portraitObjectUrl = null;
   const state = {voiceEnabled:false,remember:false};
   const MEMORY_KEY = "warlike-heart-explicit-memories-v1";
+  const LEARNING_KEY = "warlike-heart-learning-v1";
+  const learningApi=window.WarLikeLearningBrain;
+  const readLearning=()=>{
+    if(!state.remember || !learningApi)return {version:1,dialogues:[],knowledge:[]};
+    try{return learningApi.validated(JSON.parse(localStorage.getItem(LEARNING_KEY)||"null"));}
+    catch{return learningApi.validated(null);}
+  };
+  const writeLearning=data=>{
+    if(!state.remember||!learningApi)return false;
+    try{localStorage.setItem(LEARNING_KEY,JSON.stringify(learningApi.validated(data)));return true;}
+    catch{return false;}
+  };
+  const learningEngine=learningApi?.create({read:readLearning,enabled:()=>state.remember});
+  window.WarLikeHeartLearningBridge={read:readLearning,write:writeLearning,enabled:()=>state.remember};
   const readMemories = () => {
     if (!state.remember) return [];
     try {
@@ -32,10 +46,10 @@
   const brainStatus=$("localBrainStatus");
   if(brainStatus){
     brainStatus.textContent=localBrain
-      ?"✓ Moteur local v0.9 chargé · réponses sans API · mémoire facultative"
+      ?"✓ Learning Brain v1.0 chargé · dialogues et connaissances privés · sans API"
       :"⚠ Moteur local indisponible : vérifie le chargement de local-brain.js.";
   }
-  if(localBrain)$("aiMode").textContent="Moteur local v0.9 · prêt sans API";
+  if(localBrain)$("aiMode").textContent="Learning Brain v1.0 · prêt sans API";
   const safeHistory = (value) => Array.isArray(value) ? value.filter(x => x && ["user","assistant"].includes(x.role) && typeof x.text === "string" && x.text.length <= 4000).slice(-MAX) : null;
   const render = () => {
     const area = $("messages"); area.replaceChildren();
@@ -105,7 +119,7 @@
     const token=$("accessToken").value.trim();
     let answer;
     if (!token) {
-      answer=localBrain?.reply(text).text || reply(text);
+      answer=learningEngine?.answer(text)?.text || localBrain?.reply(text).text || reply(text);
       $("apiStatus").textContent="Réponse produite localement, sans API IA.";
       $("aiMode").textContent="Moteur local · indépendant de l'API";
     } else {
@@ -253,23 +267,23 @@
         $("aiMode").textContent="Service IA prêt — identification privée requise";
         $("apiStatus").textContent="Serveur IA configuré. Saisis ton jeton privé pour discuter.";
       }else{
-        $("aiMode").textContent="Moteur local v0.9 · service distant non configuré";
+        $("aiMode").textContent="Learning Brain v1.0 · service distant non configuré";
         $("apiStatus").textContent="Les secrets de production Cloudflare sont absents. Voir DEPLOIEMENT.md.";
       }
     }catch{
-      $("aiMode").textContent="Moteur local v0.9 · service distant non vérifié";
+      $("aiMode").textContent="Learning Brain v1.0 · service distant non vérifié";
       $("apiStatus").textContent="La vérification de l'API n'est pas disponible.";
     }
   })();
   $("accessToken").addEventListener("input",()=>{
     const connected=Boolean($("accessToken").value.trim());
-    $("aiMode").textContent=connected?"Mode IA distant demandé · vérifier la connexion":"Moteur local v0.9 · sans API";
+    $("aiMode").textContent=connected?"Mode IA distant demandé · vérifier la connexion":"Learning Brain v1.0 · sans API";
     $("apiStatus").textContent=connected?"Jeton présent en mémoire ; une requête sera envoyée au prochain message.":"Le mode démo reste accessible sans jeton.";
   });
   $("voiceEnabled").addEventListener("change",ev => {state.voiceEnabled=ev.target.checked; if(!state.voiceEnabled) stopVoice();persist();});
   $("remember").addEventListener("change",ev => {
     state.remember=ev.target.checked;
-    if(!state.remember){try{localStorage.removeItem(MEMORY_KEY);}catch{}}
+    if(!state.remember){try{localStorage.removeItem(MEMORY_KEY);localStorage.removeItem(LEARNING_KEY);}catch{}}
     persist();
     status(state.remember?"Historique et souvenirs explicites autorisés sur cet appareil.":"Historique et souvenirs explicites locaux supprimés.");
   });
@@ -285,7 +299,7 @@
     try{rec.start();window.WarLikeHeart3D?.setListening(true);$("portrait").classList.add("listening");status("Écoute en cours…");}catch{status("Impossible de démarrer la dictée.");}
   });
   $("export").addEventListener("click",()=>{
-    const json=JSON.stringify({format:"warlike-heart-conversation",version:1,exportedAt:new Date().toISOString(),history,memories:readMemories(),settings:{voiceEnabled:state.voiceEnabled}},null,2);
+    const json=JSON.stringify({format:"warlike-heart-conversation",version:1,exportedAt:new Date().toISOString(),history,memories:readMemories(),learning:readLearning(),settings:{voiceEnabled:state.voiceEnabled}},null,2);
     const blob=new Blob([json],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");
     a.href=url;a.download="warlike-heart-conversation.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);status("Export JSON préparé.");
   });
@@ -301,13 +315,16 @@
         const valid=data.memories.filter(x=>typeof x==="string"&&x.length>=3&&x.length<=300).slice(0,40);
         writeMemories(valid);
       }
+      if(state.remember&&data.learning&&learningApi){
+        writeLearning(data.learning);
+      }
       status("Conversation importée. Les souvenirs ne sont restaurés que si la mémoire locale est activée.");
     }catch{status("Import impossible : format ou contenu non valide.");}
   });
   $("clear").addEventListener("click",()=>{
     stopVoice();history=[welcome];render();
     state.remember=false;$("remember").checked=false;
-    try{localStorage.removeItem(KEY);localStorage.removeItem(MEMORY_KEY);}catch{}
+    try{localStorage.removeItem(KEY);localStorage.removeItem(MEMORY_KEY);localStorage.removeItem(LEARNING_KEY);}catch{}
     status("Conversation et souvenirs explicites locaux effacés.");
   });
   try {
