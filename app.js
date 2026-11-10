@@ -333,5 +333,21 @@
     if(stored?.remember===true){const h=safeHistory(stored.history);if(h?.length){history=h;state.remember=true;$("remember").checked=true;}}
     if(state.remember&&typeof stored.voiceEnabled==="boolean"){state.voiceEnabled=stored.voiceEnabled;$("voiceEnabled").checked=state.voiceEnabled;}
   }catch{status("Aucune sauvegarde locale valide.");}
+  // Explicit backup/restore bridge. Cloud sync is NEVER triggered by chat messages.
+  window.WarLikeHeartCloudBridge={
+    enabled:()=>state.remember,
+    snapshot:()=>({version:1,history:history.slice(-MAX),memories:readMemories(),learning:readLearning()}),
+    restore:data=>{
+      if(!state.remember)return false;
+      const imported=safeHistory(data?.history);
+      if(!imported||!Array.isArray(data?.memories)||!data?.learning)return false;
+      const previous={history,memories:readMemories(),learning:readLearning()};
+      if(!writeMemories(data.memories)||!writeLearning(data.learning))return false;
+      history=imported.length?imported:[welcome];
+      render();persist();
+      document.dispatchEvent(new Event("warlike-heart-learning-restored"));
+      return true;
+    }
+  };
   render();
 })();
