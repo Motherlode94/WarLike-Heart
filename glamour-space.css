@@ -99,3 +99,8 @@ button:not(:disabled):focus-visible{outline-color:#ffe3b5!important}
 .operator-publish input[type=file]{display:block;width:100%;max-width:600px;background:#17101e;border:1px solid #956c8a;color:#fcebf5;padding:12px;border-radius:11px}
 .operator-publish .controls{margin:13px 0;justify-content:flex-start}
 @media(max-width:600px){.operator-publish{padding:12px}.operator-publish .controls button{flex:1 1 auto}}
+
+/* GLB publication: obvious validation feedback before clicking. */
+#officialGlbStatus[data-state="error"]{color:#ffbcc5;font-weight:700}
+#officialGlbStatus[data-state="success"]{color:#c0ebd7}
+#officialGlbPublish:disabled{cursor:not-allowed;opacity:.42}
