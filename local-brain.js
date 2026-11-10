@@ -4,6 +4,8 @@
 (function(root) {
   "use strict";
   const normalize = value => String(value || "").toLocaleLowerCase("fr")
+    // NFD doesn't expand French ligatures: cœur must match coeur.
+    .replace(/œ/g,"oe").replace(/æ/g,"ae")
     .normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]+/g," ")
     .replace(/\s+/g," ").trim();
   const examples = [
@@ -65,6 +67,21 @@
         const all=memories(),remaining=all.filter(v=>normalize(v)!==target);
         if(remaining.length===all.length)return {text:"Je n'ai pas trouvé ce souvenir exact. Tu peux afficher la liste avec « Que sais-tu de moi ? ».",intent:"memory"};
         writeMemory(remaining);return {text:"Ce souvenir a été supprimé de la mémoire locale.",intent:"memory"};
+      }
+      // Short social turns aren't unanswered research questions. Handle them
+      // before topical keyword matching, without storing private feelings.
+      const reciprocal=/\b(et toi|et de ton cote|et toi alors|toi ca va|toi comment vas tu)\b/.test(words);
+      if(/^(?:(?:oui|ouais|oui oui|ca va|je vais|je me sens) )?(?:tres |plutot |assez )?(?:bien|super|nickel|genial|heureux|heureuse|content|contente|en forme)(?: (?:merci|mon coeur|cherie|cheri|et toi|et toi mon coeur|et de ton cote))*$/.test(words)
+         || /^(?:ca va|je vais) (?:bien|tres bien)(?: mon coeur)?(?: et toi)?$/.test(words)){
+        return {text:reciprocal
+          ?"Ça fait plaisir à lire ❤️ Je suis là et prête à discuter avec toi. Qu'est-ce qui t'a fait sourire aujourd'hui ?"
+          :"Ravie que ta journée se passe bien ❤️ Tu veux me raconter ce que tu fais ?",intent:"social-positive"};
+      }
+      if(/^(?:pas (?:tres |trop )?bien|mal|bof|moyen|moyenne|fatigue|fatiguee|triste|ca ne va pas|je ne vais pas bien)(?: (?:merci|mon coeur|et toi))*$/.test(words)){
+        return {text:"Je t'écoute ❤️ Tu veux me dire ce qui te pèse, ou tu préfères qu'on parle d'autre chose ?",intent:"social-support"};
+      }
+      if(/^(?:et toi|toi aussi|toi ca va|et de ton cote|comment va ta journee)(?: mon coeur)?$/.test(words)){
+        return {text:"Je suis disponible pour toi ❤️ On continue à discuter ou tu as quelque chose en tête ?",intent:"social-reciprocal"};
       }
       const match=examples.find(item=>item.patterns.some(pattern=>pattern.test(words)));
       if(match){
