@@ -203,3 +203,11 @@ L'interface n'affiche plus tous les panneaux d'un coup : elle comprend les secti
 
 ### Correctif d'espacement 1.3.1
 La mise en page initiale laissait des hauteurs minimum de 730 à 800 px et trop d'espaces vides autour du portrait et du chat. Le fichier `compact-layout.css` chargé en dernier supprime ces hauteurs contraintes, réduit la navigation, les marges, le portrait, les panneaux et les formulaires ; à largeur tablette/mobile, le portrait devient une vignette à gauche de la présentation. Le chat garde une zone défilante. Les menus et contrôles d'accès existants restent inchangés.
+
+## Version v1.4 — Espace 3D glamour
+
+- Onglet public **Espace 3D** : scène WebGL indépendante du chat, couleurs prune et or rose, éclairage cinématique et socle 3D, contrôle OrbitControls (souris/tactile), zoom, recentrage, visage/en pied, rotation automatique, animation idle et plein écran.
+- **Un seul moteur 3D** : le visualiseur existant `avatar3d.js` est déplacé entre le portrait de l'accueil et l'Espace 3D lorsqu'on change de menu ; pas de double rendu ni de copie d'avatar. Les réglages d'import GLB restent dans **Atelier privé** réservé aux comptes owner/referent.
+- Aucun fichier GLB/VRM officiel n'est fourni par le dépôt. Tant qu'un véritable GLB n'est pas importé, l'espace montre **le portrait canonique 2D explicitement identifié comme tel**, avec un décor 3D derrière. Il ne faut pas présenter cette image comme un avatar 3D riggé.
+- Import GLB temporaire dans la session du navigateur : les fichiers 3D ne sont pas automatiquement publiés, synchronisés ni conservés entre sessions ; le visualiseur refuse les GLB de plus de 30 Mo.
+- Navigation publique `#space3d` et interface responsive ; des dépendances Three.js externes sont nécessaires pour le WebGL. En cas de chargement impossible, le portrait 2D reste affiché.
