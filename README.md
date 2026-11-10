@@ -211,3 +211,13 @@ La mise en page initiale laissait des hauteurs minimum de 730 à 800 px et trop 
 - Aucun fichier GLB/VRM officiel n'est fourni par le dépôt. Tant qu'un véritable GLB n'est pas importé, l'espace montre **le portrait canonique 2D explicitement identifié comme tel**, avec un décor 3D derrière. Il ne faut pas présenter cette image comme un avatar 3D riggé.
 - Import GLB temporaire dans la session du navigateur : les fichiers 3D ne sont pas automatiquement publiés, synchronisés ni conservés entre sessions ; le visualiseur refuse les GLB de plus de 30 Mo.
 - Navigation publique `#space3d` et interface responsive ; des dépendances Three.js externes sont nécessaires pour le WebGL. En cas de chargement impossible, le portrait 2D reste affiché.
+
+## Version v1.5 — Publication durable de l'avatar officiel 3D
+
+Un dépôt R2 privé `warlike-heart-avatar`, lié au projet Pages via `HEART_AVATARS`, stocke le modèle officiel sous la clé fixe `official/avatar.glb`. `GET /api/avatar` sert le GLB en lecture seule aux visiteurs. `PUT /api/avatar` et `DELETE /api/avatar` nécessitent une session Heart signée, non expirée et un rôle WarLike `owner` ou `referent`, avec contrôle de l'origine HTTPS. Les GLB dépassant 30 Mo et les entêtes GLB invalides sont rejetés ; l'origine n'est jamais une simple autorisation d'écriture.
+
+Dans **Atelier privé**, le responsable sélectionne un fichier GLB (30 Mo maximum), puis confirme **Publier l'avatar 3D**. Cette action le rend visible à tous dans **Espace 3D**. Les visiteurs ne peuvent pas publier de modèle. Le visualiseur charge automatiquement la version publiée lorsqu'on ouvre Espace 3D.
+
+Le modèle Meshy reçu le 10 novembre 2026 a été étudié : original de 102 Mo, environ 1,88 M de sommets, trois textures intégrées, **sans skin ni animations**. Une version Web optimisée de 23,5 Mo a été préparée hors dépôt et doit être importée dans l'Atelier privé par un responsable ; aucun fichier binaire n'est intégré au dépôt GitHub. Ne pas affirmer que cet avatar est déjà publié ou animé tant que l'import R2 n'a pas été effectué et vérifié.
+
+R2 n'est pas exposé directement sur un domaine public ; seule la lecture du modèle officiel est accessible via le site Heart. L'URL publique donne accès au modèle à tout visiteur : ne pas publier un GLB contenant des secrets ou des éléments privés.
