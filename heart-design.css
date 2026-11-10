@@ -1,0 +1,161 @@
+/* WarLike Heart — visual design system · 2026-11
+   Progressive override of legacy inline CSS. No JS or asset changes. */
+:root{
+  color-scheme:dark;
+  --heart-bg:#0c0a13;--heart-panel:#171321;--heart-elevated:#211a2b;
+  --heart-border:#4b3b55;--heart-muted:#c3b7ca;
+  --heart-rose:#ee8eb6;--heart-pink:#f5a8cd;--heart-violet:#af8bdb;
+  --heart-focus:#ffd2e6;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--heart-bg);color:#f8f2fa;
+}
+html{scroll-behavior:smooth;scroll-padding-top:22px}
+body{
+  min-width:320px;min-height:100vh;
+  background:
+   radial-gradient(ellipse 640px 460px at 10% 8%,rgba(109,52,91,.26),transparent 75%),
+   radial-gradient(ellipse 700px 550px at 96% 74%,rgba(52,73,120,.18),transparent 75%),
+   linear-gradient(135deg,#110d1a 0%,#0c0a13 58%,#11111d 100%);
+}
+button,input,textarea{font:inherit}
+button{transition:background-color .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+button:not(:disabled):hover{transform:translateY(-1px);border-color:#ce8daf;background:#4d344e}
+button:not(:disabled):active{transform:translateY(0)}
+button.primary{background:linear-gradient(135deg,#f3a5c9,#df76a8);border:1px solid #ffaed4;color:#221021;box-shadow:0 5px 17px #e66ca424}
+button.primary:not(:disabled):hover{background:linear-gradient(135deg,#ffc0da,#ec8cbb);box-shadow:0 7px 22px #e66ca43c}
+:where(a,button,input,textarea,summary):focus-visible{outline:3px solid var(--heart-focus)!important;outline-offset:3px}
+::selection{background:#b76494;color:#fff}
+.shell{width:min(1420px,calc(100% - 48px));margin:26px auto 48px}
+.top{margin-bottom:24px;padding:2px 4px 15px;border-bottom:1px solid #49314a55}
+.brand{font-size:15px;letter-spacing:.075em;gap:12px}
+.brand .heart{font-size:29px;color:#ff87b4;filter:drop-shadow(0 0 10px #e75a9640)}
+.tag{background:#22172999;border-color:#805775;color:#f3c7df;letter-spacing:.04em;font-size:11px;white-space:nowrap}
+.layout{grid-template-columns:minmax(330px,.9fr) minmax(440px,1.1fr);align-items:start;gap:24px}
+.panel{min-width:0;border:1px solid var(--heart-border);border-radius:24px;background:linear-gradient(160deg,rgba(29,23,41,.98),rgba(17,15,29,.99));box-shadow:0 22px 60px #0004, inset 0 1px #ffffff08}
+.avatar{min-height:790px;padding:38px 26px;background:radial-gradient(circle at 50% 36%,#49283e92,transparent 54%),linear-gradient(160deg,#231a2c,#15121f 74%)}
+.avatar .glow{width:315px;height:315px;background:#ef80b324;filter:blur(78px)}
+.portrait{width:min(335px,82%);max-width:100%;border-radius:24px;border:2px solid #d896b3;box-shadow:0 0 0 5px #f8abd10b,0 24px 60px #0009;transition:box-shadow .2s ease}
+.portrait img{object-fit:cover;object-position:50% 50%}
+.avatar h1{font-size:clamp(27px,2.3vw,36px);line-height:1.16;margin:30px 0 6px;color:#ffdaec;letter-spacing:.012em}
+.avatar p{max-width:350px;margin:13px auto 20px;color:#d5c4d4;line-height:1.65}
+.avatar .controls{max-width:460px}
+.avatar .controls button{min-height:42px}
+.avatar #status{color:#d4afc2;min-height:20px}
+.chat{min-height:790px}
+.chat header{padding:25px 27px 22px;background:linear-gradient(130deg,#241a2f91,transparent);border-bottom:1px solid var(--heart-border)}
+.chat header h2{font-size:22px;letter-spacing:-.02em;margin-bottom:5px}
+.chat header small{display:block;line-height:1.5;color:#c5b4ce}
+#localBrainStatus{color:#f2b8d6!important;font-size:12px!important;line-height:1.5}
+.messages{
+  gap:17px;padding:28px 25px;
+  min-height:350px;max-height:460px;
+  scrollbar-width:thin;scrollbar-color:#73516c #191320;
+}
+.bubble{
+  max-width:min(84%,570px);font-size:14px;line-height:1.68;padding:13px 17px;
+  border-radius:18px;border:1px solid transparent;box-shadow:0 3px 12px #0002;
+}
+.bubble.assistant{background:#2e2338;border-color:#614866;border-bottom-left-radius:6px;color:#f9f1fa}
+.bubble.user{background:linear-gradient(135deg,#70425e,#603650);border:1px solid #9f6588;border-bottom-right-radius:6px;color:#fff5fc}
+.composer{
+  gap:10px;padding:17px 21px;background:#181321;border-top:1px solid var(--heart-border);
+  align-items:center;
+}
+.composer input{
+  min-height:48px;border:1px solid #786080;background:#0f0d18;color:#f9f1fa;
+  border-radius:14px;padding:12px 15px;font-size:14px;
+}
+.composer input::placeholder,input::placeholder,textarea::placeholder{color:#b0a4b7;opacity:1}
+.composer button[type="submit"]{min-height:48px;padding:10px 20px;border-radius:13px}
+.composer #emojiToggle{height:48px;min-width:48px;border-radius:13px;background:#30243a}
+.emoji-picker{background:#261c31;border:1px solid #8c6189;box-shadow:0 16px 42px #000b}
+.settings{padding:23px;gap:15px;background:linear-gradient(180deg,#171321,#15121e)}
+.settings .auth{border:1px solid #58455f;background:#20192b78;border-radius:15px;padding:15px 17px}
+.settings .auth[open]{border-color:#885f80;background:#211a2d}
+.settings .auth summary{font-size:14px;line-height:1.45;font-weight:700;list-style-position:inside;cursor:pointer;color:#fff0fa}
+.settings .auth summary:hover{color:#ffb9d8}
+.settings .auth small{display:block;color:#cebbd1;line-height:1.55}
+.settings .auth .controls{justify-content:flex-start}
+.settings .auth .controls a{min-height:39px;display:inline-flex;align-items:center}
+.settings label{color:#e7d7e9;line-height:1.55}
+.settings input[type="checkbox"]{width:16px;height:16px;accent-color:#ed91bd;flex-shrink:0}
+.auth input{background:#13101d;border-color:#695470}
+.controls{gap:10px}
+.controls button{min-height:41px}
+#serverStatus{line-height:1.55;color:#d5bfce}
+#learningPanel,#cloudMemoryPanel{
+  margin-top:0!important;overflow:visible;
+  padding:clamp(20px,3vw,34px)!important;
+  border-radius:22px;
+  background:linear-gradient(140deg,#21172b,#161320 75%);
+}
+#cloudMemoryPanel{border-color:#6a4a69}
+#learningPanel h2,#cloudMemoryPanel h2{font-size:clamp(21px,2.4vw,27px);line-height:1.24;margin:0 0 12px;color:#fbd4e7}
+#learningPanel h3{font-size:17px;color:#f6ccdf;margin:8px 0}
+#learningPanel p,#cloudMemoryPanel p{color:#d0c0d5;max-width:85ch;margin:8px 0 20px}
+#learningControls{border:1px solid #695272!important;border-radius:17px!important;background:#130f1e70;padding:clamp(16px,2.5vw,24px)!important;min-width:0}
+#learningControls form{padding:20px;border:1px solid #5a455e;border-radius:15px;background:#231b2c}
+#learningControls form label{font-size:13px;color:#e9d8e9;font-weight:650}
+#learningControls :is(input,textarea){
+  width:100%;min-width:0;background:#110e19;border:1px solid #725a7d;border-radius:11px;
+  color:#fff4fa;padding:12px 13px;line-height:1.5;resize:vertical;
+}
+#learningControls button[type="submit"]{background:#d67ca8;color:#201020;font-weight:750;border-color:#f1a3ca}
+#learningControls :is(ul){max-height:280px;overflow:auto;padding:0}
+#learningControls li{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#2a2134;border:1px solid #59455e;border-radius:12px;padding:10px 12px;line-height:1.5}
+#learningControls li button{flex-shrink:0}
+#learningStats,#cloudMemorySummary{display:inline-block;padding:10px 14px;border:1px solid #805d79;border-radius:12px;background:#36243996;font-weight:650;color:#f8d2e5;line-height:1.55}
+#learningFeedback,#cloudMemoryStatus{display:block;margin-top:16px;line-height:1.6;color:#dfc1d2}
+#cloudMemoryPanel .controls{justify-content:flex-start;gap:10px}
+#cloudMemoryPanel .controls button{flex:0 1 auto}
+.foot{margin:24px 0;font-size:12px;color:#bcb1c3;line-height:1.8}
+.foot a{color:#ffb2d2;text-underline-offset:3px}
+@media(min-width:1100px){
+  .layout{align-items:stretch}
+  .avatar,.chat{min-height:800px}
+  .messages{min-height:365px}
+}
+@media(max-width:980px){
+  .shell{width:min(760px,calc(100% - 32px));margin:16px auto 32px}
+  .layout{grid-template-columns:minmax(0,1fr);gap:18px}
+  .avatar{min-height:0;padding:32px 22px}
+  .portrait{width:min(300px,75%)}
+  .chat{min-height:620px}
+  .messages{min-height:320px;max-height:450px}
+}
+@media(max-width:600px){
+  .shell{width:calc(100% - 20px);margin:10px auto 22px}
+  .top{align-items:center;gap:8px;margin-bottom:13px}
+  .brand{font-size:12px;letter-spacing:.02em;gap:7px}
+  .brand .heart{font-size:23px}
+  .tag{font-size:9px;padding:6px 8px;white-space:nowrap}
+  .panel{border-radius:18px}
+  .avatar{padding:27px 14px;min-height:0}
+  .portrait{width:min(260px,79%);border-radius:18px}
+  .avatar h1{font-size:27px;margin:22px 0 6px}
+  .avatar p{font-size:13px;line-height:1.6;padding:0 8px}
+  .avatar .controls{gap:8px}
+  .avatar .controls button{padding:10px 11px;font-size:12px}
+  .chat{min-height:520px}
+  .chat header{padding:19px 17px}
+  .chat header h2{font-size:19px}
+  .messages{padding:18px 13px;min-height:290px;max-height:410px;gap:12px}
+  .bubble{max-width:92%;padding:11px 13px;font-size:13px}
+  .composer{padding:11px;gap:7px}
+  .composer input{min-width:0;padding:10px 9px;font-size:13px}
+  .composer button[type="submit"]{padding:10px 12px}
+  .composer #emojiToggle{min-width:42px;padding:8px}
+  .settings{padding:15px 12px;gap:12px}
+  .settings .auth{padding:13px 11px}
+  .settings .auth .controls{justify-content:flex-start}
+  .controls button{max-width:100%;white-space:normal}
+  #learningPanel,#cloudMemoryPanel{padding:18px 14px!important}
+  #learningControls{padding:12px!important}
+  #learningControls form{padding:14px}
+  #learningControls li{flex-direction:column;align-items:stretch}
+  #learningControls li button{align-self:flex-end}
+  #cloudMemoryPanel .controls button{flex:1 1 100%}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;transition-duration:.001ms!important}
+}

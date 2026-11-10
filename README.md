@@ -185,3 +185,7 @@ Les tests de logique ne remplacent pas une vérification réelle du flux de conn
 - Aucun chiffrement de bout en bout : Cloudflare et le code serveur disposent du texte des données. Ne pas stocker de secrets personnels.
 - La synchronisation n'est **pas automatique** et le cloud ne réplique pas les portraits HD/GLB ni les données des autres applications WarLike. Les sessions Heart expirent après 10 minutes.
 - Valider en navigateur réel avec **deux comptes distincts**, puis sur deux appareils ; CI ne garantit pas les autorisations réelles.
+
+## Rafraîchissement CSS v1.2.1
+
+Thème responsive dans `heart-design.css` (chargé après les anciens styles intégrés pour éviter de toucher au comportement). Harmonisation des couleurs rose/prune, contraste du chat, du portrait, des paramètres, de Learning Brain et de la mémoire Cloud. Mise en page tablette et téléphone, états de survol/clavier, mouvements réduits et messages longs mieux adaptés. Aucune modification des données, identifiants ou API. Le titre reste v1.2 : cette mise à jour est visuelle.
