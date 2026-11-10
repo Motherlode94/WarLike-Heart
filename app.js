@@ -10,6 +10,24 @@
   let busy = false;
   let portraitObjectUrl = null;
   const state = {voiceEnabled:false,remember:false};
+  const MEMORY_KEY = "warlike-heart-explicit-memories-v1";
+  const readMemories = () => {
+    if (!state.remember) return [];
+    try {
+      const facts=JSON.parse(localStorage.getItem(MEMORY_KEY)||"[]");
+      return Array.isArray(facts)?facts.filter(f=>typeof f==="string"&&f.length<=300).slice(0,40):[];
+    } catch { return []; }
+  };
+  const writeMemories = facts => {
+    if (!state.remember) return false;
+    try {
+      localStorage.setItem(MEMORY_KEY,JSON.stringify(facts));
+      return true;
+    } catch { return false; }
+  };
+  const localBrain=window.WarLikeLocalBrain?.createEngine({
+    readMemory:readMemories,writeMemory:writeMemories,canRemember:()=>state.remember
+  });
   const status = (text) => { $("status").textContent = text; };
   const safeHistory = (value) => Array.isArray(value) ? value.filter(x => x && ["user","assistant"].includes(x.role) && typeof x.text === "string" && x.text.length <= 4000).slice(-MAX) : null;
   const render = () => {
@@ -80,9 +98,9 @@
     const token=$("accessToken").value.trim();
     let answer;
     if (!token) {
-      answer=reply(text);
-      $("apiStatus").textContent="Mode démo : aucun jeton saisi.";
-      $("aiMode").textContent="Mode démo · IA non configurée";
+      answer=localBrain?.reply(text).text || reply(text);
+      $("apiStatus").textContent="Réponse produite localement, sans API IA.";
+      $("aiMode").textContent="Moteur local · indépendant de l'API";
     } else {
       $("apiStatus").textContent="Connexion au modèle IA…";
       $("aiMode").textContent="Mode IA · connexion privée";
@@ -228,21 +246,26 @@
         $("aiMode").textContent="Service IA prêt — identification privée requise";
         $("apiStatus").textContent="Serveur IA configuré. Saisis ton jeton privé pour discuter.";
       }else{
-        $("aiMode").textContent="Service IA non configuré — mode démonstration";
+        $("aiMode").textContent="Moteur local actif · service IA distant non configuré";
         $("apiStatus").textContent="Les secrets de production Cloudflare sont absents. Voir DEPLOIEMENT.md.";
       }
     }catch{
-      $("aiMode").textContent="État IA inconnu — mode démonstration";
+      $("aiMode").textContent="Moteur local actif · état du service distant inconnu";
       $("apiStatus").textContent="La vérification de l'API n'est pas disponible.";
     }
   })();
   $("accessToken").addEventListener("input",()=>{
     const connected=Boolean($("accessToken").value.trim());
-    $("aiMode").textContent=connected?"Mode IA demandé · vérifier la connexion":"Mode démo · réponses prédéfinies";
+    $("aiMode").textContent=connected?"Mode IA distant demandé · vérifier la connexion":"Moteur local · indépendant de l’API";
     $("apiStatus").textContent=connected?"Jeton présent en mémoire ; une requête sera envoyée au prochain message.":"Le mode démo reste accessible sans jeton.";
   });
   $("voiceEnabled").addEventListener("change",ev => {state.voiceEnabled=ev.target.checked; if(!state.voiceEnabled) stopVoice();persist();});
-  $("remember").addEventListener("change",ev => {state.remember=ev.target.checked;persist();status(state.remember?"Stockage local activé.":"Stockage local désactivé et ancienne copie supprimée.");});
+  $("remember").addEventListener("change",ev => {
+    state.remember=ev.target.checked;
+    if(!state.remember){try{localStorage.removeItem(MEMORY_KEY);}catch{}}
+    persist();
+    status(state.remember?"Historique et souvenirs explicites autorisés sur cet appareil.":"Historique et souvenirs explicites locaux supprimés.");
+  });
   $("stop").addEventListener("click",() => {stopVoice();if(recognition){recognition.abort();recognition=null;}$("portrait").classList.remove("listening");status("Voix arrêtée.");});
   $("listen").addEventListener("click",() => {
     const Engine=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -255,7 +278,7 @@
     try{rec.start();window.WarLikeHeart3D?.setListening(true);$("portrait").classList.add("listening");status("Écoute en cours…");}catch{status("Impossible de démarrer la dictée.");}
   });
   $("export").addEventListener("click",()=>{
-    const json=JSON.stringify({format:"warlike-heart-conversation",version:1,exportedAt:new Date().toISOString(),history,settings:{voiceEnabled:state.voiceEnabled}},null,2);
+    const json=JSON.stringify({format:"warlike-heart-conversation",version:1,exportedAt:new Date().toISOString(),history,memories:readMemories(),settings:{voiceEnabled:state.voiceEnabled}},null,2);
     const blob=new Blob([json],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");
     a.href=url;a.download="warlike-heart-conversation.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);status("Export JSON préparé.");
   });
@@ -265,14 +288,20 @@
     if(file.size>1024*1024){status("Fichier trop volumineux (maximum 1 Mo).");return;}
     try {const data=JSON.parse(await file.text());if(data.format!=="warlike-heart-conversation"||data.version!==1)throw Error("format");
       const imported=safeHistory(data.history);if(!imported||!imported.length)throw Error("content");
-      history=imported;stopVoice();render();persist();status("Conversation importée depuis le fichier.");
+      history=imported;stopVoice();render();persist();
+      // Only restore explicit memories if the user has already opted into local storage.
+      if(state.remember&&Array.isArray(data.memories)){
+        const valid=data.memories.filter(x=>typeof x==="string"&&x.length>=3&&x.length<=300).slice(0,40);
+        writeMemories(valid);
+      }
+      status("Conversation importée. Les souvenirs ne sont restaurés que si la mémoire locale est activée.");
     }catch{status("Import impossible : format ou contenu non valide.");}
   });
   $("clear").addEventListener("click",()=>{
     stopVoice();history=[welcome];render();
     state.remember=false;$("remember").checked=false;
-    try{localStorage.removeItem(KEY);}catch{}
-    status("Conversation et stockage local effacés.");
+    try{localStorage.removeItem(KEY);localStorage.removeItem(MEMORY_KEY);}catch{}
+    status("Conversation et souvenirs explicites locaux effacés.");
   });
   try {
     const stored=JSON.parse(localStorage.getItem(KEY)||"null");
