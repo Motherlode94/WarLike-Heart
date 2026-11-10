@@ -1,0 +1,29 @@
+/* Learning Brain v2 — denser workspace with supervised web research */
+#learningPanel{max-width:100%;display:block}
+#learningPanel[hidden]{display:none!important}
+.brain-toolbar,.brain-preview,.brain-web{background:linear-gradient(130deg,#2f1e33,#1b1526);border:1px solid #78576f;border-radius:15px;padding:15px;margin:12px 0}
+.brain-toolbar label,.brain-preview label,.brain-web label{display:block;font-size:12px;font-weight:750;color:#f2d5e6;margin:0 0 7px}
+.brain-toolbar input,.brain-preview input,.brain-web input,.brain-web select{width:100%;background:#130f1c;color:#fff5fb;border:1px solid #8b6784;border-radius:10px;padding:10px 12px;min-height:40px;font:inherit}
+.brain-toolbar small{display:block;margin-top:7px;color:#d9bbd1}
+.brain-preview .controls{align-items:center;gap:9px;justify-content:flex-start}
+.brain-preview .controls input{flex:1 1 320px}
+.brain-preview .controls button{flex:0 0 auto}
+#learningTestResult{white-space:pre-wrap;line-height:1.5;color:#f9daeb;margin:10px 0 0;font-size:13px}
+#learningCancelEdit{margin:10px 0 0;border-color:#d7a1b5}
+.learning-item-actions{display:flex;flex-wrap:wrap;gap:7px;flex-shrink:0}
+.learning-item-actions button{padding:7px 10px;font-size:12px}
+.brain-web{border-color:#a38372;margin-top:18px}
+.brain-web h3{font-size:19px;color:#f4dcb7;margin:0 0 7px}
+.brain-web>p{line-height:1.5}
+#brainWebForm{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,.4fr) auto;align-items:end;gap:9px}
+#brainWebForm label{grid-row:1}
+#brainWebForm input{grid-column:1;grid-row:2}
+#brainWebForm select{grid-column:2;grid-row:2}
+#brainWebForm button{grid-column:3;grid-row:2;min-height:40px;color:#261523;background:#eeb0c6;border:1px solid #f8ccd4;font-weight:750}
+#brainWebStatus{display:block;color:#e5c5d6;margin:12px 0 8px;line-height:1.55}
+#brainWebResults{list-style:none;padding:0;display:grid;gap:10px;margin:0}
+#brainWebResults li{border:1px solid #735a78;background:#251c2e;padding:13px 15px;border-radius:12px}
+#brainWebResults li a{color:#f2cb9b;text-decoration:underline;text-underline-offset:3px;font-weight:750;overflow-wrap:anywhere}
+#brainWebResults li p{margin:8px 0;color:#e0d0e2}
+#brainWebResults li button{min-height:34px;font-size:12px}
+@media(max-width:800px){#brainWebForm{display:flex;flex-direction:column;align-items:stretch}#brainWebForm>*{width:100%}#brainWebForm label{margin-top:5px}.brain-preview .controls button{width:100%}.learning-item-actions{width:100%;justify-content:flex-end}}
