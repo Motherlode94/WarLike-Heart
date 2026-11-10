@@ -235,3 +235,9 @@ R2 n'est pas exposé directement sur un domaine public ; seule la lecture du mod
 - Les requêtes de recherche sont transmises au fournisseur choisi et peuvent figurer dans ses journaux ; ne jamais rechercher des secrets privés. Les résultats ne sont pas inclus automatiquement dans les sauvegardes Cloud.
 
 La migration SQL `migrations/0002_heart_research_limits.sql` a été appliquée à la base D1 Heart existante. Aucune configuration supplémentaire n'est nécessaire pour essayer Wikipédia depuis un compte WarLike associé. L'accès Web général nécessite qu'un administrateur configure lui-même `BRAVE_SEARCH_API_KEY`.
+
+### Correction de persistance des avatars GLB (v1.6.3)
+
+Les modèles 3D **importés dans l’Atelier privé** sont conservés en binaire dans IndexedDB (`warlike-heart-local-avatar`) **sur cet appareil uniquement**, dans la limite de 30 Mo. Au prochain rechargement du site, la visionneuse recharge la copie locale avant de signaler qu'elle est prête. Le fichier ne part pas automatiquement vers Cloudflare et n'est pas rendu public. L'Atelier propose « Effacer la copie locale de cet appareil » ; cela ne supprime pas le GLB officiel partagé dans R2.
+
+**Distinction importante :** un avatar GLB publié via « Publier l'avatar 3D officiel » est disponible dans Cloudflare R2 à toute personne qui ouvre Espace 3D, sur tous les appareils. Un GLB importé via « Importer un modèle 3D GLB » reste privé à ce navigateur, même après rechargement. Si IndexedDB est bloqué, en navigation privée ou nettoyé, la persistance locale n'est pas garantie ; l'interface avertit en cas d'échec d'enregistrement. La copie IndexedDB ne remplace pas une sauvegarde maîtresse du modèle.
