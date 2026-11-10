@@ -1,11 +1,12 @@
+import {hasServerBinding,serverFetch} from "../_server-transport.js";
 // Read-only diagnostic. Never treats a Cloudflare Pages deployment as proof that
 // WarLike Server's actual authenticated API is online.
-const SERVER_HEALTH = "https://warlike-server.pages.dev/api/health";
 const headers={"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"};
 const respond=data=>new Response(JSON.stringify(data),{status:200,headers});
-export async function onRequestGet(){
+export async function onRequestGet({env}={}){
+  if(!hasServerBinding(env))return respond({status:"binding_missing",serverHealthy:false,accountConnected:false,note:"Liaison Cloudflare WARLIKE_SERVER absente. Vérifier les services de WarLike Heart."});
   try {
-    const response=await fetch(SERVER_HEALTH,{
+    const response=await serverFetch(env,"/api/health",{
       method:"GET",redirect:"error",signal:AbortSignal.timeout(6000),
       headers:{"accept":"application/json"}
     });
