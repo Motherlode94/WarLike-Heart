@@ -37,7 +37,7 @@ test("Wikipedia sources are sanitized and require no paid API key",async t=>{
  const cookie=await session(),storage=db(),saved=globalThis.fetch;
  t.after(()=>{globalThis.fetch=saved;});
  globalThis.fetch=async request=>{
-  assert.match(String(request),"^https://fr.wikipedia.org/w/rest.php/v1/search/page");
+  assert.match(String(request),/^https:\/\/fr\.wikipedia\.org\/w\/rest\.php\/v1\/search\/page/);
   return new Response(JSON.stringify({pages:[{title:"<b>Paris</b>",key:"Paris",description:"Ville française"}]}),{status:200,headers:{"content-type":"application/json"}});
  };
  const response=await query(cookie,storage,"wikipedia","Paris");
