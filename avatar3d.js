@@ -5,6 +5,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { inspectAvatar, VISEME_PATTERNS, visemeForText } from "./avatar-rig.mjs";
 import {saveLocalAvatar,readLocalAvatar,deleteLocalAvatar} from "./avatar-store.mjs";
+import {fitDistance,centerOffset} from "./avatar-camera-fit.mjs";
 
 const holder=document.getElementById("heart3d");
 const originalParent=holder.parentElement;
@@ -26,11 +27,6 @@ let autoRotate=false,animationsEnabled=true,viewMode="full";
 // The original Meshy GLB may use arbitrary model units and an offset origin.
 // Fit the *transformed* geometry to the real viewport instead of guessing a
 // fixed camera distance (which cropped the head on tall, narrow canvases).
-function fitDistance(width,height,depth,aspect,fovDegrees=35){
- const v=Math.tan((fovDegrees*Math.PI/180)/2);
- const a=Math.max(.1,aspect||1);
- return Math.max(height/(2*v),width/(2*v*a)) * 1.2 + depth*.8;
-}
 function framePose(mode="full"){
  if(!current)return false;
  const box=new THREE.Box3().setFromObject(current);
@@ -142,7 +138,8 @@ const api={
    current.scale.setScalar(scale);
    // An object's local translation is not scaled by its own scale in Three.js.
    // Centering with unscaled (-center) left the avatar offset or clipped.
-   current.position.copy(center).multiplyScalar(-scale);
+   const offset=centerOffset(center,scale);
+   current.position.set(offset.x,offset.y,offset.z);
    current.updateMatrixWorld(true);
    viewMode="full";
    framePose("full");
