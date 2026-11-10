@@ -50,14 +50,19 @@ function retrieval(query,data){
    const q=new Set(tokens(query)),matched=new Set(tokens(value).filter(x=>q.has(x)));
    if(matched.size<2)return;
   }
-  const candidate={text,source:kind,confidence:weight,matched:value};
-  if(!best||weight>best.confidence+.001||(Math.abs(weight-best.confidence)<.001&&priority>best.priority))
+  // Prefer specifically matching a longer taught question over a generic
+  // subject that happens to be included in the same query.
+  const queryTerms=new Set(tokens(query));
+  const matchedWords=new Set(tokens(value).filter(w=>queryTerms.has(w))).size;
+  const rank=weight+Math.min(.24,Math.max(0,matchedWords-2)*.16);
+  const candidate={text,source:kind,confidence:weight,matched:value,rank};
+  if(!best||rank>best.rank+.001||(Math.abs(rank-best.rank)<.001&&priority>best.priority))
    best={...candidate,priority};
  }
  db.dialogues.forEach(x=>consider("dialogue",x,x.question,x.answer,2));
  db.knowledge.forEach(x=>consider("knowledge",x,x.subject,x.content,1));
  if(!best)return null;
- const {priority,...result}=best;return result;
+ const {priority,rank,...result}=best;return result;
 }
 const followUp=/^(?:et (?:sur |pour |a propos de )?(?:ca|cela|lui|elle|ce sujet)|et alors|explique encore|tu peux preciser|peux tu preciser|plus de details|developpe|rappelle moi ce sujet)$/;
 function create({read=()=>({}),enabled=()=>false}={}){
