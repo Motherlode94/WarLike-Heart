@@ -53,5 +53,5 @@ test("small talk never swallows precise technical or memory requests",()=>{
   const b=brain.createEngine();
   assert.equal(b.reply("Comment fonctionne WarLike Engine ?").intent,"projects");
   assert.equal(b.reply("Souviens-toi que je vais bien").intent,"memory");
-  assert.equal(b.reply("Comment installer un moteur de recherche vectoriel ?").intent,"unknown");
+  assert.equal(b.reply("Comment installer un index vectoriel ?").intent,"unknown");
 });
