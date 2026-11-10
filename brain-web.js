@@ -50,7 +50,15 @@ form.addEventListener("submit",async event=>{
  }catch(error){text(error?.message||"Recherche impossible.");}
  finally{search.disabled=false;}
 });
-window.WarLikeHeartWebResearch={research:async(query)=>{
+window.WarLikeHeartWebResearch={
+  autoEnabled:()=>Boolean($("brainAutoWeb")?.checked),
+  lookup:async(query,provider="wikipedia")=>{
+    const response=await fetch("/api/research",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({query,provider})});
+    const data=await response.json();
+    if(!response.ok)throw Error(data.error||"Recherche indisponible.");
+    return data;
+  },
+  research:async(query)=>{
  $("brainWebQuery").value=String(query||"").slice(0,240);
  $("brainWebProvider").value="wikipedia";
  form.requestSubmit();
