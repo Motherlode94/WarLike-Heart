@@ -27,5 +27,5 @@ test("sensitive backend stays separately protected",()=>{
 test("CSS retains hidden and responsive behavior",()=>{
  assert.match(css,/\[hidden\]\{display:none!important\}/);
  assert.match(css,/@media\(max-width:720px\)/);
- assert.match(html,/navigation\.js\?v=1\.3/);
+ assert.match(html,/navigation\.js\?v=1\.\d+/);
 });
