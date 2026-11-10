@@ -11,14 +11,14 @@
 #touch{display:none;position:absolute;bottom:20px;right:20px;pointer-events:auto;gap:8px;align-items:end}.pad{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px);gap:4px}.pad button{padding:0;touch-action:none}.pad button:first-child{grid-column:2}.pad button:nth-child(2){grid-column:1;grid-row:2}.pad button:nth-child(3){grid-column:2;grid-row:2}.pad button:nth-child(4){grid-column:3;grid-row:2}
 #fallback{position:fixed;inset:0;display:none;place-items:center;background:#100d22;text-align:center;padding:24px}#fallback p{max-width:580px}
 @media(max-width:850px){#touch{display:flex}#help{display:none}header{top:8px;left:8px;padding:10px}h1{font-size:15px}#dialog{bottom:126px}}
-</style>
+ #loveland-tools{position:fixed;right:12px;top:12px;z-index:8;background:#21182eea;padding:10px;border-radius:12px;display:flex;gap:7px;flex-wrap:wrap;max-width:350px}#loveland-tools button{font-size:12px} </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js"}}</script></head><body>
 <div id="hud"><header><h1>♥ WARLIKE LOVELAND</h1><small>Prototype 3D · Parc romantique interactif · 18+</small><div class="meta" id="score">Cœurs trouvés : 0 / 8</div><div class="meta" id="place">Place des Lumières</div></header>
 <div id="help">ZQSD / WASD : marcher · Souris : orienter la caméra<br>Maj : courir · E : interagir · Échap : fermer<br>Approche-toi des attractions et de l'avatar ♥</div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="dialog" role="dialog" aria-modal="false" aria-labelledby="dialogTitle"><h2 id="dialogTitle"></h2><p id="dialogText"></p><div class="buttons" id="dialogButtons"></div></div>
 <div id="touch"><div class="pad"><button data-key="w" aria-label="Avancer">▲</button><button data-key="a" aria-label="Gauche">◀</button><button data-key="s" aria-label="Reculer">▼</button><button data-key="d" aria-label="Droite">▶</button></div><button id="touchInteract">Parler / Jouer</button></div></div>
-<div id="fallback"><div><h1>WebGL indisponible</h1><p>LoveLand nécessite un navigateur compatible WebGL et le chargement du module Three.js. Vérifie la connexion Internet et l'accélération graphique.</p></div></div>
+<div id="loveland-tools"><button id="modelButton">Charger avatar GLB</button><input id="modelFile" type="file" accept=".glb" hidden><button id="aiButton">Parler avec Heart (IA)</button></div><div id="fallback"><div><h1>WebGL indisponible</h1><p>LoveLand nécessite un navigateur compatible WebGL et le chargement du module Three.js. Vérifie la connexion Internet et l'accélération graphique.</p></div></div>
 <script type="module">
 import * as THREE from 'three';
 const $=id=>document.getElementById(id);
@@ -80,5 +80,6 @@ camera.position.lerp(new THREE.Vector3(player.position.x+Math.sin(yaw)*9,7,playe
 near=null;let best=4.5;for(const a of attractions){const dist=a.pos.distanceTo(new THREE.Vector3(player.position.x,0,player.position.z));if(dist<best){near=a;best=dist}}$('place').textContent=near?'E — '+near.name:'Explore le parc pour découvrir les attractions';
 for(let i=0;i<bulbs.length;i++)bulbs[i].scale.setScalar(.88+Math.sin(t*2+i)*.12);
 renderer.render(scene,camera)}
+window.LoveLandBridge={THREE,scene,companion,openDialog,closeDialog,toast};import("./extras.js").catch(e=>console.error("LoveLand extensions:",e));
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});animate();
 </script></body></html>
