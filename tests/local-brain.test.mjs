@@ -55,3 +55,19 @@ test("small talk never swallows precise technical or memory requests",()=>{
   assert.equal(b.reply("Souviens-toi que je vais bien").intent,"memory");
   assert.equal(b.reply("Comment installer un index vectoriel ?").intent,"unknown");
 });
+
+test("romantic follow-ups distinguish wellbeing, love topic, and plural kisses",()=>{
+ const b=brain.createEngine();
+ assert.equal(b.reply("hey").intent,"greeting");
+ for(const text of ["Bien et toi mon amour ?", "Bien mon cœur et toi mon amour ?", "Je vais bien et toi ma chérie ?"]){
+  const result=b.reply(text);
+  assert.equal(result.intent,"social-positive",text);
+  assert.doesNotMatch(result.text,/ne connais pas encore|de quoi as-tu envie de parler \?/i);
+ }
+ for(const text of ["D'amour", "d'amour", "De l'amour"]){
+  assert.equal(b.reply(text).intent,"social-affection",text);
+ }
+ for(const text of ["Bisous", "bisou", "Plein de bisous", "Câlins"]){
+  assert.equal(b.reply(text).intent,"affection",text);
+ }
+});
