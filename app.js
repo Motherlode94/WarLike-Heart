@@ -54,6 +54,22 @@
   function append(role,text) {
     history.push({role,text}); history=history.slice(-MAX); render(); persist();
   }
+  // Clavier emoji local : aucun transfert réseau, insertion au curseur.
+  const emojiToggle=$("emojiToggle"), emojiPicker=$("emojiPicker"),messageField=$("message");
+  const emojis=["❤️","💕","💖","💗","💓","💞","💋","😘","🥰","😍","😊","☺️","😏","😉","😂","🤣","🥹","😭","😢","😔","😴","😳","🤭","😎","🙃","😇","😡","😤","🤔","🫶","🤗","👀","✨","🌹","🌷","🌙","💐","🔥","🎶","🎉","💜","💙","💚","🖤","🤍","💛","🍀","🌺"];
+  for (const emoji of emojis) {
+    const button=document.createElement("button");button.type="button";button.textContent=emoji;button.title="Insérer "+emoji;button.setAttribute("aria-label","Insérer "+emoji);
+    button.addEventListener("click",()=>{
+      const start=messageField.selectionStart ?? messageField.value.length,end=messageField.selectionEnd ?? start;
+      const next=messageField.value.slice(0,start)+emoji+messageField.value.slice(end);
+      if(next.length>messageField.maxLength)return;
+      messageField.value=next;messageField.focus();messageField.setSelectionRange(start+emoji.length,start+emoji.length);
+      emojiPicker.hidden=true;emojiToggle.setAttribute("aria-expanded","false");
+    });emojiPicker.append(button);
+  }
+  emojiToggle.addEventListener("click",()=>{emojiPicker.hidden=!emojiPicker.hidden;emojiToggle.setAttribute("aria-expanded",String(!emojiPicker.hidden));});
+  document.addEventListener("pointerdown",event=>{if(!emojiPicker.hidden && !event.target.closest(".emoji-wrap")){emojiPicker.hidden=true;emojiToggle.setAttribute("aria-expanded","false");}});
+  document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!emojiPicker.hidden){emojiPicker.hidden=true;emojiToggle.setAttribute("aria-expanded","false");emojiToggle.focus();}});
   $("chatForm").addEventListener("submit",async ev => {
     ev.preventDefault();
     const field=$("message"); const text=field.value.trim();
