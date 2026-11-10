@@ -76,7 +76,7 @@ test("upstream errors are not leaked to the browser", async t => {
 
 test("WarLike Server diagnostic never reports an authenticated account", async t => {
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => new Response("{}", { status: 200 });
+  globalThis.fetch = async () => new Response(JSON.stringify({service:"warlike-server",ready:true}), { status: 200 });
   t.after(() => { globalThis.fetch = originalFetch; });
   const r = await serverStatus();
   const data = await r.json();
