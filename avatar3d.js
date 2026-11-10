@@ -18,20 +18,46 @@ const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,1,.01,200);
 camera.position.set(0,1.1,4.8);
 const controls=new OrbitControls(camera,canvas);
 controls.enableDamping=true;controls.dampingFactor=.075;
-controls.minDistance=1.4;controls.maxDistance=9;
+controls.minDistance=.4;controls.maxDistance=30;
 controls.minPolarAngle=.18;controls.maxPolarAngle=Math.PI-.18;
-controls.enablePan=false;controls.target.set(0,.15,0);
+controls.enablePan=false;controls.target.set(0,0,0);
 controls.update();
-const initialCamera=camera.position.clone();
-let autoRotate=false,animationsEnabled=true;
+let autoRotate=false,animationsEnabled=true,viewMode="full";
+// The original Meshy GLB may use arbitrary model units and an offset origin.
+// Fit the *transformed* geometry to the real viewport instead of guessing a
+// fixed camera distance (which cropped the head on tall, narrow canvases).
+function fitDistance(width,height,depth,aspect,fovDegrees=35){
+ const v=Math.tan((fovDegrees*Math.PI/180)/2);
+ const a=Math.max(.1,aspect||1);
+ return Math.max(height/(2*v),width/(2*v*a)) * 1.2 + depth*.8;
+}
 function framePose(mode="full"){
  if(!current)return false;
- const distance=mode==="face"?2.05:4.2;
- controls.target.set(0,mode==="face"?.62:.08,0);
- camera.position.set(0,mode==="face"?.65:.38,distance);
- controls.update();return true;
+ const box=new THREE.Box3().setFromObject(current);
+ if(box.isEmpty())return false;
+ const size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
+ const face=mode==="face";
+ viewMode=face?"face":"full";
+ const target=center.clone();
+ // The upper 40% of a humanoid is a good head-and-shoulders composition
+ // even without bones. The full view always contains the entire mesh.
+ if(face)target.y=box.max.y-size.y*.20;
+ const regionHeight=face?size.y*.40:size.y;
+ const regionWidth=face?Math.min(size.x,size.y*.65):size.x;
+ const viewport=holder.getBoundingClientRect();
+ const aspect=viewport.width>0&&viewport.height>0?viewport.width/viewport.height:camera.aspect;
+ const distance=fitDistance(regionWidth,regionHeight,size.z,aspect,camera.fov);
+ controls.target.copy(target);
+ camera.position.copy(target).add(new THREE.Vector3(0,0,distance));
+ controls.minDistance=Math.max(.3,distance*.22);
+ controls.maxDistance=Math.max(12,distance*5);
+ camera.near=Math.max(.01,distance/1000);
+ camera.far=Math.max(200,distance*30);
+ camera.updateProjectionMatrix();
+ controls.update();
+ return true;
 }
-function resetView(){camera.position.copy(initialCamera);controls.target.set(0,.15,0);controls.update();}
+function resetView(){return framePose("full");}
 function addStage(){
  const base=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.45,.14,80),new THREE.MeshStandardMaterial({color:0x3d263e,metalness:.62,roughness:.27}));
  base.position.y=-1.78;scene.add(base);
@@ -55,6 +81,7 @@ function resize(){
  const {width,height}=holder.getBoundingClientRect();
  if(!width||!height)return;
  renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();
+ if(current)framePose(viewMode);
 }
 new ResizeObserver(resize).observe(holder);
 function setMorph(pattern,value){
@@ -111,12 +138,14 @@ const api={
    mixer=null;morphs.length=0;current=gltf.scene;scene.add(current);
    const size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
    const max=Math.max(size.x,size.y,size.z,0.01);
-   current.position.sub(center);
-   current.position.y+=size.y*.12;
-   const scale=2.9/max;current.scale.setScalar(scale);
-   camera.position.set(0,size.y*scale*.18,Math.max(2.5,max*scale*1.25));
-   controls.target.set(0,0,0);
-   controls.update();
+   const scale=2.9/max;
+   current.scale.setScalar(scale);
+   // An object's local translation is not scaled by its own scale in Three.js.
+   // Centering with unscaled (-center) left the avatar offset or clipped.
+   current.position.copy(center).multiplyScalar(-scale);
+   current.updateMatrixWorld(true);
+   viewMode="full";
+   framePose("full");
    const bones=[],shapes=[];let skinnedMeshes=0,meshes=0;
    current.traverse(object=>{
     if(object.isBone)bones.push(object.name);
