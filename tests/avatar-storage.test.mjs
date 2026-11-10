@@ -21,7 +21,7 @@ test("viewer restores local model before dispatching its ready event",()=>{
  const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
  assert.match(viewer,/await readLocalAvatar\(\)/);
  assert.match(viewer,/await api.loadGLB\(file,\{source:"local"\}\)/);
- assert.match(viewer,/finally\{document.dispatchEvent\(new Event\("warlike-heart-3d-ready"\)\)\}/);
+ assert.match(viewer,/finally\{document.dispatchEvent\(new Event\("warlike-heart-3d-ready"\)\);\}/);
  assert.match(app,/loadGLB\(file,\{rememberLocal:true\}\)/);
  assert.match(html,/id="forgetLocalAvatar"/);
  assert.match(html,/avatar3d\.js\?v=1\.6\.3/);
