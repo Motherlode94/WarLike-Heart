@@ -189,3 +189,14 @@ Les tests de logique ne remplacent pas une vérification réelle du flux de conn
 ## Rafraîchissement CSS v1.2.1
 
 Thème responsive dans `heart-design.css` (chargé après les anciens styles intégrés pour éviter de toucher au comportement). Harmonisation des couleurs rose/prune, contraste du chat, du portrait, des paramètres, de Learning Brain et de la mémoire Cloud. Mise en page tablette et téléphone, états de survol/clavier, mouvements réduits et messages longs mieux adaptés. Aucune modification des données, identifiants ou API. Le titre reste v1.2 : cette mise à jour est visuelle.
+
+## Version v1.3 — Navigation et niveaux d'accès
+
+L'interface n'affiche plus tous les panneaux d'un coup : elle comprend les sections **Conversation**, **Mon compte**, **Cerveau**, **Mémoire Cloud** et **Atelier privé**. Les onglets s'adaptent à la session WarLike autorisée par `GET /api/account`.
+
+- **Public** : portrait et conversation locale de démonstration, accès à Mon compte pour se connecter et consulter les options générales. Aucune sauvegarde Cloud ni information d'un compte tiers.
+- **Compte associé (owner, referent ou member)** : Cerveau personnel et Mémoire Cloud, sauvegardes manuelles, paramètres du compte.
+- **Opérateur (owner ou referent)** : Atelier privé, import et suppression du portrait HD, import de modèles GLB, champ de jeton API facultatif.
+- Les onglets réservés sont masqués tant que le serveur ne confirme pas la session ; une session expirée retire l'accès aux écrans privés au prochain contrôle. Le navigateur recontrôle à chaque retour sur l'onglet.
+- **Sécurité** : masquer un panneau n'est pas une autorisation ! Les fichiers CSS/JS restent publics ; `/api/memory` continue à vérifier le cookie signé, le compte et l'origine sur le serveur. `/api/chat` exige toujours le jeton serveur privé. Les outils locaux de l'Atelier ne publient pas d'API de modification distante.
+- Si l'utilisateur utilise le moteur local sans compte, les données restent uniquement dans le navigateur, sous son contrôle. Les fonctions privées nécessitent une session WarLike.
