@@ -172,3 +172,16 @@ Le panneau « État de WarLike Server et association de compte » fournit l'asso
 Les fonctions `/api/server-status` et `/api/account` utilisent désormais le **service binding** Cloudflare Pages `WARLIKE_SERVER` pointant sur `warlike-server-runtime`. Cet appel interne remplace le `fetch('https://warlike-server.pages.dev/...')` qui pouvait échouer dans le réseau Worker. L'absence du binding est signalée sans repli externe ; une liste blanche limite les routes à `/api/health` et `/api/heart/exchange`. Le secret `HEART_SESSION_SECRET` reste requis.
 
 Les tests de logique ne remplacent pas une vérification réelle du flux de connexion avec un compte WarLike.
+
+## Version v1.2 — Mémoire Cloud privée, synchronisation manuelle
+
+- Cloudflare D1 `warlike-heart-memory` (juridiction **EU**) : binding Cloudflare Pages `HEART_DB`.
+- Table `heart_snapshots` isolée par l'identifiant WarLike issu d'une session Heart signée et limitée à dix minutes. **Aucune API de liste globale.**
+- `GET /api/memory` : lecture de la seule sauvegarde du compte connecté.
+- `PUT /api/memory` : sauvegarde de l'historique local (100 messages max), 40 souvenirs, 500 dialogues, 500 connaissances ; taille maximale 190 Ko ; protection de conflits par révision atomique. Rien n'est transmis sans action explicite.
+- `DELETE /api/memory` : suppression de la sauvegarde Cloud après confirmation, sans supprimer les données locales.
+- Import manuel de la sauvegarde Cloud **avec confirmation**. Les données locales existantes ne sont jamais fusionnées automatiquement ; exporter un JSON avant restauration évite de perdre une version.
+- Les écritures exigent origine HTTPS identique et cookie de session Heart valide et signé. Le serveur ne prend jamais l'identifiant du propriétaire depuis le corps de la requête.
+- Aucun chiffrement de bout en bout : Cloudflare et le code serveur disposent du texte des données. Ne pas stocker de secrets personnels.
+- La synchronisation n'est **pas automatique** et le cloud ne réplique pas les portraits HD/GLB ni les données des autres applications WarLike. Les sessions Heart expirent après 10 minutes.
+- Valider en navigateur réel avec **deux comptes distincts**, puis sur deux appareils ; CI ne garantit pas les autorisations réelles.
