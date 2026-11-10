@@ -36,3 +36,22 @@ test("normalizes accents and rejects oversized facts",()=>{
   b.reply("Souviens-toi que "+ "a".repeat(310));
   assert.equal(saved.length,0);
 });
+
+test("French ligatures and natural reciprocal small talk",()=>{
+  const b=brain.createEngine();
+  assert.equal(brain.normalize("Mon cœur et ma sœur"),"mon coeur et ma soeur");
+  assert.equal(b.reply("hey").intent,"greeting");
+  for(const text of ["bien mon cœur et toi ?", "Bien mon coeur et toi ?", "Ça va bien et toi ?", "très bien merci", "je vais bien mon cœur et toi ?"]){
+    const result=b.reply(text);
+    assert.equal(result.intent,"social-positive",text);
+    assert.doesNotMatch(result.text,/ne connais pas encore une reponse fiable/i);
+  }
+  assert.equal(b.reply("Et toi ?").intent,"social-reciprocal");
+  assert.equal(b.reply("Bof").intent,"social-support");
+});
+test("small talk never swallows precise technical or memory requests",()=>{
+  const b=brain.createEngine();
+  assert.equal(b.reply("Comment fonctionne WarLike Engine ?").intent,"projects");
+  assert.equal(b.reply("Souviens-toi que je vais bien").intent,"memory");
+  assert.equal(b.reply("Comment installer un moteur de recherche vectoriel ?").intent,"unknown");
+});
