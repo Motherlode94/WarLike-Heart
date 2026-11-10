@@ -20,6 +20,7 @@ jobs:
           node --check notifications/scheduler.mjs
           node --check app.js
           node --check avatar3d.js
+          node --check avatar-space.js
           node --check avatar-rig.mjs
           node --check functions/api/chat.js
           node --check functions/api/account.js

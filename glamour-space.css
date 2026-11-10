@@ -1,0 +1,92 @@
+/* WarLike Heart — Glamour Edition, v1.4.
+   Gold accents, plum velvet and satin pink; compact, responsive and accessible. */
+:root{
+ --glam-gold:#e6c48b;--glam-rose:#f1a6ca;--glam-ink:#120e18;
+ --glam-velvet:#26182b;--glam-line:#886578;
+}
+body{
+ background:radial-gradient(ellipse at 20% 5%,#60344b54,transparent 43%),
+ radial-gradient(ellipse at 94% 70%,#453b6545,transparent 45%),
+ linear-gradient(145deg,#110d16,#1a1220 42%,#100d17)!important;
+}
+.top{border-bottom-color:#8a61765c}
+.brand .heart{color:var(--glam-rose)}
+.tag{border-color:#b58c68;background:#2c2025;color:#f8e2b6;letter-spacing:.065em}
+.heart-navigation{
+ background:linear-gradient(110deg,#241626ed,#211727f0 70%,#35232fed)!important;
+ border-color:#8c5f78!important;
+ box-shadow:0 7px 26px #0005,inset 0 1px #f9d8ce10;
+}
+.heart-navigation button[aria-current="page"]{
+ background:linear-gradient(120deg,#854b6e,#633b5b)!important;
+ border-color:#f0b899!important;box-shadow:0 0 0 1px #ffceaa22,inset 0 1px #fff2;
+}
+.heart-navigation button:not([aria-current="page"]):hover{border-color:#ab829d;color:#fff7fb}
+.view-title{color:#f9dded}
+.panel{border-color:#6b4b60;background:linear-gradient(160deg,#2a1c2e,#19121f 80%);box-shadow:0 12px 40px #07020e55,inset 0 1px #ffffff0a}
+button.primary{background:linear-gradient(125deg,#ffd4df,#ed9abf)!important;border-color:#ffe0d2!important;color:#371c2d!important}
+button:not(:disabled):focus-visible{outline-color:#ffe3b5!important}
+#avatarSpaceView{
+ display:block;position:relative;width:100%;min-height:0;
+ padding:clamp(16px,2.6vw,30px);
+ border:1px solid #956d75;
+ border-radius:22px;
+ background:radial-gradient(circle at 65% 0%,#59364c66,transparent 48%),linear-gradient(145deg,#281829,#140f1c);
+}
+#avatarSpaceView[hidden]{display:none!important}
+.space-heading{display:flex;align-items:start;justify-content:space-between;gap:15px;margin:0 0 16px}
+.space-heading h2{margin:1px 0 5px;color:#ffe1ed;font-size:clamp(25px,3.5vw,37px);line-height:1.15}
+.space-heading p{font-size:13px;line-height:1.5;color:#e2ccda;margin:0}
+.space-heading .eyebrow{font-size:10px;letter-spacing:.18em;font-weight:800;color:var(--glam-gold);margin:0 0 8px}
+.space-chip{flex-shrink:0;color:#f6dfb3;background:#322228;border:1px solid #b08a67;border-radius:99px;padding:8px 12px;letter-spacing:.05em;font-size:10px;font-weight:700}
+.space-stage{
+ position:relative;width:100%;height:clamp(390px,60vh,690px);
+ overflow:hidden;border-radius:18px;
+ border:1px solid #b78a9375;
+ background:radial-gradient(ellipse at 51% 25%,#61405d 0%,#33243c 35%,#1a1227 72%,#100e18 100%);
+ box-shadow:inset 0 0 95px #09010d60,0 18px 38px #0005;
+ isolation:isolate;
+}
+.space-stage::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+ background:linear-gradient(110deg,transparent 0%,#ffe3af09 49%,transparent 51%),radial-gradient(circle at 50% 5%,#ffc4d21e,transparent 45%)}
+.space-stage::after{content:"";position:absolute;inset:12px;z-index:1;border:1px solid #e2b89b38;pointer-events:none;border-radius:12px}
+.space-canvas{position:absolute;inset:0;z-index:2;touch-action:none}
+.space-canvas #heart3d{display:block!important;position:absolute!important;inset:0!important;width:100%;height:100%}
+.space-canvas #heart3d canvas{display:block;width:100%;height:100%;touch-action:none}
+.space-portrait-fallback{
+ position:absolute;z-index:3;left:50%;top:48%;transform:translate(-50%,-50%);
+ display:flex;flex-direction:column;align-items:center;gap:12px;
+ width:min(310px,72%);pointer-events:none;text-align:center;
+}
+.space-portrait-fallback img{
+ display:block;width:min(225px,74%);aspect-ratio:1199/1312;object-fit:cover;object-position:center;
+ border:2px solid #e5bd9b;border-radius:17px;
+ box-shadow:0 0 0 8px #eec7ad0b,0 20px 45px #0008;
+}
+.space-portrait-fallback p{
+ padding:8px 12px;margin:0;border-radius:10px;
+ color:#fff0f5;background:#231728dd;border:1px solid #956e88;font-size:12px;line-height:1.5;
+}
+.space-status{
+ position:absolute;z-index:4;left:20px;bottom:14px;right:20px;
+ margin:0;color:#ffe9f4;background:#1b1425d9;
+ border:1px solid #a37b94;border-radius:12px;
+ padding:9px 13px;font-size:12px;line-height:1.5;pointer-events:none;
+}
+.space-controls{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 8px}
+.space-controls button{font-size:12px;min-height:38px;padding:9px 12px;border:1px solid #946e84;color:#f9e7f4;background:#3a263a}
+.space-controls button[aria-pressed="true"]{border-color:#eec39b;background:#68435a;color:#fff3dd}
+.space-controls button:disabled{opacity:.5}
+.space-help{color:#cdb7c9;font-size:12px;line-height:1.55;margin:8px 0 0}
+.space-stage:fullscreen{height:100vh!important;width:100vw!important;border:0;border-radius:0}
+.space-stage:fullscreen .space-status{bottom:26px}
+@media(max-width:720px){
+ #avatarSpaceView{padding:14px!important;border-radius:16px}
+ .space-heading{gap:8px;flex-wrap:wrap}
+ .space-chip{font-size:9px;padding:6px 9px}
+ .space-stage{height:clamp(390px,61vh,560px);border-radius:13px}
+ .space-controls{gap:6px}
+ .space-controls button{font-size:11px;padding:8px 10px;flex:1 1 auto}
+ .space-portrait-fallback img{width:min(178px,70%)}
+ .space-status{left:10px;right:10px;bottom:10px}
+}
