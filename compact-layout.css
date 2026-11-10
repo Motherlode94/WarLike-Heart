@@ -1,0 +1,72 @@
+/* WarLike Heart — compact layout. Loaded last to override inherited demo dimensions. */
+.shell{width:min(1240px,calc(100% - 36px));margin:12px auto 22px}
+.top{margin-bottom:10px;padding:2px 2px 8px}
+.heart-navigation{padding:7px 9px;margin-bottom:10px;gap:6px;border-radius:13px;top:4px}
+.heart-navigation button{padding:7px 11px;min-height:35px;font-size:12px;border-radius:9px}
+#navAccountStatus{padding:5px 9px;font-size:11px}
+.view-title{font-size:21px;margin:8px 2px 11px}
+#homeView.layout{gap:14px;align-items:start;grid-template-columns:minmax(260px,0.82fr) minmax(360px,1.18fr)}
+#homeView .avatar,#homeView .chat{min-height:0!important;height:auto}
+#homeView .avatar{padding:20px 16px 16px;justify-content:flex-start}
+#homeView .avatar .glow{width:210px;height:210px;filter:blur(58px)}
+#homeView .portrait{width:min(216px,56%);border-radius:16px;box-shadow:0 10px 28px #0008}
+#homeView .avatar h1{font-size:24px;margin:13px 0 3px}
+#homeView .avatar p{font-size:12px;margin:5px auto 10px;line-height:1.45;max-width:300px}
+#homeView .avatar .controls{gap:7px;margin-top:7px}
+#homeView .avatar .controls button{min-height:35px;padding:8px 11px;font-size:12px}
+#homeView #status{margin-top:9px;font-size:11px;line-height:1.35}
+#homeView .chat header{padding:14px 18px 11px}
+#homeView .chat header h2{font-size:19px;margin:0 0 3px}
+#homeView .chat header small,#homeView #localBrainStatus{font-size:11px!important;line-height:1.35}
+#homeView #localBrainStatus{margin-top:4px!important}
+#homeView .messages{min-height:245px;max-height:440px;height:clamp(245px,45vh,440px);padding:14px 16px;gap:9px}
+#homeView .bubble{padding:10px 12px;font-size:13px;line-height:1.45;border-radius:13px}
+#homeView .composer{padding:10px 12px;gap:8px}
+#homeView .composer input,#homeView .composer button[type=submit],#homeView .composer #emojiToggle{min-height:40px;height:40px}
+#homeView .composer button[type=submit]{padding:8px 13px}
+#accountView,#studioView{min-height:0;padding:20px}
+.private-heading{margin-bottom:13px;padding-bottom:10px}
+.private-heading h2{font-size:22px;margin:0 0 4px}
+.private-heading p{font-size:13px}
+#accountBody .settings{gap:10px}
+#accountBody .settings .auth{padding:12px 14px;margin-bottom:0}
+#learningPanel,#cloudMemoryPanel{padding:18px!important}
+#learningPanel h2,#cloudMemoryPanel h2{font-size:22px;margin-bottom:8px}
+#learningPanel p,#cloudMemoryPanel p{margin:5px 0 12px;line-height:1.45;font-size:13px}
+#learningControls{padding:13px!important}
+#learningControls form{padding:13px;gap:6px!important}
+#learningControls h3{font-size:15px;margin:5px 0}
+#learningControls :is(input,textarea){padding:9px 10px}
+#learningStats,#cloudMemorySummary{padding:7px 11px;font-size:12px}
+#cloudMemoryPanel .controls{margin-top:8px}
+#cloudMemoryPanel .controls button{min-height:36px;padding:8px 11px}
+#learningFeedback,#cloudMemoryStatus{margin-top:9px;font-size:12px}
+.foot{margin:12px 0;font-size:11px;line-height:1.55}
+@media(max-width:900px){
+  #homeView.layout{grid-template-columns:minmax(0,1fr);gap:12px}
+  #homeView .avatar{padding:14px 12px;display:grid;grid-template-columns:110px minmax(0,1fr);grid-template-rows:auto auto auto;align-items:center;justify-items:start;text-align:left;column-gap:14px}
+  #homeView .avatar .glow{display:none}
+  #homeView .portrait{width:110px;grid-column:1;grid-row:1 / span 3;aspect-ratio:1199/1312}
+  #homeView .avatar h1{grid-column:2;margin:0;font-size:21px}
+  #homeView .avatar p{grid-column:2;margin:3px 0 5px;max-width:none}
+  #homeView .avatar .controls,#homeView #status{grid-column:1/-1;justify-content:flex-start}
+  #homeView .messages{height:clamp(260px,43vh,400px)}
+}
+@media(max-width:600px){
+  .shell{width:calc(100% - 16px);margin:6px auto 15px}
+  .top{margin-bottom:5px}
+  .heart-navigation{padding:5px;gap:4px;margin-bottom:8px;top:0}
+  .heart-navigation button{padding:7px 9px;min-height:34px;font-size:11px}
+  .view-title{font-size:19px;margin:6px 2px 9px}
+  #homeView .avatar{grid-template-columns:82px minmax(0,1fr);gap:0 11px}
+  #homeView .portrait{width:82px}
+  #homeView .avatar h1{font-size:19px}
+  #homeView .avatar p{font-size:11px;line-height:1.35}
+  #homeView .avatar .controls{margin-top:8px}
+  #homeView .avatar .controls button{min-height:33px;font-size:11px;padding:7px 9px}
+  #homeView .chat header{padding:12px}
+  #homeView .messages{min-height:225px;height:44vh;max-height:390px;padding:10px 12px}
+  #homeView .composer{padding:8px}
+  #accountView,#studioView{padding:14px;min-height:0}
+  #learningPanel,#cloudMemoryPanel{padding:13px!important}
+}
