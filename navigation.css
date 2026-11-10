@@ -1,0 +1,30 @@
+/* WarLike Heart v1.3 — navigation and page visibility */
+[hidden]{display:none!important}
+.heart-navigation{position:sticky;top:8px;z-index:30;display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px;margin:0 0 18px;border:1px solid #674663;border-radius:19px;background:#1c1527f5;box-shadow:0 12px 34px #0006;backdrop-filter:blur(15px)}
+.heart-navigation button{background:transparent;color:#ddd0e2;border:1px solid transparent;padding:11px 15px;border-radius:12px;font-size:14px;font-weight:650;min-height:43px}
+.heart-navigation button:hover{background:#41304b;border-color:#795875}
+.heart-navigation button[aria-current=page]{background:#6c3a5f;color:#fff2f9;border-color:#ca85b0;box-shadow:inset 0 1px #ffffff21}
+#navAccountStatus{margin-left:auto;color:#cdb8ca;font-size:12px;border:1px solid #59445e;background:#251b2e;border-radius:99px;padding:8px 11px}
+.view-title{margin:10px 2px 20px;color:#ffe0ef;font-size:clamp(22px,2.6vw,31px)}
+.nav-notice{color:#ffe6f3;border:1px solid #976b91;background:#39253e;padding:16px 18px;border-radius:14px;line-height:1.5}
+[data-view][hidden]{display:none!important}
+#accountView,#studioView{padding:clamp(20px,3vw,34px);min-height:340px}
+.private-heading{margin-bottom:24px;border-bottom:1px solid #5a425a;padding-bottom:18px}
+.private-heading h2{font-size:26px;color:#ffdbeb;margin:0 0 9px}
+.private-heading p{margin:0;color:#d7c4d6}
+#accountBody .settings{border:0;padding:0;max-width:960px;background:transparent}
+#accountBody .settings .auth{padding:19px 21px;margin-bottom:6px}
+#studioBody{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;max-width:950px}
+#studioBody>button{min-height:55px}
+#studioBody>input[type=file]{display:none}
+#studioBody>details{grid-column:1/-1;border:1px solid #614664;background:#23192e;border-radius:14px;padding:18px}
+#studioBody>details summary{font-weight:750;cursor:pointer}
+#studioBody input:not([type=file]){width:100%;background:#120f1d;border:1px solid #745775;border-radius:11px;color:white;padding:12px;margin:15px 0}
+#studioBody small{display:block;color:#d1bfce;line-height:1.6}
+#studioBody #apiStatus{margin-top:12px}
+#learningPanel,#cloudMemoryPanel{width:100%}
+#homeView .avatar .controls{max-width:380px}
+#homeView .avatar .controls button{padding:12px 18px}
+#homeView .chat{min-height:730px}
+@media(max-width:720px){.heart-navigation{top:0;border-radius:0 0 14px 14px;gap:5px;padding:9px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}.heart-navigation button{font-size:12px;white-space:nowrap;padding:9px 12px;min-height:40px}#navAccountStatus{display:none}.view-title{margin-top:18px}.private-heading h2{font-size:22px}#studioBody{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.heart-navigation{backdrop-filter:none}}

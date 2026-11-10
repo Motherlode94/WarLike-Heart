@@ -11,11 +11,12 @@
   try {
    const response=await fetch("/api/account",{cache:"no-store",credentials:"same-origin"});
    const data=await response.json();
+   document.dispatchEvent(new CustomEvent("warlike-heart-account-updated",{detail:data}));
    if(!data.available){button.disabled=true;disconnect.hidden=true;status.textContent="Association non configurée côté serveur. Le chat local reste disponible.";return;}
    button.disabled=false;
    disconnect.hidden=!data.connected;
    status.textContent=data.connected?"Compte WarLike associé : "+data.user.name+" (session temporaire de 10 minutes).":"Aucun compte WarLike associé. Aucun mot de passe n'est partagé.";
-  }catch{button.disabled=true;status.textContent="Diagnostic de connexion indisponible. Le chat local fonctionne toujours.";}
+  }catch{document.dispatchEvent(new CustomEvent("warlike-heart-account-updated",{detail:null}));button.disabled=true;status.textContent="Diagnostic de connexion indisponible. Le chat local fonctionne toujours.";}
  };
  button.addEventListener("click",async()=>{
   if(!crypto?.subtle||!sessionStorage)return error("Navigateur HTTPS requis.");

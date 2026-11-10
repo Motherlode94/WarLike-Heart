@@ -27,6 +27,7 @@ jobs:
           node --check cloud-memory.js
           node --check functions/_server-transport.js
           node --check heart-account.js
+          node --check navigation.js
           node --check functions/api/server-status.js
       - name: Run backend API regression tests
         run: node --test tests/*.test.mjs
