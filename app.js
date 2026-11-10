@@ -4,7 +4,7 @@
   const $ = id => document.getElementById(id);
   const KEY = "warlike-heart-demo-v1"; // keep compatibility with v0.2 history
   const MAX = 100;
-  const welcome = {role:"assistant",text:"Coucou ❤️ Bienvenue sur WarLike Heart v1.0 Learning Brain ! Je peux répondre localement, apprendre des réponses que tu approuves dans l'espace Cerveau et conserver des souvenirs avec ton accord."};
+  const welcome = {role:"assistant",text:"Coucou ❤️ Bienvenue sur WarLike Heart v1.6 et Learning Brain v2.0 ! Je peux répondre localement, apprendre des réponses que tu approuves dans l'espace Cerveau et conserver des souvenirs avec ton accord."};
   let history = [welcome];
   let recognition = null;
   let busy = false;
@@ -46,10 +46,10 @@
   const brainStatus=$("localBrainStatus");
   if(brainStatus){
     brainStatus.textContent=localBrain
-      ?"✓ Learning Brain v1.0 chargé · dialogues et connaissances privés · sans API"
+      ?"✓ Learning Brain v2.0 chargé · dialogues et connaissances privés · sans API"
       :"⚠ Moteur local indisponible : vérifie le chargement de local-brain.js.";
   }
-  if(localBrain)$("aiMode").textContent="Learning Brain v1.0 · prêt sans API";
+  if(localBrain)$("aiMode").textContent="Learning Brain v2.0 · prêt sans API";
   const safeHistory = (value) => Array.isArray(value) ? value.filter(x => x && ["user","assistant"].includes(x.role) && typeof x.text === "string" && x.text.length <= 4000).slice(-MAX) : null;
   const render = () => {
     const area = $("messages"); area.replaceChildren();
@@ -290,17 +290,17 @@
         $("aiMode").textContent="Service IA prêt — identification privée requise";
         $("apiStatus").textContent="Serveur IA configuré. Saisis ton jeton privé pour discuter.";
       }else{
-        $("aiMode").textContent="Learning Brain v1.0 · service distant non configuré";
+        $("aiMode").textContent="Learning Brain v2.0 · service distant non configuré";
         $("apiStatus").textContent="Les secrets de production Cloudflare sont absents. Voir DEPLOIEMENT.md.";
       }
     }catch{
-      $("aiMode").textContent="Learning Brain v1.0 · service distant non vérifié";
+      $("aiMode").textContent="Learning Brain v2.0 · service distant non vérifié";
       $("apiStatus").textContent="La vérification de l'API n'est pas disponible.";
     }
   })();
   $("accessToken").addEventListener("input",()=>{
     const connected=Boolean($("accessToken").value.trim());
-    $("aiMode").textContent=connected?"Mode IA distant demandé · vérifier la connexion":"Learning Brain v1.0 · sans API";
+    $("aiMode").textContent=connected?"Mode IA distant demandé · vérifier la connexion":"Learning Brain v2.0 · sans API";
     $("apiStatus").textContent=connected?"Jeton présent en mémoire ; une requête sera envoyée au prochain message.":"Le mode démo reste accessible sans jeton.";
   });
   $("voiceEnabled").addEventListener("change",ev => {state.voiceEnabled=ev.target.checked; if(!state.voiceEnabled) stopVoice();persist();});
