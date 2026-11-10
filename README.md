@@ -200,3 +200,6 @@ L'interface n'affiche plus tous les panneaux d'un coup : elle comprend les secti
 - Les onglets réservés sont masqués tant que le serveur ne confirme pas la session ; une session expirée retire l'accès aux écrans privés au prochain contrôle. Le navigateur recontrôle à chaque retour sur l'onglet.
 - **Sécurité** : masquer un panneau n'est pas une autorisation ! Les fichiers CSS/JS restent publics ; `/api/memory` continue à vérifier le cookie signé, le compte et l'origine sur le serveur. `/api/chat` exige toujours le jeton serveur privé. Les outils locaux de l'Atelier ne publient pas d'API de modification distante.
 - Si l'utilisateur utilise le moteur local sans compte, les données restent uniquement dans le navigateur, sous son contrôle. Les fonctions privées nécessitent une session WarLike.
+
+### Correctif d'espacement 1.3.1
+La mise en page initiale laissait des hauteurs minimum de 730 à 800 px et trop d'espaces vides autour du portrait et du chat. Le fichier `compact-layout.css` chargé en dernier supprime ces hauteurs contraintes, réduit la navigation, les marges, le portrait, les panneaux et les formulaires ; à largeur tablette/mobile, le portrait devient une vignette à gauche de la présentation. Le chat garde une zone défilante. Les menus et contrôles d'accès existants restent inchangés.
