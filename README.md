@@ -245,3 +245,14 @@ Les modèles 3D **importés dans l’Atelier privé** sont conservés en binaire
 ### Correction de cadrage automatique GLB — 1.6.4
 
 Le calcul de cadrage du visualiseur 3D ne repose plus sur une distance de caméra fixe. Le GLB est recentré selon sa boîte englobante et son échelle ; la caméra ajuste sa distance à la hauteur, à la largeur, à la profondeur et au ratio largeur/hauteur de la fenêtre. Le bouton « En pied » cadre toute la géométrie, « Visage » zoome sur la partie supérieure sans supposer un rig facial, et « Recentrer » revient au cadrage complet. Le cadrage est réévalué quand on passe du portrait d'accueil à l'Espace 3D ou quand la taille du canvas change. Tests géométriques ajoutés. La validation visuelle avec le vrai modèle et plusieurs appareils reste à effectuer.
+
+
+## État de production vérifié — 11 novembre 2026
+
+- Cloudflare Pages sert le commit de production `3532a762dae82100995e49e886cc766a6ac21d53` au moment du contrôle. Les fonctions Pages de Heart sont actives.
+- `GET /api/chat` répond `aiConfigured:false`. Les secrets OpenAI requis ne sont pas configurés; le chat distant n'est donc pas prêt.
+- `GET /api/account` répond `available:true, connected:false`. La session Heart est configurée et le service binding `WARLIKE_SERVER` est présent.
+- `GET /api/server-status` confirme la santé de l'API WarLike Server. Un code PKCE de test invalide a été refusé en HTTP 401 par l'échange. Ce contrôle ne remplace pas une association réelle avec consentement d'un utilisateur.
+- Les tests automatisés locaux passent (79/79). Les parcours navigateur réel, IA distante, compte réel et matériel Raspberry Pi ne sont pas validés dans cette session.
+
+Voir [DEPLOIEMENT.md](DEPLOIEMENT.md) pour les étapes de mise en service et les contrôles à reprendre.
