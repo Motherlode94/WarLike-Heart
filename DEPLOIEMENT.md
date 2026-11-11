@@ -32,7 +32,11 @@ Ne jamais déposer ces valeurs sur GitHub ni les ajouter à `app.js`, `index.htm
 - La fonction refuse les appels sans jeton; elle n'a pas d'authentification WarLike Keys/Server, de limitation de débit distribuée ni de quotas par utilisateur. **Réserver à un usage personnel ou restreindre l'accès au site et ajouter une limitation de débit Cloudflare avant toute ouverture multi-utilisateurs.**
 - La fonction vérifie l'origine des requêtes de navigateur, mais cette vérification n'est pas un mécanisme d'authentification indépendant.
 - Ce prototype utilise une synthèse vocale de navigateur; il ne fournit pas une vraie synchronisation lèvres-phonèmes, ni un modèle 3D riggé.
-- Aucun test Cloudflare de bout en bout, aucun test matériel Raspberry Pi et aucune intégration WarLike Server ne sont encore confirmés.
+- État vérifié le 11 novembre 2026 : `/api/chat` répond `aiConfigured:false` en production. Les secrets `OPENAI_API_KEY` et `HEART_ACCESS_TOKEN` ne sont donc pas configurés pour l'environnement vérifié; aucune réponse IA distante n'a été testée.
+- Le projet Pages Heart a ses fonctions activées, le binding `WARLIKE_SERVER` vers `warlike-server-runtime`, le binding D1 `HEART_DB`, le bucket `HEART_AVATARS` et le secret de session Heart. `GET /api/account` répond `available:true, connected:false`.
+- `GET /api/server-status` confirme la santé publique de WarLike Server. Un échange PKCE de test invalide a été refusé en HTTP 401, ce qui confirme que la route d'échange et le transport interne répondent; aucune connexion réelle de compte n'a été tentée.
+- Les tests automatisés du dépôt ont passé localement (79/79). Cela ne valide pas l'interface en navigateur réel, l'IA distante, ni le flux complet d'association.
+- Aucun Raspberry Pi n'est disponible dans cette session : les essais matériel, micro, haut-parleur et écran restent à faire.
 
 ## Test manuel minimal
 
@@ -43,3 +47,12 @@ Ne jamais déposer ces valeurs sur GitHub ni les ajouter à `app.js`, `index.htm
 5. Exporter/importer → confirmer la restauration de l'historique sans jeton.
 6. Désactiver la mémoire locale puis effacer → confirmer la suppression de l'historique stocké.
 7. Tester dictée et lecture vocale sous Chrome/Edge et vérifier les autorisations.
+
+
+## Mise en service restant à faire
+
+1. Ajouter `OPENAI_API_KEY` comme secret Cloudflare Pages et définir `HEART_ACCESS_TOKEN` comme secret aléatoire distinct d'au moins 20 caractères. Ne pas envoyer ces valeurs dans le chat ni les committer.
+2. Redéployer, vérifier `/api/chat` (`aiConfigured:true`), puis tester une réponse avec le jeton exact. Sans ces secrets, le mode IA reste fermé et l'application demeure en mode local.
+3. Effectuer une association réelle avec un compte WarLike de test; vérifier consentement, cookie de session, déconnexion, expiration du code, réutilisation refusée et absence de transmission de mot de passe.
+4. Tester la navigation, le micro, la synthèse vocale et les panneaux privés dans un navigateur réel.
+5. Reprendre la même liste de contrôles sur Raspberry Pi 5 quand l'appareil sera disponible.
