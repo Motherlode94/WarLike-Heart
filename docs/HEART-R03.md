@@ -1,0 +1,2 @@
+# R03 — Knowledge Graph
+Private explicit graph, 200 nodes and 500 directed edges per account. Typed relationships, user-supplied source and confidence, duplicate prevention and cascading deletion. Goal and cognitive memory titles are available for manual reference; graph nodes are independent snapshots, not live foreign keys to R01/R02. Contradicts is an explicit relationship, not automatic contradiction detection. No LLM inference or automatic fact extraction. Apply migration 0005 after 0004; D1 deployment and browser validation required.
