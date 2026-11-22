@@ -39,6 +39,7 @@ jobs:
           node --check navigation.js
           node --check goal-panel.js
           node --check agent-panel.js
+          node --check lib/plugin-gateway.mjs
           node --check lib/agent-registry.mjs
           node --check functions/api/agents.js
           node --check vision-panel.js
