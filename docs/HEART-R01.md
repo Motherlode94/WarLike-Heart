@@ -1,0 +1,2 @@
+# HEART R01 — Goal Engine
+Private user-authored goals and checklist steps in D1; authenticated CRUD and optimistic revision checks. Apply migration 0003 to HEART_DB before deployment. UI: Objectifs & missions. This is manual planning, not autonomous agent execution. Existing snapshot export does not include goals; deletion is available per goal. Next: structured memory, agent approval and execution, model router, graph and scheduler.
