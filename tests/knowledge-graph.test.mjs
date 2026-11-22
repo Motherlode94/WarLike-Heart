@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync} from 'node:fs';
+import {onRequestGet,onRequestPost} from '../functions/api/knowledge-graph.js';
+import {onRequestPost as pair} from '../functions/api/account.js';
+test('private graph API, duplicates, cross-account links and cascade',async()=>{
+ const raw=new DatabaseSync(':memory:');raw.exec('PRAGMA foreign_keys=ON');
+ for(const file of ['0003_heart_goals.sql','0004_heart_cognitive_memory.sql','0005_heart_knowledge_graph.sql'])raw.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+ const db={prepare(sql){return {bind(...args){return {first:async()=>raw.prepare(sql).get(...args)||null,all:async()=>({results:raw.prepare(sql).all(...args)}),run:async()=>raw.prepare(sql).run(...args)};}};},batch:async stmts=>Promise.all(stmts.map(s=>s.all()))};
+ const env={HEART_DB:db,HEART_SESSION_SECRET:'test-secret-for-heart-graph-123456789012345'},origin='https://heart.example';
+ async function cookie(id){const r=await pair({request:new Request(origin+'/api/account',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({code:'a'.repeat(43),verifier:'b'.repeat(43)})}),env:{...env,WARLIKE_SERVER:{fetch:async()=>Response.json({user:{id,name:id,role:'member'}})}}});assert.equal(r.status,200);return r.headers.get('set-cookie').split(';')[0];}
+ const a=await cookie('a'),b=await cookie('b');
+ const get=c=>onRequestGet({request:new Request(origin+'/api/knowledge-graph',{headers:{cookie:c}}),env});
+ const post=(c,d,o=origin)=>onRequestPost({request:new Request(origin+'/api/knowledge-graph',{method:'POST',headers:{cookie:c,origin:o,'content-type':'application/json'},body:JSON.stringify(d)}),env});
+ const node=label=>({action:'createNode',kind:'project',label});
+ assert.equal((await get('')).status,401);
+ const x=await post(a,node('Engine'));assert.equal(x.status,201);const {id:from}=await x.json();
+ assert.equal((await post(a,node('engine'))).status,409);
+ const {id:to}=await (await post(a,node('Studio'))).json();
+ const {id:other}=await (await post(b,node('Engine'))).json();
+ const edge={action:'createEdge',from,to,relation:'depends_on'};
+ assert.equal((await post(a,{...edge,to:other})).status,409);
+ assert.equal((await post(a,edge)).status,201);
+ assert.equal((await post(a,edge)).status,409);
+ assert.equal((await post(a,node('bad'),'https://evil.example')).status,403);
+ assert.equal((await (await get(b)).json()).nodes.length,1);
+ assert.equal((await (await get(a)).json()).edges.length,1);
+ assert.equal((await post(a,{action:'deleteNode',id:from})).status,200);
+ assert.equal((await (await get(a)).json()).edges.length,0);
+ raw.close();
+});
