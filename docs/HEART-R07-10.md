@@ -1,0 +1,2 @@
+# Plugin Manager
+External adapters are disabled by default, including previously configured adapters. Owner must enable each one explicitly. D1 stores account-scoped preference and revision, never provider secrets. Mission creation and execution recheck policy; disabling cancels pending/approved missions for that connector, but cannot recall a request already sent upstream. Apply migration 0007 before deployment. Internal Heart tasks remain available. Configured does not mean live verified. No OAuth or live health checks in this release.
