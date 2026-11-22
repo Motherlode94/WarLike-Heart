@@ -1,0 +1,2 @@
+# R04 — Reasoning & Decision Engine
+Read-only private evidence retrieval across R01/R02/R03, lexical relevance, explicit graph relationships and weighted decision matrix. Scores supplied by the user, not inferred probabilities. No external model call or execution. No private data leaves Heart via this endpoint. No automatic contradiction inference; explicit graph links are surfaced. CI and production browser checks required. No new migration.
