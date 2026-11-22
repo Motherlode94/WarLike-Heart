@@ -1,0 +1,2 @@
+# HEART R02 — Cognitive memory
+Explicit user-managed semantic, episodic, procedural and working memory. Each record is scoped to the authenticated account, with revision checks, literal search, export and deletion. Working memory expires 24h after creation or update and is physically purged on next authenticated memory access. Existing snapshots remain unchanged; entries are not automatically retrieved for inference yet. No automatic model training or knowledge verification. Apply migration 0004 after 0003 before deployment. D1 is not end-to-end encrypted.

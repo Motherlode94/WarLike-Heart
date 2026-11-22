@@ -37,6 +37,9 @@ jobs:
           node --check heart-account.js
           node --check navigation.js
           node --check goal-panel.js
+          node --check cognitive-panel.js
+          node --check lib/cognitive-memory.mjs
+          node --check functions/api/cognitive-memory.js
           node --check functions/api/goals.js
           node --check functions/api/server-status.js
       - name: Run backend API regression tests
