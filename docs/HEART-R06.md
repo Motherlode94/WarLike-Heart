@@ -1,0 +1,2 @@
+# HEART R06 — Heart Vision
+Private operator-only still-image analysis (PNG, JPEG, WebP, maximum 4 MiB). Explicit consent per submission to OpenAI; configure HEART_VISION_MODEL to an image-capable Responses API model and OPENAI_API_KEY. No image persistence in Heart, no automatic memory insertion, no provider fallback. Provider data handling rules still apply. Signature checks are not full image decoding. No PDF parser, camera, active screen capture or Computer Use yet. Rate limiting at the edge and live provider/browser certification remain required. No new D1 migration.
