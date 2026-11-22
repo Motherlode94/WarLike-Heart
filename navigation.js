@@ -24,7 +24,7 @@
   function allowed(view){
     if(["home","account","space3d"].includes(view))return true;
     if(["brain","cloud","goals","cognitive","graph","reasoning"].includes(view))return Boolean(account);
-    if(["studio","vision"].includes(view))return Boolean(account&&roles.has(account.role));
+    if(["studio","vision","agents"].includes(view))return Boolean(account&&roles.has(account.role));
     return false;
   }
   function show(view,writeHistory=true){
@@ -42,7 +42,7 @@
       b.setAttribute("aria-selected",String(b.dataset.nav===view));
     }
     if(writeHistory)history.replaceState(history.state,"","#"+view);
-    $("pageTitle").textContent=({home:"Conversation",space3d:"Espace 3D",account:"Mon compte",brain:"Cerveau & apprentissage",cloud:"Mémoire Cloud",goals:"Objectifs & missions",cognitive:"Mémoire cognitive",graph:"Knowledge Graph",reasoning:"Raisonnement & décisions",vision:"Heart Vision",studio:"Atelier privé"})[view]||"Conversation";
+    $("pageTitle").textContent=({home:"Conversation",space3d:"Espace 3D",account:"Mon compte",brain:"Cerveau & apprentissage",cloud:"Mémoire Cloud",goals:"Objectifs & missions",cognitive:"Mémoire cognitive",graph:"Knowledge Graph",reasoning:"Raisonnement & décisions",vision:"Heart Vision",agents:"Agent Engine",studio:"Atelier privé"})[view]||"Conversation";
     document.dispatchEvent(new CustomEvent("warlike-heart-view-changed",{detail:{view}}));
     window.scrollTo({top:0,behavior:"instant"});
   }
