@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {executePlugin,validPluginQuery} from '../lib/plugin-gateway.mjs';
+const id='018a210d-8ba4-705c-b111-1f1776f7f578',env={HEART_NETLIFY_TOKEN:'test',HEART_NETLIFY_SITES:id};
+test('Netlify allowlist and fixed endpoint',async()=>{assert.equal(validPluginQuery('netlify.site.inspect','../bad',env),false);await assert.rejects(executePlugin({...env,HEART_NETLIFY_SITES:''},'netlify.site.inspect',id));const d=await executePlugin(env,'netlify.site.inspect',id,async(url,o)=>{assert.equal(url,'https://api.netlify.com/api/v1/sites/'+id);assert.equal(o.redirect,'error');return Response.json({id,name:'test',secret:'discard'});});assert.equal(d[0].id,id);assert.equal(d[0].secret,undefined);});
