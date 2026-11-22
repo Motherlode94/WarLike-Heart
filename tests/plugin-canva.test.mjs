@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {validPluginQuery,executePlugin,pluginAvailability} from '../lib/plugin-gateway.mjs';
+const env={HEART_CANVA_TOKEN:'test'};
+test('Canva rejects invalid IDs and missing credentials',async()=>{assert.equal(validPluginQuery('canva.design.inspect','../bad',env),false);assert.equal(pluginAvailability({}).canva,false);await assert.rejects(executePlugin(env,'canva.design.inspect','../bad',()=>{throw Error('unexpected network');}));});
+test('Canva returns selected fields via fixed host',async()=>{const out=await executePlugin(env,'canva.design.inspect','DA123',async(url,opts)=>{assert.equal(url,'https://api.canva.com/rest/v1/designs/DA123');assert.equal(opts.redirect,'error');return Response.json({design:{id:'DA123',title:'Test',secret:'discard'}});});assert.equal(out[0].id,'DA123');assert.equal(out[0].secret,undefined);});
