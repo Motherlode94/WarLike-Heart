@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Check JavaScript syntax
         run: |
           node --check local-brain.js
@@ -33,6 +36,8 @@ jobs:
           node --check functions/_server-transport.js
           node --check heart-account.js
           node --check navigation.js
+          node --check goal-panel.js
+          node --check functions/api/goals.js
           node --check functions/api/server-status.js
       - name: Run backend API regression tests
         run: node --test tests/*.test.mjs
