@@ -41,6 +41,8 @@ jobs:
           node --check agent-panel.js
           node --check lib/agent-execution.mjs
           node --check lib/plugin-policy.mjs
+          node --check lib/plugin-permissions.mjs
+          node --check lib/plugin-health.mjs
           node --check lib/plugin-gateway.mjs
           node --check lib/agent-registry.mjs
           node --check functions/api/agents.js
