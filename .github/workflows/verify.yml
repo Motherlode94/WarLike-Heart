@@ -29,6 +29,7 @@ jobs:
           node --check avatar-publish.js
           node --check functions/api/avatar.js
           node --check avatar-rig.mjs
+          node --check lib/model-router.mjs
           node --check functions/api/chat.js
           node --check functions/api/account.js
           node --check functions/api/memory.js
