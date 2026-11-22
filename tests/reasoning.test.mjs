@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {selectEvidence,compareOptions} from '../lib/reasoning.mjs';
+test('lexical relevance and accents',()=>{assert.equal(selectEvidence('memoire Engine',[{id:'1',title:'Mémoire Engine'},{id:'2',title:'Studio'}])[0].id,'1');assert.equal(selectEvidence('unknown',[{id:'1',title:'Engine'}]).length,0);});
+test('weighted ranking and invalid input',()=>{const c=[{label:'Impact',weight:3},{label:'Coût',weight:1}];const o=[{label:'A',scores:[8,4]},{label:'B',scores:[4,10]}];assert.equal(compareOptions(o,c)[0].label,'A');assert.equal(compareOptions(o,c)[0].score,7);assert.throws(()=>compareOptions([{label:'A',scores:[99,0]},o[1]],c));});
