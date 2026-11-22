@@ -37,6 +37,8 @@ jobs:
           node --check heart-account.js
           node --check navigation.js
           node --check goal-panel.js
+          node --check graph-panel.js
+          node --check functions/api/knowledge-graph.js
           node --check cognitive-panel.js
           node --check lib/cognitive-memory.mjs
           node --check functions/api/cognitive-memory.js
