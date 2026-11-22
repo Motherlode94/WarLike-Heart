@@ -37,6 +37,9 @@ jobs:
           node --check heart-account.js
           node --check navigation.js
           node --check goal-panel.js
+          node --check reasoning-panel.js
+          node --check lib/reasoning.mjs
+          node --check functions/api/reasoning.js
           node --check graph-panel.js
           node --check functions/api/knowledge-graph.js
           node --check cognitive-panel.js
