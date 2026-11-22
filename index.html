@@ -57,6 +57,7 @@
   <button type="button" data-nav="space3d">✨ Espace 3D</button>
   <button type="button" data-nav="account">👤 Mon compte</button>
   <button type="button" data-nav="brain" data-access="member" hidden>🧠 Cerveau</button>
+  <button type="button" data-nav="cognitive" data-access="member" hidden>Mémoire cognitive</button>
   <button type="button" data-nav="goals" data-access="member" hidden>Objectifs & missions</button>
   <button type="button" data-nav="cloud" data-access="member" hidden>☁️ Mémoire</button>
   <button type="button" data-nav="studio" data-access="operator" hidden>🛠️ Atelier privé</button>
@@ -104,6 +105,12 @@
 <button id="cloudMemoryDelete" type="button">Supprimer la sauvegarde Cloud</button>
 </div>
 <small id="cloudMemoryStatus" role="status" aria-live="polite">Le stockage Cloud n'est pas chiffré de bout en bout. Exporte ton JSON avant de remplacer une sauvegarde locale.</small>
+</section>
+<section class="panel" data-view="cognitive" hidden style="padding:24px;margin-top:16px">
+<h2>Bibliothèque cognitive</h2><p>Enregistrement explicite, privé par compte. La mémoire de travail expire après 24 h et est purgée au prochain accès. Les autres entrées restent jusqu'à suppression. Ces données ne sont pas encore injectées dans les réponses IA.</p>
+<form id="cogForm" class="brain-toolbar"><label for="cogKind">Type</label><select id="cogKind"><option value="semantic">Sémantique — connaissances</option><option value="episodic">Épisodique — événements</option><option value="procedural">Procédurale — méthodes</option><option value="working">Travail — temporaire (24 h)</option></select><label for="cogTitle">Titre</label><input id="cogTitle" required maxlength="160"><label for="cogText">Contenu</label><textarea id="cogText" required rows="4" maxlength="2500"></textarea><label for="cogSource">Source ou provenance (facultatif)</label><input id="cogSource" maxlength="500"><button type="submit" class="primary">Enregistrer</button><button id="cogCancel" type="button">Annuler</button></form>
+<div class="brain-toolbar"><label for="cogFilter">Catégorie</label><select id="cogFilter"><option value="">Toutes</option><option value="semantic">Sémantique — connaissances</option><option value="episodic">Épisodique — événements</option><option value="procedural">Procédurale — méthodes</option><option value="working">Travail — temporaire (24 h)</option></select><label for="cogQuery">Recherche</label><input id="cogQuery" maxlength="160" type="search"><button id="cogSearch" type="button">Rechercher</button><button id="cogExport" type="button">Exporter toutes les entrées</button><button id="cogClear" type="button">Tout supprimer</button></div>
+<p id="cogStatus" role="status" aria-live="polite"></p><div id="cogList"></div>
 </section>
 <section class="panel" data-view="goals" hidden style="padding:24px;margin-top:16px">
 <h2>Goal Engine</h2><p>Planifie tes objectifs et suis leurs étapes. Aucune action externe n'est exécutée automatiquement.</p>
@@ -175,5 +182,5 @@
   </section>
 </section>
 <p class="foot">Confidentialité : en mode IA, jusqu'aux 20 derniers messages sont envoyés à la fonction Cloudflare et au fournisseur IA pour obtenir une réponse ; aucun historique n'est stocké volontairement par cette application côté serveur. En mode démo, aucun message de chat n'est transmis à l'API. La synthèse et la reconnaissance vocales sont des fonctions du navigateur et peuvent être absentes ou utiliser les services de son fournisseur. Ne dicte pas d'informations sensibles. Le stockage local est facultatif. La sauvegarde Cloud manuelle utilise une base D1 européenne liée à ton compte et reste lisible par le serveur ; elle n'est pas chiffrée de bout en bout. Le fichier d'export contient la conversation si tu choisis de l'exporter. <a href="https://github.com/Motherlode94/WarLike-Heart">Code source GitHub</a>.</p>
-</main><script src="./local-brain.js?v=1.6.2" defer></script><script src="./learning-brain.js?v=2.0" defer></script><script src="./app.js?v=1.6.3" defer></script><script src="./learning-panel.js?v=2.0" defer></script><script src="./brain-web.js?v=2.0" defer></script><script type="module" src="./avatar3d.js?v=1.6.4"></script><script src="./heart-initiatives.js?v=1.2" defer></script><script src="./heart-account.js?v=1.2" defer></script><script src="./cloud-memory.js?v=1.2" defer></script><script src="./navigation.js?v=1.5" defer></script><script src="./avatar-space.js?v=1.5" defer></script><script src="./avatar-publish.js?v=1.5.1" defer></script>
-<script src="./goal-panel.js?v=1" defer></script></body></html>
+</main><script src="./local-brain.js?v=1.6.2" defer></script><script src="./learning-brain.js?v=2.0" defer></script><script src="./app.js?v=1.6.3" defer></script><script src="./learning-panel.js?v=2.0" defer></script><script src="./brain-web.js?v=2.0" defer></script><script type="module" src="./avatar3d.js?v=1.6.4"></script><script src="./heart-initiatives.js?v=1.2" defer></script><script src="./heart-account.js?v=1.2" defer></script><script src="./cloud-memory.js?v=1.2" defer></script><script src="./navigation.js?v=1.6" defer></script><script src="./avatar-space.js?v=1.5" defer></script><script src="./avatar-publish.js?v=1.5.1" defer></script>
+<script src="./goal-panel.js?v=1" defer></script><script src="./cognitive-panel.js?v=1" defer></script></body></html>

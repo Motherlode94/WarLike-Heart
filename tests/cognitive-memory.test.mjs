@@ -1,0 +1,31 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync} from 'node:fs';
+import {onRequestGet,onRequestPost} from '../functions/api/cognitive-memory.js';
+import {normalizeMemory,memoryExpiry} from '../lib/cognitive-memory.mjs';
+import {onRequestPost as pair} from '../functions/api/account.js';
+test('memory validation and expiry',()=>{assert.equal(normalizeMemory({kind:'fake'}),null);assert.equal(memoryExpiry('working',100),86400100);assert.equal(memoryExpiry('semantic',100),null);});
+test('private cognitive records, search, expiry, revision and removal',async()=>{
+ const raw=new DatabaseSync(':memory:');raw.exec(readFileSync(new URL('../migrations/0004_heart_cognitive_memory.sql',import.meta.url),'utf8'));
+ const db={prepare(sql){return {bind(...args){return {first:async()=>raw.prepare(sql).get(...args)||null,all:async()=>({results:raw.prepare(sql).all(...args)}),run:async()=>raw.prepare(sql).run(...args)};}};}};
+ const env={HEART_DB:db,HEART_SESSION_SECRET:'test-secret-for-heart-cognitive-memory-123456789'},origin='https://heart.example';
+ async function cookie(id){const r=await pair({request:new Request(origin+'/api/account',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({code:'a'.repeat(43),verifier:'b'.repeat(43)})}),env:{...env,WARLIKE_SERVER:{fetch:async()=>Response.json({user:{id,name:id,role:'member'}})}}});assert.equal(r.status,200);return r.headers.get('set-cookie').split(';')[0];}
+ const a=await cookie('a'),b=await cookie('b');
+ const get=(c,q='')=>onRequestGet({request:new Request(origin+'/api/cognitive-memory'+q,{headers:{cookie:c}}),env});
+ const post=(c,body,o=origin)=>onRequestPost({request:new Request(origin+'/api/cognitive-memory',{method:'POST',headers:{cookie:c,origin:o,'content-type':'application/json'},body:JSON.stringify(body)}),env});
+ assert.equal((await get('')).status,401);
+ const input={action:'create',kind:'semantic',title:'Engine',content:'Moteur web',source:'Documentation'};
+ const created=await post(a,input);assert.equal(created.status,201);const {memory}=await created.json();
+ assert.equal((await (await get(b)).json()).memories.length,0);
+ assert.equal((await (await get(a,'?q=moteur&kind=semantic')).json()).memories.length,1);
+ assert.equal((await post(b,{action:'delete',id:memory.id,revision:1})).status,409);
+ assert.equal((await post(a,{...input,action:'update',id:memory.id,revision:1,title:'New'})).status,200);
+ assert.equal((await post(a,{action:'delete',id:memory.id,revision:1})).status,409);
+ const temp=await post(a,{...input,kind:'working'});assert.equal(temp.status,201);
+ raw.prepare("UPDATE heart_cognitive_memory SET expires_at=1 WHERE kind='working'").run();
+ assert.equal((await (await get(a)).json()).memories.length,1);
+ assert.equal((await post(a,{action:'clear',confirm:true},'https://evil.example')).status,403);
+ assert.equal((await post(a,{action:'clear',confirm:true})).status,200);
+ assert.equal((await (await get(a)).json()).memories.length,0);raw.close();
+});
