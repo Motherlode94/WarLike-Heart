@@ -1,3 +1,4 @@
+import {probePlugin} from '../../lib/plugin-health.mjs';
 import {claimRun,finishRun,expireRuns,deleteRun} from '../../lib/agent-execution.mjs';
 import {enabledPlugins,pluginAllowed} from '../../lib/plugin-policy.mjs';
 import {pluginActions,pluginAvailability,validPluginQuery,executePlugin} from '../../lib/plugin-gateway.mjs';
@@ -35,13 +36,20 @@ export async function onRequestPost({request,env}){
  const allowed=d.op==='approve'?"status='pending'":"status IN ('pending','approved')";
  const r=await db.batch([db.prepare("INSERT INTO heart_agent_events SELECT member_id,id,(SELECT COALESCE(MAX(seq),0)+1 FROM heart_agent_events WHERE member_id=? AND run_id=?),?,? FROM heart_agent_runs WHERE member_id=? AND id=? AND "+allowed).bind(owner,id,next,now,owner,id),db.prepare("UPDATE heart_agent_runs SET status=?,updated_at=? WHERE member_id=? AND id=? AND "+allowed).bind(next,now,owner,id)]);
  return r[1].meta.changes?reply({status:next}):reply({error:'Transition refusée'},409);}
- if(d.op==='run'){
+ if(d.op==='run'||d.op==='probe'){
  const row=await db.prepare("SELECT action,query FROM heart_agent_runs WHERE member_id=? AND id=? AND status='approved'").bind(owner,id).first();if(!row||!actions.includes(row.action))return reply({error:'Autorisation requise'},409);
  const plugin=pluginActions.includes(row.action)?row.action.split('.')[0]:null;
+ if(d.op==='probe'&&!plugin)return reply({error:'Diagnostic externe requis'},400);
  if(plugin&&(!await pluginAllowed(db,owner,c.role,pluginAvailability(env),plugin)||!validPluginQuery(row.action,row.query,env)))return reply({error:'Connecteur ou ressource non autorisé'},403);
  if(!await claimRun(db,owner,id,plugin,Date.now()))return reply({error:'Mission déjà prise en charge ou désactivée'},409);
  try{
  let result;
+ if(d.op==='probe'){
+ const health=await probePlugin(env,row.action,row.query);
+ const status=health.status==='verified'?'done':'failed';
+ const committed=await finishRun(db,owner,id,status,JSON.stringify({diagnostic:health}),Date.now());
+ return committed?reply({status,diagnostic:health}):reply({error:'Mission expirée'},409);
+ }
  if(plugin)result={results:await executePlugin(env,row.action,row.query)};
  else if(row.action==='heart.goal.inspect')result=await db.prepare("SELECT id,title,status FROM heart_goals WHERE member_id=? AND instr(lower(title),lower(?))>0 LIMIT 20").bind(owner,row.query).all();
  else result=await db.prepare("SELECT id,title,kind,substr(content,1,500) AS content FROM heart_cognitive_memory WHERE member_id=? AND (expires_at IS NULL OR expires_at>?) AND instr(lower(title||' '||content),lower(?))>0 LIMIT 20").bind(owner,now,row.query).all();
