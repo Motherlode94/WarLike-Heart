@@ -1,0 +1,2 @@
+# Agent execution hardening
+Atomic D1 claim before any external call; claim checks plugin enablement in the same transaction. No automatic retries. Terminal success/failure recorded with audit event. Stale running missions become failed on next account access after two minutes; late results cannot overwrite them. Terminal missions can be explicitly deleted with their audit events. Running external requests cannot be guaranteed cancelled; a timeout does not prove that no upstream operation occurred. No new migration, uses 0006/0007. CI and production verification required.
