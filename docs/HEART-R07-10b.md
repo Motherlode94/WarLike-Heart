@@ -1,0 +1,2 @@
+# Readiness
+Owner-only GET /api/readiness checks actual runtime D1 column readability for migrations 0003–0007, without accessing rows or mutating the schema. The UI reports configuration flags only, not live provider health. A successful check is not proof of migration history, indexes, constraints, write permissions or end-to-end certification. A missing or inaccessible table/column yields HTTP 503 with structured status. No credentials or raw database errors returned. Apply migrations through the deployment process; never auto-migrate on request.
