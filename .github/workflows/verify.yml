@@ -38,6 +38,12 @@ jobs:
           node --check heart-account.js
           node --check navigation.js
           node --check goal-panel.js
+          node --check agent-panel.js
+          node --check lib/agent-registry.mjs
+          node --check functions/api/agents.js
+          node --check vision-panel.js
+          node --check lib/vision.mjs
+          node --check functions/api/vision.js
           node --check reasoning-panel.js
           node --check lib/reasoning.mjs
           node --check functions/api/reasoning.js
