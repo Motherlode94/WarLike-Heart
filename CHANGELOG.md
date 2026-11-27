@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.3 — Release candidate
+
+- Release metadata for the R08 integration cycle. Feature availability depends on merged PRs and verified deployment.
+- No production certification or autonomous execution claim.
+
 ## 2.0.0-rc.2 — Release candidate
 
 - Agent workspace: mission plan preview, persistent goal progress, application inventory and model routing diagnostics.
