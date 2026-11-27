@@ -350,6 +350,9 @@
     $("localModelPanel").hidden=mode!=='local-llm';
     $("apiStatus").textContent=mode==='remote'?'Le prochain message sera envoyé au service distant avec le jeton privé.':'Les réponses restent sur cet appareil.';
   });
+  $("localCognitiveContext").addEventListener("change",()=>{if(!$("localCognitiveContext").checked)resetLocalContext();else conversationRevision++;});
+  let cognitiveOwner=null;
+  document.addEventListener("warlike-heart-account-updated",event=>{const owner=event.detail?.connected?event.detail.user?.id:null;if(owner!==cognitiveOwner&&$("localCognitiveContext").checked)resetLocalContext();cognitiveOwner=owner;});
   $("voiceEnabled").addEventListener("change",ev => {state.voiceEnabled=ev.target.checked; if(!state.voiceEnabled) stopVoice();persist();});
   $("remember").addEventListener("change",ev => {
     if(!ev.target.checked)resetLocalContext();
