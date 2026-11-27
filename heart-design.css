@@ -159,3 +159,7 @@ button.primary:not(:disabled):hover{background:linear-gradient(135deg,#ffc0da,#e
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;transition-duration:.001ms!important}
 }
+/* Local conversation controls share the existing palette and fit small screens. */
+#conversationModelControls select,#localTeachingForm input,#localTeachingForm textarea{width:100%;min-width:0;max-width:100%;font:inherit;color:var(--heart-text,#f6eff8);background:#171321;border:1px solid #72556f;border-radius:10px;padding:10px}
+#localTeachingForm{display:grid;gap:10px}
+#localModelPanel p{font-size:13px;overflow-wrap:anywhere}

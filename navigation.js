@@ -10,7 +10,7 @@
   let account=null;
   const accountLabel=$("navAccountStatus");
   const guard=$("navNotice");
-  const settings=document.querySelector(".chat > .settings");
+  const settings=$("accountSettings");
   const accountBody=$("accountBody");
   if(settings&&accountBody)accountBody.append(settings);
   // These are operator tools, not public avatar controls.

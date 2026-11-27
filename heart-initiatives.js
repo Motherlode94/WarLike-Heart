@@ -29,7 +29,7 @@
     <button type="button" id="heartSuggest">Proposer maintenant</button>
     <button type="button" id="heartPause">Arrêt immédiat</button>
     <div class="heart-note" id="heartInitiativeStatus" role="status">Désactivé par défaut. Aucun mouvement physique ni action sans accord.</div>`;
-  const settings=document.querySelector(".settings");
+  const settings=document.getElementById("accountSettings");
   if(!settings)return;
   settings.append(controls);
   const invite=document.createElement("aside");invite.id="heartInvite";invite.hidden=true;invite.setAttribute("aria-live","polite");
