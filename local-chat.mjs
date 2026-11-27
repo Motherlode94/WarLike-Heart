@@ -1,3 +1,5 @@
+import {createSemanticSearch} from './lib/semantic-search.mjs';
+import {semanticCorpus} from './lib/semantic-index.mjs';
 import {journalEvidence} from './lib/conversation-journal.mjs';
 import {mountModelComparison} from './model-comparison-panel.mjs';
 import {fetchCognitiveContext} from './lib/context-selection.mjs';
@@ -6,8 +8,12 @@ import {createLocalModel,LOCAL_MODELS} from './lib/local-model.mjs';
 import {buildLocalContext} from './lib/local-context.mjs';
 import {retrieveLocalEvidence} from './lib/local-evidence.mjs';
 import {approveTeaching} from './lib/local-teaching.mjs';
-export function createLocalChat({readLearning,readMemories,readArchive=()=>[],writeLearning,canRemember,document:doc=globalThis.document,modelFactory=createLocalModel}){
+export function createLocalChat({readLearning,readMemories,readArchive=()=>[],writeLearning,canRemember,document:doc=globalThis.document,modelFactory=createLocalModel,semanticFactory=createSemanticSearch}){
  const $=id=>doc.getElementById(id),feedback=$('localTeachingStatus');
+ const semantic=semanticFactory({onState:value=>{if($('semanticStatus'))$('semanticStatus').textContent={idle:'Recherche par mots. Modèle sémantique non chargé.',loading:'Chargement du modèle sémantique…',ready:'Recherche sémantique locale prête.',searching:'Recherche sémantique locale…',error:'Modèle sémantique indisponible ; recherche par mots.'}[value];if($('semanticLoad'))$('semanticLoad').disabled=['loading','searching'].includes(value);},onProgress:detail=>{if($('semanticStatus'))$('semanticStatus').textContent=detail;}});
+ $('semanticLoad')?.addEventListener('click',async()=>{try{await semantic.load();}catch(error){$('semanticStatus').textContent=error.message+' Recherche par mots conservée.';}});
+ $('semanticStop')?.addEventListener('click',()=>{epoch++;cloudRequest?.abort();semantic.stop();});
+ const corpus=()=>semanticCorpus({learning:readLearning(),memories:readMemories(),archive:readArchive()});
  const modelSelect=$('localModelSelect'),load=$('localModelLoad'),stop=$('localModelStop');
  for(const model of LOCAL_MODELS){const option=doc.createElement('option');option.value=model.id;option.textContent=model.label+' — '+model.memory;modelSelect.append(option);}
  let comparing=false,comparison=null,replying=false;
@@ -47,14 +53,17 @@ export function createLocalChat({readLearning,readMemories,readArchive=()=>[],wr
    const cloud=await fetchCognitiveContext(contextQuery(history),{enabled:$('localCognitiveContext')?.checked===true,signal:AbortSignal.any([cloudRequest.signal,AbortSignal.timeout(10000)])});
    if(ticket!==epoch)throw Error('Contexte de conversation modifié.');
    const evidence=retrieveLocalEvidence({query:contextQuery(history),history,learning:readLearning()});
-   const context=buildLocalContext({history,memories:readMemories(),evidence:[...evidence,...journalEvidence(readArchive(),contextQuery(history)),...cloud]});
+   let semanticRows=[];if(semantic.status()==='ready'){try{semanticRows=await semantic.search(contextQuery(history),corpus());}catch(error){if(ticket!==epoch)throw error;$('semanticStatus').textContent='Recherche par mots : '+error.message;}}
+   if(ticket!==epoch)throw Error('Contexte de conversation modifié.');
+   const context=buildLocalContext({history,memories:readMemories(),evidence:[...semanticRows,...evidence,...journalEvidence(readArchive(),contextQuery(history)),...cloud]});
    const result=await model.generate(context.messages);
    $('localModelStatus').textContent='Réponse générée sur cet appareil.'+(context.contextCount?' Contexte approuvé : '+context.contextCount+' élément(s).':'')+(context.truncated?' Historique réduit pour la fenêtre du modèle.':'');
    return result.reply;
    }finally{replying=false;}
   },
+  async recall(text){if(semantic.status()!=='ready')return null;try{const rows=await semantic.search(text.replace(/^\/rappel\s+/i,''),corpus());return rows.length?'Extraits retrouvés par similarité sémantique (exactitude non vérifiée) :\n'+rows.map(x=>x.title+' : « '+x.text+' »').join('\n'):null;}catch{return null;}},
   prepareTeaching,
   onReply({question,answer}){lastReply={question,answer};$('localTeachingUseLast').disabled=false;},
-  reset(){comparison?.stop();epoch++;cloudRequest?.abort();model.stop();clearTeaching();},clearTeaching,status:model.status
+  reset(){comparison?.stop();epoch++;cloudRequest?.abort();semantic.stop();model.stop();clearTeaching();},clearTeaching,status:model.status
  };
 }
