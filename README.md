@@ -296,3 +296,8 @@ Cycle R09 : contexte cognitif, recherche classée, synthèse IA, inspection MCP,
 ## Version v2.0.0-rc.8 — Préversion
 
 Cycle R11 : orchestration interne par vagues, références partagées, critique déterministe des résultats et propositions complémentaires. Les fonctionnalités dépendent de la fusion des PR correspondantes. Certification réelle et intégration complète du contexte partagé restent nécessaires.
+
+
+## Version v2.0.0-rc.9 — Préversion
+
+Cycle R13 : interface de raisonnement multisource, examen des divergences, critique IA avec consentement et apprentissage supervisé depuis les missions enregistrées. Fusion des PR dépendantes et certification navigateur nécessaires. Aucun entraînement automatique du modèle.
