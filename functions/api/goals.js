@@ -1,3 +1,4 @@
+import {decomposeGoal} from '../../lib/goal-decomposition.mjs';
 import {authenticatedHeartUser} from './account.js';
 const reply=(x,status=200)=>Response.json(x,{status,headers:{'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
 const statuses=['planned','active','done','paused'];
@@ -33,6 +34,7 @@ export async function onRequestPost({request,env}){
   for(;;){const {done,value}=await reader.read();if(done)break;n+=value.byteLength;if(n>18000){await reader.cancel();return reply({error:'Requête excessive.'},413);}raw+=decoder.decode(value,{stream:true});}raw+=decoder.decode();data=JSON.parse(raw);
  }catch{return reply({error:'JSON invalide.'},400);}
  try{
+  if(data?.action==='previewDecomposition'){try{return reply({steps:decomposeGoal(data.title),method:'template',executed:false});}catch{return reply({error:'Objectif invalide.'},400);}}
   if(data?.action==='delete'){
    if(!validId(data.id)||!rev(data.revision))return reply({error:'Identifiant ou révision invalide.'},400);
    const x=await c.db.prepare('DELETE FROM heart_goals WHERE member_id=? AND id=? AND revision=? RETURNING id').bind(c.owner,data.id,data.revision).first();
