@@ -39,6 +39,7 @@ jobs:
           node --check navigation.js
           node --check goal-panel.js
           node --check agent-panel.js
+          node --check agent-workspace.js
           node --check lib/agent-execution.mjs
           node --check lib/plugin-policy.mjs
           node --check lib/plugin-permissions.mjs
