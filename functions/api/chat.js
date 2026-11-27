@@ -48,7 +48,7 @@ export async function onRequestPost({request,env}) {
   if(messages[messages.length-1].role!=="user") return respond({error:"Dernier message utilisateur requis."},400);
   const provider=payload.provider??'auto';
   if(!['auto','openai','workers-ai'].includes(provider))return respond({error:"Fournisseur invalide."},400);
-  const native=nativeReply(messages.at(-1).content);if(native)return respond({reply:native.reply,mode:'native',verification:native.verification});
+  const native=nativeReply(messages.at(-1).content,{history:messages.slice(0,-1).map(x=>({role:x.role,text:x.content}))});if(native)return respond({reply:native.reply,mode:'native',verification:native.verification});
   let context=[];if(payload.useCognitiveContext===true){
     if(new URL(request.url).protocol!=='https:'||origin!==new URL(request.url).origin)return respond({error:'Origine refusée'},403);
     const user=await authenticatedHeartUser(request,env);if(!user)return respond({error:'Session requise pour la mémoire'},401);if(!env.HEART_DB)return respond({error:'Mémoire indisponible'},503);

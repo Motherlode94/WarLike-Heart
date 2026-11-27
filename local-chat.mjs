@@ -1,3 +1,4 @@
+import {journalEvidence} from './lib/conversation-journal.mjs';
 import {mountModelComparison} from './model-comparison-panel.mjs';
 import {fetchCognitiveContext} from './lib/context-selection.mjs';
 import {contextQuery} from './lib/conversation-signals.mjs';
@@ -5,7 +6,7 @@ import {createLocalModel,LOCAL_MODELS} from './lib/local-model.mjs';
 import {buildLocalContext} from './lib/local-context.mjs';
 import {retrieveLocalEvidence} from './lib/local-evidence.mjs';
 import {approveTeaching} from './lib/local-teaching.mjs';
-export function createLocalChat({readLearning,readMemories,writeLearning,canRemember,document:doc=globalThis.document,modelFactory=createLocalModel}){
+export function createLocalChat({readLearning,readMemories,readArchive=()=>[],writeLearning,canRemember,document:doc=globalThis.document,modelFactory=createLocalModel}){
  const $=id=>doc.getElementById(id),feedback=$('localTeachingStatus');
  const modelSelect=$('localModelSelect'),load=$('localModelLoad'),stop=$('localModelStop');
  for(const model of LOCAL_MODELS){const option=doc.createElement('option');option.value=model.id;option.textContent=model.label+' — '+model.memory;modelSelect.append(option);}
@@ -46,7 +47,7 @@ export function createLocalChat({readLearning,readMemories,writeLearning,canReme
    const cloud=await fetchCognitiveContext(contextQuery(history),{enabled:$('localCognitiveContext')?.checked===true,signal:AbortSignal.any([cloudRequest.signal,AbortSignal.timeout(10000)])});
    if(ticket!==epoch)throw Error('Contexte de conversation modifié.');
    const evidence=retrieveLocalEvidence({query:contextQuery(history),history,learning:readLearning()});
-   const context=buildLocalContext({history,memories:readMemories(),evidence:[...evidence,...cloud]});
+   const context=buildLocalContext({history,memories:readMemories(),evidence:[...evidence,...journalEvidence(readArchive(),contextQuery(history)),...cloud]});
    const result=await model.generate(context.messages);
    $('localModelStatus').textContent='Réponse générée sur cet appareil.'+(context.contextCount?' Contexte approuvé : '+context.contextCount+' élément(s).':'')+(context.truncated?' Historique réduit pour la fenêtre du modèle.':'');
    return result.reply;
