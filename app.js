@@ -4,7 +4,7 @@
   const $ = id => document.getElementById(id);
   const KEY = "warlike-heart-demo-v1"; // keep compatibility with v0.2 history
   const MAX = 100;
-  const welcome = {role:"assistant",text:"Coucou ❤️ Bienvenue sur WarLike Heart v1.6 et Learning Brain v2.0 ! Je peux répondre localement, apprendre des réponses que tu approuves dans l'espace Cerveau et conserver des souvenirs avec ton accord."};
+  const welcome = {role:"assistant",text:"Coucou ❤️ Bienvenue sur WarLike HEART ! Je peux répondre localement, apprendre des réponses que tu approuves dans l'espace Cerveau et conserver des souvenirs avec ton accord."};
   let history = [welcome];
   let recognition = null;
   let busy = false;
