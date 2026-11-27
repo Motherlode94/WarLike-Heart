@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {consolidationCandidates} from '../lib/cognitive-memory.mjs';
+test('only same kind content and provenance are proposed; temporary memories excluded',()=>{const r={kind:'semantic',title:'Engine',content:'A  B',source:'manual',revision:1};assert.deepEqual(consolidationCandidates([{...r,id:'a'},{...r,id:'b',content:'A B'},{...r,id:'c',source:'other'},{...r,id:'d',kind:'working'},{...r,id:'e',kind:'working'}]),[[{id:'a',revision:1},{id:'b',revision:1}]]);});
