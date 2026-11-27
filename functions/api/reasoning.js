@@ -1,5 +1,5 @@
 import {authenticatedHeartUser} from './account.js';
-import {selectEvidence,compareOptions} from '../../lib/reasoning.mjs';
+import {selectEvidence,compareOptions,contextualEvidence} from '../../lib/reasoning.mjs';
 const reply=(d,status=200)=>Response.json(d,{status,headers:{'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
 export async function onRequestPost({request,env}){
  const url=new URL(request.url);if(url.protocol!=='https:'||request.headers.get('origin')!==url.origin||request.headers.get('sec-fetch-site')==='cross-site')return reply({error:'Origine refusée'},403);
@@ -16,7 +16,7 @@ export async function onRequestPost({request,env}){
  db.prepare('SELECT id,label AS title,kind,source,confidence FROM heart_graph_nodes WHERE member_id=? LIMIT 200').bind(owner),
  db.prepare('SELECT id,from_id,to_id,relation,source,confidence FROM heart_graph_edges WHERE member_id=? LIMIT 500').bind(owner)]);
  const records=[...g.results.map(x=>({...x,type:'goal',content:x.status+' '+x.steps})),...m.results.map(x=>({...x,type:'memory'})),...n.results.map(x=>({...x,type:'node'}))];
- const evidence=selectEvidence(d.question,records).map(({steps,...r})=>({...r,content:r.content?.slice(0,500)}));
+ const evidence=(d.contextual===true?contextualEvidence:selectEvidence)(d.question,records).map(({steps,...r})=>({...r,content:r.content?.slice(0,500)}));
  const ids=new Set(evidence.filter(x=>x.type==='node').map(x=>x.id));
  const links=e.results.filter(x=>ids.has(x.from_id)||ids.has(x.to_id)).slice(0,30);
  return reply({evidence,links,ranking,limitations:['Recherche lexicale, non sémantique','Sources déclaratives, non vérifiées','Scores fournis par utilisateur, pas des probabilités','Aucune action exécutée'],needsEvidence:!evidence.length});
