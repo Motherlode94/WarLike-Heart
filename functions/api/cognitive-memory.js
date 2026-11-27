@@ -1,3 +1,4 @@
+import {reviewLearning} from '../../lib/learning-review.mjs';
 import {authenticatedHeartUser} from './account.js';
 import {KINDS,normalizeMemory,memoryExpiry,searchMemories,consolidationCandidates} from '../../lib/cognitive-memory.mjs';
 const reply=(x,status=200)=>Response.json(x,{status,headers:{'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
@@ -22,6 +23,7 @@ export async function onRequestPost({request,env}){
  let data;try{const reader=request.body?.getReader();if(!reader)throw Error();let size=0,raw='';const decoder=new TextDecoder();for(;;){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>16000){await reader.cancel();return reply({error:'Requête excessive.'},413);}raw+=decoder.decode(value,{stream:true});}data=JSON.parse(raw+decoder.decode());}catch{return reply({error:'JSON invalide.'},400);}
  const id=data?.id,revision=data?.revision,valid=typeof id==='string'&&/^[a-f0-9-]{36}$/.test(id)&&Number.isSafeInteger(revision)&&revision>0;
  try{
+  if(data?.action==='reviewLearning'){try{return reply(reviewLearning(data));}catch{return reply({error:'Candidat invalide.'},400);}}
   const now=Date.now();await purge(c,now);
   if(data?.action==='clear'){if(data.confirm!==true)return reply({error:'Confirmation requise.'},400);await c.db.prepare('DELETE FROM heart_cognitive_memory WHERE member_id=?').bind(c.owner).run();return reply({deleted:true});}
   if(data?.action==='delete'&&valid){const row=await c.db.prepare('DELETE FROM heart_cognitive_memory WHERE member_id=? AND id=? AND revision=? RETURNING id').bind(c.owner,id,revision).first();return row?reply({deleted:true}):reply({error:'Entrée absente ou modifiée.'},409);}
