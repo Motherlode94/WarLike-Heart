@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {contextualEvidence} from '../lib/reasoning.mjs';
+test('coverage precedes title weight and returns traceable matched terms',()=>{const r=contextualEvidence('moteur électrique',[{id:'a',title:'Moteur',content:''},{id:'b',title:'Documentation',content:'moteur électrique'},{id:'c',title:'Moteur électrique',content:''}]);assert.deepEqual(r.map(x=>x.id),['c','b','a']);assert.equal(r[0].coverage,1);assert.deepEqual(r[0].matchedTerms,['moteur','electrique']);assert.equal(r[2].coverage,.5);});
