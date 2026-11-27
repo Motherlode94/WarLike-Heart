@@ -286,3 +286,8 @@ Cycle R08 : exécution interne confirmée, historique optionnel et préparation 
 ## Version v2.0.0-rc.6 — Préversion
 
 Cycle R08.21–R08.25 : planification IA, transfert modifiable, synthèse locale et vérification du contrat MCP. Disponibilité après fusion des PR correspondantes et déploiement vérifié. Aucun contrôle externe autonome certifié.
+
+
+## Version v2.0.0-rc.7 — Préversion
+
+Cycle R09 : contexte cognitif, recherche classée, synthèse IA, inspection MCP, suivi des commandes, brouillons de reprise et notifications consultables. Fusion des PR correspondantes et certification réelle nécessaires. Le statut stable reste bloqué tant que les parcours navigateur, fournisseurs IA, D1 et MCP n'ont pas été vérifiés sur le déploiement.
