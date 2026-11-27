@@ -1,3 +1,4 @@
+import {contextQuery} from './lib/conversation-signals.mjs';
 import {createLocalModel,LOCAL_MODELS} from './lib/local-model.mjs';
 import {buildLocalContext} from './lib/local-context.mjs';
 import {retrieveLocalEvidence} from './lib/local-evidence.mjs';
@@ -31,7 +32,7 @@ export function createLocalChat({readLearning,readMemories,writeLearning,canReme
  function clearTeaching(){lastReply=null;$('localTeachingUseLast').disabled=true;$('localTeachingForm').reset();feedback.textContent='Aucun exemple enregistré automatiquement.';}
  return {
   async reply(history){
-   const evidence=retrieveLocalEvidence({query:history.at(-1).text,history,learning:readLearning()});
+   const evidence=retrieveLocalEvidence({query:contextQuery(history),history,learning:readLearning()});
    const context=buildLocalContext({history,memories:readMemories(),evidence});
    const result=await model.generate(context.messages);
    $('localModelStatus').textContent='Réponse générée sur cet appareil.'+(context.contextCount?' Contexte approuvé : '+context.contextCount+' élément(s).':'')+(context.truncated?' Historique réduit pour la fenêtre du modèle.':'');
