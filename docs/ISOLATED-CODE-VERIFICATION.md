@@ -1,0 +1,3 @@
+# Isolated verification contract
+
+R21 prepares fixed check types only. It does not run user code in Pages Functions or launch a shell. Before enabling a real runner, provision an isolated disposable environment with no production bindings, repository write token or secrets, deny network by default, pin the source revision, use resource/time limits, collect bounded output, and destroy the environment after each job. Tests must execute against the exact reviewed patch in a sandbox. Do not treat a plan, syntax check or green unrelated CI as semantic validation. No automatically generated shell commands or automatic merges.
