@@ -281,3 +281,8 @@ Correction de la palette locale HEART et suppression du numéro obsolète dans l
 ## Version v2.0.0-rc.5 — Préversion
 
 Cycle R08 : exécution interne confirmée, historique optionnel et préparation depuis le chat. La disponibilité dépend des PR fusionnées, de la migration D1 et du déploiement vérifié. Aucun contrôle externe ni autonomie certifiée.
+
+
+## Version v2.0.0-rc.6 — Préversion
+
+Cycle R08.21–R08.25 : planification IA, transfert modifiable, synthèse locale et vérification du contrat MCP. Disponibilité après fusion des PR correspondantes et déploiement vérifié. Aucun contrôle externe autonome certifié.
