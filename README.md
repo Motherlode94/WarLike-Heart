@@ -261,3 +261,8 @@ Voir [DEPLOIEMENT.md](DEPLOIEMENT.md) pour les étapes de mise en service et les
 ## Version v2.0.0-rc.1 — Préversion
 
 Cette préversion établit le versionnement explicite de HEART et conserve les modules cognitifs et agentiques existants. Voir [CHANGELOG.md](CHANGELOG.md) et [version.json](version.json). La mise en production et les connexions externes ne sont pas certifiées par ce numéro.
+
+
+## Version v2.0.0-rc.2 — Préversion
+
+Espace agent : prévisualisation des missions, suivi des objectifs, inventaire des applications et diagnostic du routage IA. Aucune exécution autonome ni certification de production.
