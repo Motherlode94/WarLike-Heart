@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.9 — Release candidate
+
+- R13 candidate: multisource reasoning UI, knowledge disagreement review, consent-gated AI critique API and supervised mission lessons.
+- Updated client script cache versions; live certification remains pending.
+
 ## 2.0.0-rc.8 — Release candidate
 
 - R11 candidate: bounded concurrent internal missions, shared evidence references, outcome critique and complementary drafts.
