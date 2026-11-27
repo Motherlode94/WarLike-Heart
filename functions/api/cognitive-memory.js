@@ -1,5 +1,5 @@
 import {authenticatedHeartUser} from './account.js';
-import {KINDS,normalizeMemory,memoryExpiry} from '../../lib/cognitive-memory.mjs';
+import {KINDS,normalizeMemory,memoryExpiry,searchMemories} from '../../lib/cognitive-memory.mjs';
 const reply=(x,status=200)=>Response.json(x,{status,headers:{'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
 const cols='id,kind,title,content,source,revision,created_at,updated_at,expires_at';
 async function context(request,env){
@@ -11,9 +11,9 @@ async function context(request,env){
 async function purge(c,now){await c.db.prepare('DELETE FROM heart_cognitive_memory WHERE member_id=? AND expires_at<=?').bind(c.owner,now).run();}
 export async function onRequestGet({request,env}){
  const c=await context(request,env);if(c.error)return c.error;
- const params=new URL(request.url).searchParams,kind=params.get('kind')||'',q=(params.get('q')||'').trim();
- if((kind&&!KINDS.includes(kind))||q.length>160)return reply({error:'Filtre invalide.'},400);
- try{const now=Date.now();await purge(c,now);const rows=await c.db.prepare('SELECT '+cols+' FROM heart_cognitive_memory WHERE member_id=? AND (expires_at IS NULL OR expires_at>?) AND (?=\'\' OR kind=?) AND (?=\'\' OR instr(lower(title||\' \'||content||\' \'||source),lower(?))>0) ORDER BY updated_at DESC,id LIMIT 200').bind(c.owner,now,kind,kind,q,q).all();return reply({memories:rows.results});}catch{return reply({error:'Lecture indisponible.'},503);}
+ const params=new URL(request.url).searchParams,mode=params.get('search')||'literal',kind=params.get('kind')||'',q=(params.get('q')||'').trim();
+ if(!['literal','context'].includes(mode)||(kind&&!KINDS.includes(kind))||q.length>160)return reply({error:'Filtre invalide.'},400);
+ try{const now=Date.now();await purge(c,now);const rows=await c.db.prepare('SELECT '+cols+' FROM heart_cognitive_memory WHERE member_id=? AND (expires_at IS NULL OR expires_at>?) AND (?=\'\' OR kind=?) AND (?=\'\' OR instr(lower(title||\' \'||content||\' \'||source),lower(?))>0) ORDER BY updated_at DESC,id LIMIT 200').bind(c.owner,now,kind,kind,mode==='context'?'':q,mode==='context'?'':q).all();return reply({memories:mode==='context'&&q?searchMemories(rows.results,q):rows.results});}catch{return reply({error:'Lecture indisponible.'},503);}
 }
 export async function onRequestPost({request,env}){
  const url=new URL(request.url);if(url.protocol!=='https:'||request.headers.get('origin')!==url.origin||request.headers.get('sec-fetch-site')==='cross-site')return reply({error:'Origine refusée.'},403);
