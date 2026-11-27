@@ -311,3 +311,8 @@ Cycle R15 : registre GitHub autorisé, inspection des PR ouvertes et workflows r
 ## Version v2.0.0-rc.11 — Préversion
 
 Cycle R16/R17 : diagnostics CI, inventaire et comparaison de commits, lecture de fichiers explicitement sélectionnés, revue d'extraits de logs et propositions IA de remplacement de texte. Le Coding Workspace nécessite les PR R17 correspondantes. Ne jamais soumettre de secrets au fournisseur IA. Les propositions ne sont ni appliquées ni testées automatiquement. Certification réelle encore nécessaire.
+
+
+## Version v2.0.0-rc.12 — Préversion
+
+R19 : stockage D1 des opérations Git (migration 0010 à appliquer), approbations expirantes, adaptateurs de branche et de PR en brouillon, gestionnaire de préparation. Les écritures distantes ne sont pas exposées par l'API de cette version : certification et orchestration atomique requises avant activation. Le code proposé reste dans le navigateur et n'est pas persisté.
