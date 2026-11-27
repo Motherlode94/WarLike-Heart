@@ -154,7 +154,7 @@
     const token=$("accessToken").value.trim();
     let answer,canTeach=false;
     try {
-    if(native){answer=native.reply;$("aiMode").textContent='Outil natif · sur cet appareil';$("apiStatus").textContent=native.verification.status==='native-verified'?'Vérification native sur les données fournies.':native.verification.status==='source-excerpts'?'Extraits conservés, sans validation de leur exactitude.':'Précise les données à vérifier.';}else if(selected==='local-llm'){
+    if(native){answer=(/^\/rappel\s+/i.test(text)?await window.WarLikeHeartLocalChat?.recall(text):null)||native.reply;$("aiMode").textContent='Outil natif · sur cet appareil';$("apiStatus").textContent=native.verification.status==='native-verified'?'Vérification native sur les données fournies.':native.verification.status==='source-excerpts'?'Extraits conservés, sans validation de leur exactitude.':'Précise les données à vérifier.';}else if(selected==='local-llm'){
       $("aiMode").textContent="Modèle de langage local · sur cet appareil";
       try{
         if(explicitMemory&&localBrain){answer=localBrain.reply(text).text;$("apiStatus").textContent="Commande de mémoire locale traitée.";}
