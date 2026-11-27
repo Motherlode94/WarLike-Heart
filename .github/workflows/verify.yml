@@ -93,6 +93,10 @@ jobs:
           test -f avatar3d.js
           test -f functions/api/chat.js
           test -f functions/api/server-status.js
+          test -f functions/api/git-operation-execute.js
+          test -f functions/api/multi-file-proposal.js
+          test -f functions/api/multi-file-verification.js
+          node --check advanced-coding-workspace.js
           grep -q 'id="officialPortrait"' index.html
           grep -q 'id="modelFile"' index.html
           grep -q 'id="accessToken"' index.html
