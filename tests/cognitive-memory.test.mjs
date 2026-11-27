@@ -15,17 +15,20 @@ test('private cognitive records, search, expiry, revision and removal',async()=>
  const get=(c,q='')=>onRequestGet({request:new Request(origin+'/api/cognitive-memory'+q,{headers:{cookie:c}}),env});
  const post=(c,body,o=origin)=>onRequestPost({request:new Request(origin+'/api/cognitive-memory',{method:'POST',headers:{cookie:c,origin:o,'content-type':'application/json'},body:JSON.stringify(body)}),env});
  assert.equal((await get('')).status,401);
+ for(const kind of ['semantic','episodic','procedural','working']){const r=await post(b,{action:'create',kind,title:'Memory '+kind,content:'Private '+kind});assert.equal(r.status,201);const {memory}=await r.json();assert.equal(memory.kind,kind);assert.equal(memory.expires_at!==null,kind==='working');assert.equal((await post(a,{action:'update',kind,title:'Intrusion',content:'Forbidden',id:memory.id,revision:1})).status,409);assert.equal((await (await get(b,'?kind='+kind)).json()).memories.length,1);}
+ assert.equal((await (await get(a)).json()).memories.length,0);
+ assert.equal((await post(b,{action:'clear'})).status,400);
  const input={action:'create',kind:'semantic',title:'Engine',content:'Moteur web',source:'Documentation'};
  const created=await post(a,input);assert.equal(created.status,201);const {memory}=await created.json();
- assert.equal((await (await get(b)).json()).memories.length,0);
+ assert.equal((await (await get(b)).json()).memories.length,4);
  assert.equal((await (await get(a,'?q=moteur&kind=semantic')).json()).memories.length,1);
  assert.equal((await post(b,{action:'delete',id:memory.id,revision:1})).status,409);
  assert.equal((await post(a,{...input,action:'update',id:memory.id,revision:1,title:'New'})).status,200);
  assert.equal((await post(a,{action:'delete',id:memory.id,revision:1})).status,409);
  const temp=await post(a,{...input,kind:'working'});assert.equal(temp.status,201);
- raw.prepare("UPDATE heart_cognitive_memory SET expires_at=1 WHERE kind='working'").run();
+ raw.prepare("UPDATE heart_cognitive_memory SET expires_at=1 WHERE kind='working' AND member_id='a'").run();
  assert.equal((await (await get(a)).json()).memories.length,1);
  assert.equal((await post(a,{action:'clear',confirm:true},'https://evil.example')).status,403);
  assert.equal((await post(a,{action:'clear',confirm:true})).status,200);
- assert.equal((await (await get(a)).json()).memories.length,0);raw.close();
+ assert.equal((await (await get(a)).json()).memories.length,0);assert.equal((await (await get(b)).json()).memories.length,4);raw.close();
 });
