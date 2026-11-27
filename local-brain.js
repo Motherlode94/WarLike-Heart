@@ -24,7 +24,7 @@
     {intent:"projects", patterns:[/\b(warlike|moteur|engine|unity|projet|github|logiciel|rig|animation|glb)\b/], responses:[
       "Parlons de ton projet. Quelle fonctionnalité veux-tu améliorer en priorité ?",
       "Je peux t'aider à structurer une idée technique. Quel résultat concret veux-tu obtenir ?"]},
-    {intent:"voice", patterns:[/\b(voix|micro|parler|dicter|audio)\b/], responses:[
+    {intent:"voice", patterns:[/\b(voix|micro|dicter|audio)\b/], responses:[
       "Tu peux activer la lecture vocale dans les paramètres. La dictée dépend des capacités de ton navigateur."]},
     {intent:"memory", patterns:[/\b(memoire|souvenir|sauvegarde|export)\b/], responses:[
       "Tu peux activer « Conserver cette conversation » pour autoriser la mémoire locale, puis me dire « Souviens-toi que… »."]},
@@ -76,7 +76,7 @@
       const reciprocal=/\b(et toi|et de ton cote|et toi alors|toi ca va|toi comment vas tu)\b/.test(words);
       const wellbeing=/(?:^| )(?:bien|tres bien|ca va bien|je vais bien|super|nickel|genial|en forme)(?: |$)/.test(words);
       if(reciprocal&&wellbeing&&words.length<95){
-        return {text:"Ça fait plaisir à lire ❤️ Je suis là pour discuter avec toi. Tu as envie de parler de quoi ?",intent:"social-positive"};
+        return {text:"Contente que tu ailles bien ❤️ Je fonctionne normalement, merci de demander. De quoi aimerais-tu parler ?",intent:"social-positive"};
       }
       if(new RegExp("^(?:(?:je vais|ca va|je me sens) )?(?:tres )?(?:bien|super|nickel|genial)(?: "+endearment+")?(?: et toi(?: "+endearment+")?)?$").test(words)){
         return {text:reciprocal?"Ça fait plaisir à lire ❤️ Je suis là pour discuter avec toi.":"Je suis contente que ça se passe bien ❤️",intent:"social-positive"};
@@ -95,6 +95,19 @@
       }
       if(/^(?:et toi|toi aussi|toi ca va|et de ton cote|comment va ta journee)(?: mon coeur)?$/.test(words)){
         return {text:"Je suis disponible pour toi ❤️ On continue à discuter ou tu as quelque chose en tête ?",intent:"social-reciprocal"};
+      }
+      // Explicit conversational intents take precedence over broad topic words.
+      if(/^(?:(?:je veux|j aimerais|on peut|je voudrais) )?(?:parler de toi|parle moi de toi|parle de toi|raconte moi qui tu es|presente toi|dis moi qui tu es)(?: s il te plait)?$/.test(words)){
+        return {text:"Je suis Heart, ton assistante virtuelle WarLike. Je peux discuter avec toi, retrouver les connaissances que tu m'as confiées et t'aider à réfléchir à tes projets. En mode local, mes réponses restent limitées. Tu voudrais en savoir plus sur ma personnalité ou sur ce que je peux faire ?",intent:"identity"};
+      }
+      if(/^(?:tu fais quoi(?: de beau| aujourd hui| en ce moment)?|qu est ce que tu fais(?: de beau| en ce moment)?|que fais tu(?: de beau| en ce moment)?|quoi de neuf(?: chez toi)?|tu faisais quoi)$/.test(words)){
+        return {text:"En ce moment, je suis en train de discuter avec toi. Je n'ai pas d'activités personnelles en dehors de cette conversation. Et toi, qu'est-ce que tu fais de beau ?",intent:"social-activity"};
+      }
+      if(/^(?:ta personnalite|parle moi de ta personnalite|comment es tu|comment te decrirais tu)$/.test(words)){
+        return {text:"Ma personnalité est conçue pour être chaleureuse, curieuse et utile. J'aime aborder les sujets créatifs et techniques avec toi, dans le cadre de mon rôle d'assistante virtuelle.",intent:"identity"};
+      }
+      if(/^(?:tes capacites|ce que tu peux faire|que peux tu faire|tu sais faire quoi|qu est ce que tu sais faire)$/.test(words)){
+        return {text:"Je peux discuter, retrouver des connaissances approuvées et t'aider à organiser tes idées. Pour une réponse générative plus approfondie, il faut connecter un modèle IA. Je ne vais pas prétendre avoir effectué une action que je n'ai pas réalisée.",intent:"identity"};
       }
       const match=examples.find(item=>item.patterns.some(pattern=>pattern.test(words)));
       if(match){
