@@ -301,3 +301,8 @@ Cycle R11 : orchestration interne par vagues, références partagées, critique 
 ## Version v2.0.0-rc.9 — Préversion
 
 Cycle R13 : interface de raisonnement multisource, examen des divergences, critique IA avec consentement et apprentissage supervisé depuis les missions enregistrées. Fusion des PR dépendantes et certification navigateur nécessaires. Aucun entraînement automatique du modèle.
+
+
+## Version v2.0.0-rc.10 — Préversion
+
+Cycle R15 : registre GitHub autorisé, inspection des PR ouvertes et workflows récents, recommandations par SHA et tableau de bord. Configuration serveur HEART_GITHUB_TOKEN et HEART_GITHUB_REPOS, activation du connecteur GitHub et permission github.repo.inspect/read requises. Fusion des PR correspondantes avant utilisation. Aucun droit de fusion ou d'écriture ajouté, aucune certification réelle annoncée.
