@@ -256,3 +256,8 @@ Le calcul de cadrage du visualiseur 3D ne repose plus sur une distance de camér
 - Les tests automatisés locaux passent (79/79). Les parcours navigateur réel, IA distante, compte réel et matériel Raspberry Pi ne sont pas validés dans cette session.
 
 Voir [DEPLOIEMENT.md](DEPLOIEMENT.md) pour les étapes de mise en service et les contrôles à reprendre.
+
+
+## Version v2.0.0-rc.1 — Préversion
+
+Cette préversion établit le versionnement explicite de HEART et conserve les modules cognitifs et agentiques existants. Voir [CHANGELOG.md](CHANGELOG.md) et [version.json](version.json). La mise en production et les connexions externes ne sont pas certifiées par ce numéro.
