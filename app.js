@@ -154,7 +154,7 @@
           method:"POST",
           credentials:"same-origin",
           headers:{"content-type":"application/json","authorization":"Bearer "+token},
-          body:JSON.stringify({messages:history.filter(m=>["user","assistant"].includes(m.role)).slice(-20)}),
+          body:JSON.stringify({messages:history.filter(m=>["user","assistant"].includes(m.role)).slice(-20),useCognitiveContext:$("chatCognitiveContext").checked}),
           signal:controller.signal,
           cache:"no-store"
         });
