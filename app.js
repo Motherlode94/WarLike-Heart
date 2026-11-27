@@ -4,6 +4,7 @@
   const $ = id => document.getElementById(id);
   const KEY = "warlike-heart-demo-v1"; // keep compatibility with v0.2 history
   const MAX = 100;
+  const nativeReady=import('./lib/native-assistant.mjs?v=25.01');
   const welcome = {role:"assistant",text:"Coucou ❤️ Bienvenue sur WarLike HEART ! Je peux répondre localement, apprendre des réponses que tu approuves dans l'espace Cerveau et conserver des souvenirs avec ton accord."};
   let history = [welcome];
   let recognition = null;
@@ -139,9 +140,10 @@
     const field=$("message"); const text=field.value.trim();
     if (!text || busy) return;
     const selected=$("conversationEngine").value;
+    const native=(await nativeReady).nativeReply(text);
     const explicitMemory=memoryCommandPattern.test(window.WarLikeLocalBrain?.normalize(text)||'');
-    if(selected==='local-llm'&&!explicitMemory&&window.WarLikeHeartLocalChat?.status().state!=='ready'){status('Charge un modèle dans Cerveau pour commencer. Ton message est conservé.');openBrain();return;}
-    if(selected==='remote'&&!$("accessToken").value.trim()){status('Configure le service distant dans Cerveau. Ton message est conservé.');openBrain();return;}
+    if(!native&&selected==='local-llm'&&!explicitMemory&&window.WarLikeHeartLocalChat?.status().state!=='ready'){status('Charge un modèle dans Cerveau pour commencer. Ton message est conservé.');openBrain();return;}
+    if(!native&&selected==='remote'&&!$("accessToken").value.trim()){status('Configure le service distant dans Cerveau. Ton message est conservé.');openBrain();return;}
     busy=true; const sendButton=$("chatForm").querySelector("button[type=submit]");
     sendButton.disabled=true; field.disabled=true;
     const turnRevision=conversationRevision;
@@ -150,7 +152,7 @@
     const token=$("accessToken").value.trim();
     let answer,canTeach=false;
     try {
-    if(selected==='local-llm'){
+    if(native){answer=native.reply;$("aiMode").textContent='Outil natif · sur cet appareil';$("apiStatus").textContent=native.verification.status==='native-verified'?'Résultat vérifié par calcul natif.':'Précise les données du calcul.';}else if(selected==='local-llm'){
       $("aiMode").textContent="Modèle de langage local · sur cet appareil";
       try{
         if(explicitMemory&&localBrain){answer=localBrain.reply(text).text;$("apiStatus").textContent="Commande de mémoire locale traitée.";}
