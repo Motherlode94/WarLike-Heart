@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.15 — Release candidate
+
+- Specialist capability registry, collaboration preview, objective decomposition and stored-outcome recovery.
+- Agent Command Center with explicit review before importing a mission. Existing read-only execution boundaries unchanged.
+
 ## 2.0.0-rc.14 — Release candidate
 
 - R21 multi-file proposal and pinned remote diff verification workspace.
