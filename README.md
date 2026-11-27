@@ -276,3 +276,8 @@ Cycle R08 : intégration progressive de l’apprentissage supervisé, des initia
 ## Version v2.0.0-rc.4 — Préversion
 
 Correction de la palette locale HEART et suppression du numéro obsolète dans le nouveau message d’accueil. Les conversations enregistrées restent intactes. Déploiement non certifié.
+
+
+## Version v2.0.0-rc.5 — Préversion
+
+Cycle R08 : exécution interne confirmée, historique optionnel et préparation depuis le chat. La disponibilité dépend des PR fusionnées, de la migration D1 et du déploiement vérifié. Aucun contrôle externe ni autonomie certifiée.
