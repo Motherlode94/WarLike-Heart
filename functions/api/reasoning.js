@@ -1,5 +1,5 @@
 import {authenticatedHeartUser} from './account.js';
-import {selectEvidence,compareOptions} from '../../lib/reasoning.mjs';
+import {selectEvidence,compareOptions,explainDecision} from '../../lib/reasoning.mjs';
 const reply=(d,status=200)=>Response.json(d,{status,headers:{'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
 export async function onRequestPost({request,env}){
  const url=new URL(request.url);if(url.protocol!=='https:'||request.headers.get('origin')!==url.origin||request.headers.get('sec-fetch-site')==='cross-site')return reply({error:'Origine refusée'},403);
@@ -7,7 +7,7 @@ export async function onRequestPost({request,env}){
  const user=await authenticatedHeartUser(request,env);if(!user)return reply({error:'Session requise'},401);if(!env.HEART_DB)return reply({error:'Base indisponible'},503);
  let d;try{const reader=request.body.getReader(),dec=new TextDecoder();let raw='',size=0;for(;;){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>16000){await reader.cancel();return reply({error:'Requête excessive'},413);}raw+=dec.decode(value,{stream:true});}d=JSON.parse(raw+dec.decode());}catch{return reply({error:'JSON invalide'},400);}
  if(typeof d?.question!=='string'||!d.question.trim()||d.question.length>1000)return reply({error:'Question invalide'},400);
- let ranking=[];try{if(d.options!==undefined||d.criteria!==undefined)ranking=compareOptions(d.options,d.criteria);}catch(e){return reply({error:e.message},400);}
+ let ranking=[],decision=null;try{if(d.options!==undefined||d.criteria!==undefined){ranking=compareOptions(d.options,d.criteria);if(d.explainDecision===true)decision=explainDecision(d.options,d.criteria);}}catch(e){return reply({error:e.message},400);}
  try{
  const db=env.HEART_DB,owner=user.id;
  const [g,m,n,e]=await db.batch([
@@ -19,6 +19,6 @@ export async function onRequestPost({request,env}){
  const evidence=selectEvidence(d.question,records).map(({steps,...r})=>({...r,content:r.content?.slice(0,500)}));
  const ids=new Set(evidence.filter(x=>x.type==='node').map(x=>x.id));
  const links=e.results.filter(x=>ids.has(x.from_id)||ids.has(x.to_id)).slice(0,30);
- return reply({evidence,links,ranking,limitations:['Recherche lexicale, non sémantique','Sources déclaratives, non vérifiées','Scores fournis par utilisateur, pas des probabilités','Aucune action exécutée'],needsEvidence:!evidence.length});
+ return reply({evidence,links,ranking,...(decision?{decision}:{}),limitations:['Recherche lexicale, non sémantique','Sources déclaratives, non vérifiées','Scores fournis par utilisateur, pas des probabilités','Aucune action exécutée'],needsEvidence:!evidence.length});
  }catch{return reply({error:'Analyse indisponible'},503);}
 }
