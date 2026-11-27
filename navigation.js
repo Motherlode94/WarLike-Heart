@@ -20,7 +20,7 @@
     if(node&&studioBody)studioBody.append(node);
   }
   const advancedConfig=$("accessToken")?.closest("details");
-  if(advancedConfig&&studioBody)studioBody.append(advancedConfig);
+  if(advancedConfig&&$("brainSettings"))$("brainSettings").append(advancedConfig);
   function allowed(view){
     if(["home","account","space3d"].includes(view))return true;
     if(["brain","cloud","goals","cognitive","graph","reasoning"].includes(view))return Boolean(account);

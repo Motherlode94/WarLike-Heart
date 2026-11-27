@@ -1,9 +1,9 @@
 import {compareLocalModels} from './lib/model-comparison.mjs';
-export function mountModelComparison(root,{model,onBusy=()=>{}}){
+export function mountModelComparison(root,{model,onBusy=()=>{},canStart=()=>true}){
  root.innerHTML='<summary>Comparer les modèles et leurs réponses</summary><p>Compare Qwen 1,5B et 3B sur les mêmes cinq cas. Leurs poids peuvent être téléchargés. Le chat personnel est exclu de cet essai. Les réponses doivent être évaluées par toi.</p><div class="controls"><button type="button" data-compare>Comparer les deux modèles</button><button type="button" data-cancel disabled>Arrêter</button><button type="button" data-export disabled>Exporter le compte rendu JSON</button></div><p data-status role="status"></p><div data-results></div>';
  const $=q=>root.querySelector(q),button=$('[data-compare]'),cancel=$('[data-cancel]'),out=$('[data-results]');let controller,report;
  button.onclick=async()=>{
-  if(controller)return;controller=new AbortController();report=null;out.replaceChildren();button.disabled=true;cancel.disabled=false;$('[data-export]').disabled=true;onBusy(true);
+  if(controller)return;if(!canStart()){$('[data-status]').textContent='Termine ou arrête la réponse en cours avant de comparer.';return;}controller=new AbortController();report=null;out.replaceChildren();button.disabled=true;cancel.disabled=false;$('[data-export]').disabled=true;onBusy(true);
   try{report=await compareLocalModels({model,signal:controller.signal,onResult:row=>{
    const card=document.createElement('section'),title=document.createElement('strong'),reply=document.createElement('p'),criterion=document.createElement('small'),review=document.createElement('select');
    title.textContent=row.model+' · '+(row.name||row.caseId)+(Number.isFinite(row.latencyMs)?' · '+row.latencyMs+' ms':'');reply.textContent=row.error||row.reply;criterion.textContent=row.criterion||'Chargement indisponible.';

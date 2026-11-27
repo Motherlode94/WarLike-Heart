@@ -1,3 +1,8 @@
+## 2.0.0-rc.17
+
+- R24 : personnalité française commune, continuité, souvenirs pertinents et mémoire Cloud locale optionnelle, comparaison des modèles et conversation simplifiée.
+- Réglages dans Mon compte → Cerveau ; correction explicite sous chaque réponse. La qualité GPU réelle reste à évaluer.
+
 ## 2.0.0-rc.16
 
 - Modèle local WebGPU Qwen, contexte de conversation, connaissances approuvées et corrections supervisées. Validation GPU et qualité conversationnelle encore requises.

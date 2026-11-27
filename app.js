@@ -43,7 +43,7 @@
   const localBrain=window.WarLikeLocalBrain?.createEngine({
     readMemory:readMemories,writeMemory:writeMemories,canRemember:()=>state.remember
   });
-  const localChatReady=import('./local-chat.mjs?v=23.05').then(({createLocalChat})=>{
+  const localChatReady=import('./local-chat.mjs?v=24.05').then(({createLocalChat})=>{
     const chat=createLocalChat({readLearning,readMemories,writeLearning,canRemember:()=>state.remember});
     window.WarLikeHeartLocalChat=chat;return chat;
   }).catch(()=>{ $("localModelStatus").textContent="Le module local n’a pas pu être chargé. Recharge la page.";return null; });
@@ -59,11 +59,13 @@
   const safeHistory = (value) => Array.isArray(value) ? value.filter(x => x && ["user","assistant"].includes(x.role) && typeof x.text === "string" && x.text.length <= 4000).slice(-MAX) : null;
   const render = () => {
     const area = $("messages"); area.replaceChildren();
-    for (const item of history) {
+    for (const [index,item] of history.entries()) {
       const el = document.createElement("div");
       el.className = "bubble " + item.role;
       el.textContent = item.text;
       area.appendChild(el);
+      const question=item.role==='assistant'?history.slice(0,index).reverse().find(turn=>turn.role==='user')?.text:null;
+      if(question){const action=document.createElement('button');action.type='button';action.className='reply-teach';action.textContent='Corriger et enseigner';action.setAttribute('aria-label','Corriger cette réponse de Heart');action.onclick=async()=>{const chat=await localChatReady;if(chat){chat.prepareTeaching({question,answer:item.text});$("localTeachingDialog").showModal();}};area.append(action);}
     }
     area.scrollTop = area.scrollHeight;
   };
@@ -115,10 +117,31 @@
   emojiToggle.addEventListener("click",()=>{emojiPicker.hidden=!emojiPicker.hidden;emojiToggle.setAttribute("aria-expanded",String(!emojiPicker.hidden));});
   document.addEventListener("pointerdown",event=>{if(!emojiPicker.hidden && !event.target.closest(".emoji-wrap")){emojiPicker.hidden=true;emojiToggle.setAttribute("aria-expanded","false");}});
   document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!emojiPicker.hidden){emojiPicker.hidden=true;emojiToggle.setAttribute("aria-expanded","false");emojiToggle.focus();}});
+  const fitConversation=()=>{
+    if($("homeView").hidden)return;
+    const chat=document.querySelector('#homeView .chat');
+    const top=chat.getBoundingClientRect().top+window.scrollY;
+    chat.style.setProperty('--chat-height',Math.max(280,window.innerHeight-top-16)+'px');
+  };
+  const scheduleFit=()=>requestAnimationFrame(fitConversation);
+  window.addEventListener('resize',scheduleFit);
+  document.addEventListener('warlike-heart-view-changed',scheduleFit);
+  document.fonts?.ready.then(scheduleFit);
+  if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(scheduleFit);for(const node of document.querySelectorAll('#homeView .avatar,.heart-navigation,.top,#pageTitle'))observer.observe(node);}
+  scheduleFit();
+  const openBrain=()=>{document.querySelector('[data-nav="account"]').click();$("brainSettings").open=true;$("brainSettings").scrollIntoView({block:'start'});};
+  $("openBrainSettings").addEventListener("click",openBrain);
+  $("backToChat").addEventListener("click",()=>document.querySelector('[data-nav="home"]').click());
+  $("localTeachingClose").addEventListener("click",()=>$("localTeachingDialog").close());
+  const memoryCommandPattern=/^(?:(?:souviens toi|retiens|memorise|rappelle toi) que |(?:efface|supprime|oublie) (?:tous )?(?:tes |mes |nos )?(?:souvenirs|memoires)\b|que sais tu de moi|de quoi te souviens tu|rappelle moi (?:mes|tes) souvenirs|liste (?:mes|tes) souvenirs|(?:oublie|supprime) (?:que |le fait que ))/;
   $("chatForm").addEventListener("submit",async ev => {
     ev.preventDefault();
     const field=$("message"); const text=field.value.trim();
     if (!text || busy) return;
+    const selected=$("conversationEngine").value;
+    const explicitMemory=memoryCommandPattern.test(window.WarLikeLocalBrain?.normalize(text)||'');
+    if(selected==='local-llm'&&!explicitMemory&&window.WarLikeHeartLocalChat?.status().state!=='ready'){status('Charge un modèle dans Cerveau pour commencer. Ton message est conservé.');openBrain();return;}
+    if(selected==='remote'&&!$("accessToken").value.trim()){status('Configure le service distant dans Cerveau. Ton message est conservé.');openBrain();return;}
     busy=true; const sendButton=$("chatForm").querySelector("button[type=submit]");
     sendButton.disabled=true; field.disabled=true;
     const turnRevision=conversationRevision;
@@ -126,14 +149,11 @@
     window.WarLikeHeartLocalChat?.clearTeaching();
     const token=$("accessToken").value.trim();
     let answer,canTeach=false;
-    const selected=$("conversationEngine").value;
     try {
     if(selected==='local-llm'){
       $("aiMode").textContent="Modèle de langage local · sur cet appareil";
       try{
-        const words=window.WarLikeLocalBrain?.normalize(text)||'';
-        const memoryCommand=/^(?:(?:souviens toi|retiens|memorise|rappelle toi) que |(?:efface|supprime|oublie) (?:tous )?(?:tes |mes |nos )?(?:souvenirs|memoires)\b|que sais tu de moi|de quoi te souviens tu|rappelle moi (?:mes|tes) souvenirs|liste (?:mes|tes) souvenirs|(?:oublie|supprime) (?:que |le fait que ))/.test(words);
-        if(memoryCommand&&localBrain){answer=localBrain.reply(text).text;$("apiStatus").textContent="Commande de mémoire locale traitée.";}
+        if(explicitMemory&&localBrain){answer=localBrain.reply(text).text;$("apiStatus").textContent="Commande de mémoire locale traitée.";}
         else{
           const chat=await localChatReady;
           if(!chat)throw Error('Le module local n’a pas pu être chargé. Recharge la page.');
