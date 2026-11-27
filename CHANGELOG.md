@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.2 — Release candidate
+
+- Agent workspace: mission plan preview, persistent goal progress, application inventory and model routing diagnostics.
+- No autonomous dispatch or production verification.
+
 ## 2.0.0-rc.1 — Release candidate
 
 - Establishes visible application version and machine-readable version metadata.
