@@ -326,3 +326,8 @@ R20 : orchestration d'opérations Git approuvées, API propriétaire, rapprochem
 ## Version v2.0.0-rc.14 — Préversion
 
 R21 : propositions IA multifichiers, vérification distante des diffs, analyse lexicale des dépendances et planification des tests isolés. Les propositions multifichiers sont uniquement des prévisualisations ; aucun exécuteur multifichier ni sandbox de tests n'est activé. Récupération de l'API R20 manquante dans main.
+
+
+## Version v2.0.0-rc.15 — Préversion
+
+R22 : registre de spécialistes, prévisualisation des collaborations et dépendances, décomposition des objectifs explicites et préparation de reprise depuis les résultats D1. Agent Command Center intégré. Les missions internes restent limitées à cinq tâches de lecture, deux en parallèle. Les rôles consultatifs ne disposent pas de nouvelles permissions. La reprise ne restaure pas les requêtes ni les résultats précédents.
