@@ -306,3 +306,8 @@ Cycle R13 : interface de raisonnement multisource, examen des divergences, criti
 ## Version v2.0.0-rc.10 — Préversion
 
 Cycle R15 : registre GitHub autorisé, inspection des PR ouvertes et workflows récents, recommandations par SHA et tableau de bord. Configuration serveur HEART_GITHUB_TOKEN et HEART_GITHUB_REPOS, activation du connecteur GitHub et permission github.repo.inspect/read requises. Fusion des PR correspondantes avant utilisation. Aucun droit de fusion ou d'écriture ajouté, aucune certification réelle annoncée.
+
+
+## Version v2.0.0-rc.11 — Préversion
+
+Cycle R16/R17 : diagnostics CI, inventaire et comparaison de commits, lecture de fichiers explicitement sélectionnés, revue d'extraits de logs et propositions IA de remplacement de texte. Le Coding Workspace nécessite les PR R17 correspondantes. Ne jamais soumettre de secrets au fournisseur IA. Les propositions ne sont ni appliquées ni testées automatiquement. Certification réelle encore nécessaire.

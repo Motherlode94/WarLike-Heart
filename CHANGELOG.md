@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.11 — Release candidate
+
+- R16/R17 developer diagnostics and coding workspace: source excerpts, local log review API, consent-gated AI critique and inert replacement proposals.
+- No automatic patch application, GitHub writes, raw log download or live certification.
+
 ## 2.0.0-rc.10 — Release candidate
 
 - R15 GitHub read-only audit dashboard for allowlisted repositories, observed PRs and workflows, and SHA-based recommendations.
