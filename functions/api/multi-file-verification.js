@@ -1,0 +1,7 @@
+import {authenticatedHeartUser} from './account.js';
+import {pluginAllowed} from '../../lib/plugin-policy.mjs';
+import {pluginAvailability} from '../../lib/plugin-gateway.mjs';
+import {readPermissions} from '../../lib/plugin-permissions.mjs';
+import {verifyMultiFile} from '../../lib/multi-file-verification.mjs';
+const reply=(x,status=200)=>Response.json(x,{status,headers:{'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
+export async function onRequestPost({request,env}){const u=new URL(request.url);if(u.protocol!=='https:'||request.headers.get('origin')!==u.origin||request.headers.get('sec-fetch-site')==='cross-site')return reply({error:'Origine refusée'},403);if(request.headers.get('content-type')?.split(';')[0]!=='application/json')return reply({error:'JSON requis'},415);try{const owner=await authenticatedHeartUser(request,env);if(owner?.role!=='owner'||!env.HEART_DB||!await pluginAllowed(env.HEART_DB,owner.id,owner.role,pluginAvailability(env),'github')||!(await readPermissions(env.HEART_DB,owner.id))['github.repo.inspect']?.read)return reply({error:'Accès refusé'},403);const reader=request.body.getReader(),dec=new TextDecoder();let raw='',size=0;for(;;){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>64000){await reader.cancel();return reply({error:'Requête excessive'},413);}raw+=dec.decode(value,{stream:true});}return reply(await verifyMultiFile(env,JSON.parse(raw+dec.decode())));}catch{return reply({error:'Vérification multifichier impossible'},422);}}
