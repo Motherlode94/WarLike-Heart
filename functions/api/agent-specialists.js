@@ -1,0 +1,3 @@
+import {authenticatedHeartUser} from './account.js';
+import {specialistCapabilities} from '../../lib/agent-specialists.mjs';
+export async function onRequestGet({request,env}){const headers={'cache-control':'private, no-store','x-content-type-options':'nosniff'},u=await authenticatedHeartUser(request,env);if(!u||!['owner','referent'].includes(u.role))return Response.json({error:'Accès opérateur requis'},{status:403,headers});return Response.json({specialists:specialistCapabilities(env.HEART_DB?['heart.memory.search','heart.goal.inspect']:[]),scope:'internal-read-only',liveVerified:false},{headers});}
