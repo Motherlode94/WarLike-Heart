@@ -1,0 +1,1 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {missionNotices} from '../lib/mission-notices.mjs';test('terminal notices are bounded, deduplicated and exclude private payloads',()=>{const a={run_id:'a',seq:2,event:'done',at:10,secret:'x'};assert.deepEqual(missionNotices([a,a,{...a,seq:1,event:'created'}]),[{id:'a:2',runId:'a',event:'done',at:10}]);});
