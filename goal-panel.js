@@ -3,7 +3,7 @@
  let epoch=0,active=false,busy=false;
  const labels={planned:'Planifié',active:'En cours',paused:'En pause',done:'Terminé'};
  async function api(body){const response=await fetch('/api/goals',{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{})});const data=await response.json();if(!response.ok)throw Error(data.error||'Service indisponible');return data;}
- function clear(){epoch++;list.replaceChildren();form.reset();busy=false;status.textContent='';}
+ function clear(){epoch++;list.replaceChildren();$('goalInitiativeList').replaceChildren();form.reset();busy=false;status.textContent='';}
  function render(goals){
   list.replaceChildren();
   for(const g of goals){
@@ -21,9 +21,10 @@
  async function mutate(body){if(busy||!active)return;busy=true;const e=epoch;try{await api(body);if(e===epoch&&active){if(body.action==='create')form.reset();await load();}}catch(err){if(e===epoch&&active)status.textContent=err.message;}finally{busy=false;}}
  form.onsubmit=e=>{e.preventDefault();const steps=$('goalSteps').value.split(/\r?\n/).map(text=>text.trim()).filter(Boolean).map(text=>({text,done:false}));mutate({action:'create',title:$('goalTitle').value,steps,status:'planned'});};
  $('goalDecompose').onclick=async()=>{if(busy||!active)return;const e=epoch,title=$('goalTitle').value,previous=$('goalSteps').value;if(previous.trim()&&!confirm('Remplacer les étapes actuelles par une proposition modifiable ?'))return;busy=true;try{const data=await api({action:'previewDecomposition',title});if(e===epoch&&active&&$('goalTitle').value===title&&$('goalSteps').value===previous){$('goalSteps').value=data.steps.map(s=>s.text).join('\n');status.textContent='Proposition modifiable, non enregistrée.';}}catch(err){if(e===epoch&&active)status.textContent=err.message;}finally{if(e===epoch)busy=false;}};
+ $('goalInitiativeRefresh').onclick=async()=>{if(!active||busy||document.hidden)return;const e=epoch;const out=$('goalInitiativeList');out.replaceChildren();try{const r=await fetch('/api/goal-initiatives',{credentials:'same-origin',cache:'no-store'});const d=await r.json();if(e!==epoch||!active||document.hidden)return;if(!r.ok)throw Error(d.error||'Service indisponible');for(const x of d.initiatives){const li=document.createElement('li');li.textContent=x.text;out.append(li);}if(!d.initiatives.length)out.textContent='Aucune suggestion pour les objectifs actifs.';}catch(err){if(e===epoch&&active&&!document.hidden)out.textContent=err.message;}};
  $('goalReload').onclick=()=>{if(!busy)load();};
  document.addEventListener('warlike-heart-view-changed',e=>{active=e.detail.view==='goals';clear();if(active)load();});
  document.addEventListener('warlike-heart-account-updated',()=>{clear();if(active)load();});
- document.addEventListener('visibilitychange',()=>{if(!document.hidden&&active){clear();load();}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){clear();}else if(active){clear();load();}});
  if(!document.querySelector('[data-view="goals"]').hidden){active=true;load();}
 })();
