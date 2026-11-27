@@ -1,3 +1,4 @@
+import {normalizeArchive} from '../../lib/conversation-journal.mjs';
 import {authenticatedHeartUser} from "./account.js";
 
 // A private per-member snapshot. No public list endpoint and no implicit backup.
@@ -17,7 +18,8 @@ export function normalizeSnapshot(value){
  if(!value.memories.every(m=>validText(m,300)))return null;
  if(!learning.dialogues.every(x=>x&&validText(x.question,240)&&validText(x.answer,700)))return null;
  if(!learning.knowledge.every(x=>x&&validText(x.subject,100)&&validText(x.content,700)))return null;
- return {version:1,history:value.history.map(x=>({role:x.role,text:x.text})),
+ if(value.archive!==undefined&&(!Array.isArray(value.archive)||value.archive.length>160||value.archive.some(x=>!x||!['user','assistant'].includes(x.role)||!validText(x.text,400))||new TextEncoder().encode(JSON.stringify(value.archive)).length>80000))return null;
+ return {version:1,...(value.archive===undefined?{}:{archive:normalizeArchive(value.archive)}),history:value.history.map(x=>({role:x.role,text:x.text})),
   memories:[...value.memories],
   learning:{version:1,dialogues:learning.dialogues.map(x=>({question:x.question,answer:x.answer})),
     knowledge:learning.knowledge.map(x=>({subject:x.subject,content:x.content}))}};

@@ -4,7 +4,8 @@
   const $ = id => document.getElementById(id);
   const KEY = "warlike-heart-demo-v1"; // keep compatibility with v0.2 history
   const MAX = 100;
-  const nativeReady=import('./lib/native-assistant.mjs?v=25.01');
+  let archive=[],archiveApi=null;
+  const nativeReady=import('./lib/native-assistant.mjs?v=25.03').then(api=>{archiveApi=api;archive=api.normalizeArchive(archive);return api;});
   const welcome = {role:"assistant",text:"Coucou ❤️ Bienvenue sur WarLike HEART ! Je peux répondre localement, apprendre des réponses que tu approuves dans l'espace Cerveau et conserver des souvenirs avec ton accord."};
   let history = [welcome];
   let recognition = null;
@@ -45,7 +46,7 @@
     readMemory:readMemories,writeMemory:writeMemories,canRemember:()=>state.remember
   });
   const localChatReady=import('./local-chat.mjs?v=24.05').then(({createLocalChat})=>{
-    const chat=createLocalChat({readLearning,readMemories,writeLearning,canRemember:()=>state.remember});
+    const chat=createLocalChat({readLearning,readMemories,readArchive:()=>archiveApi?.normalizeArchive(archive)||[],writeLearning,canRemember:()=>state.remember});
     window.WarLikeHeartLocalChat=chat;return chat;
   }).catch(()=>{ $("localModelStatus").textContent="Le module local n’a pas pu être chargé. Recharge la page.";return null; });
   const resetLocalContext=()=>{conversationRevision++;learningEngine?.resetContext();window.WarLikeHeartLocalChat?.reset();};
@@ -72,7 +73,7 @@
   };
   const persist = () => {
     if (!state.remember) { try { localStorage.removeItem(KEY); } catch {} return; }
-    try { localStorage.setItem(KEY,JSON.stringify({version:1,history:history.slice(-MAX),voiceEnabled:state.voiceEnabled,remember:true})); }
+    try { localStorage.setItem(KEY,JSON.stringify({version:1,history:history.slice(-MAX),archive,voiceEnabled:state.voiceEnabled,remember:true})); }
     catch { status("Stockage local indisponible. Exporte ton JSON pour sauvegarder."); }
   };
   const stopVoice = () => {
@@ -100,7 +101,7 @@
     return "J'ai reçu ton message. Ce prototype ne génère pas encore de réponses IA. On pourra connecter un moteur conversationnel autorisé dans une prochaine version.";
   }
   function append(role,text) {
-    history.push({role,text}); history=history.slice(-MAX); render(); persist();
+    history.push({role,text}); if(history.length>MAX)archive=archiveApi.archiveTurns(archive,history.slice(0,-MAX)); history=history.slice(-MAX); render(); persist();
   }
   // Clavier emoji local : aucun transfert réseau, insertion au curseur.
   const emojiToggle=$("emojiToggle"), emojiPicker=$("emojiPicker"),messageField=$("message");
@@ -140,7 +141,7 @@
     const field=$("message"); const text=field.value.trim();
     if (!text || busy) return;
     const selected=$("conversationEngine").value;
-    const native=(await nativeReady).nativeReply(text);
+    const native=(await nativeReady).nativeReply(text,{archive,history});
     if(busy)return;
     const explicitMemory=memoryCommandPattern.test(window.WarLikeLocalBrain?.normalize(text)||'');
     if(!native&&selected==='local-llm'&&!explicitMemory&&window.WarLikeHeartLocalChat?.status().state!=='ready'){status('Charge un modèle dans Cerveau pour commencer. Ton message est conservé.');openBrain();return;}
@@ -153,7 +154,7 @@
     const token=$("accessToken").value.trim();
     let answer,canTeach=false;
     try {
-    if(native){answer=native.reply;$("aiMode").textContent='Outil natif · sur cet appareil';$("apiStatus").textContent=native.verification.status==='native-verified'?'Résultat vérifié par calcul natif.':'Précise les données du calcul.';}else if(selected==='local-llm'){
+    if(native){answer=native.reply;$("aiMode").textContent='Outil natif · sur cet appareil';$("apiStatus").textContent=native.verification.status==='native-verified'?'Vérification native sur les données fournies.':native.verification.status==='source-excerpts'?'Extraits conservés, sans validation de leur exactitude.':'Précise les données à vérifier.';}else if(selected==='local-llm'){
       $("aiMode").textContent="Modèle de langage local · sur cet appareil";
       try{
         if(explicitMemory&&localBrain){answer=localBrain.reply(text).text;$("apiStatus").textContent="Commande de mémoire locale traitée.";}
@@ -381,9 +382,9 @@
     if(!ev.target.checked)resetLocalContext();
     else {conversationRevision++;learningEngine?.resetContext();window.WarLikeHeartLocalChat?.clearTeaching();}
     state.remember=ev.target.checked;
-    if(!state.remember){try{localStorage.removeItem(MEMORY_KEY);localStorage.removeItem(LEARNING_KEY);}catch{}}
+    if(!state.remember){archive=[];try{localStorage.removeItem(MEMORY_KEY);localStorage.removeItem(LEARNING_KEY);}catch{}}
     persist();
-    status(state.remember?"Historique et souvenirs explicites autorisés sur cet appareil.":"Historique et souvenirs explicites locaux supprimés.");
+    status(state.remember?"Historique, extraits anciens et souvenirs explicites autorisés sur cet appareil.":"Historique et souvenirs explicites locaux supprimés.");
   });
   $("stop").addEventListener("click",() => {stopVoice();if(recognition){recognition.abort();recognition=null;}$("portrait").classList.remove("listening");status("Voix arrêtée.");});
   $("listen").addEventListener("click",() => {
@@ -397,7 +398,7 @@
     try{rec.start();window.WarLikeHeart3D?.setListening(true);$("portrait").classList.add("listening");status("Écoute en cours…");}catch{status("Impossible de démarrer la dictée.");}
   });
   $("export").addEventListener("click",()=>{
-    const json=JSON.stringify({format:"warlike-heart-conversation",version:1,exportedAt:new Date().toISOString(),history,memories:readMemories(),learning:readLearning(),settings:{voiceEnabled:state.voiceEnabled}},null,2);
+    const json=JSON.stringify({format:"warlike-heart-conversation",version:1,exportedAt:new Date().toISOString(),history,archive,memories:readMemories(),learning:readLearning(),settings:{voiceEnabled:state.voiceEnabled}},null,2);
     const blob=new Blob([json],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");
     a.href=url;a.download="warlike-heart-conversation.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);status("Export JSON préparé.");
   });
@@ -407,7 +408,7 @@
     if(file.size>1024*1024){status("Fichier trop volumineux (maximum 1 Mo).");return;}
     try {const data=JSON.parse(await file.text());if(data.format!=="warlike-heart-conversation"||data.version!==1)throw Error("format");
       const imported=safeHistory(data.history);if(!imported||!imported.length)throw Error("content");
-      resetLocalContext();history=imported;stopVoice();render();persist();
+      resetLocalContext();archive=(await nativeReady).normalizeArchive(data.archive);history=imported;stopVoice();render();persist();
       // Only restore explicit memories if the user has already opted into local storage.
       if(state.remember&&Array.isArray(data.memories)){
         const valid=data.memories.filter(x=>typeof x==="string"&&x.length>=3&&x.length<=300).slice(0,40);
@@ -420,20 +421,20 @@
     }catch{status("Import impossible : format ou contenu non valide.");}
   });
   $("clear").addEventListener("click",()=>{
-    resetLocalContext();stopVoice();history=[welcome];render();
+    resetLocalContext();stopVoice();archive=[];history=[welcome];render();
     state.remember=false;$("remember").checked=false;
     try{localStorage.removeItem(KEY);localStorage.removeItem(MEMORY_KEY);localStorage.removeItem(LEARNING_KEY);}catch{}
     status("Conversation et souvenirs explicites locaux effacés.");
   });
   try {
     const stored=JSON.parse(localStorage.getItem(KEY)||"null");
-    if(stored?.remember===true){const h=safeHistory(stored.history);if(h?.length){history=h;state.remember=true;$("remember").checked=true;}}
+    if(stored?.remember===true){const h=safeHistory(stored.history);if(h?.length){history=h;archive=Array.isArray(stored.archive)?stored.archive:[];state.remember=true;$("remember").checked=true;}}
     if(state.remember&&typeof stored.voiceEnabled==="boolean"){state.voiceEnabled=stored.voiceEnabled;$("voiceEnabled").checked=state.voiceEnabled;}
   }catch{status("Aucune sauvegarde locale valide.");}
   // Explicit backup/restore bridge. Cloud sync is NEVER triggered by chat messages.
   window.WarLikeHeartCloudBridge={
     enabled:()=>state.remember,
-    snapshot:()=>({version:1,history:history.slice(-MAX),memories:readMemories(),learning:readLearning()}),
+    snapshot:()=>({version:1,history:history.slice(-MAX),archive:archiveApi?.normalizeArchive(archive)||[],memories:readMemories(),learning:readLearning()}),
     restore:data=>{
       if(!state.remember)return false;
       const imported=safeHistory(data?.history);
@@ -441,6 +442,7 @@
       resetLocalContext();
       const previous={history,memories:readMemories(),learning:readLearning()};
       if(!writeMemories(data.memories)||!writeLearning(data.learning))return false;
+      archive=archiveApi?.normalizeArchive(data.archive)||[];
       history=imported.length?imported:[welcome];
       render();persist();
       document.dispatchEvent(new Event("warlike-heart-learning-restored"));
