@@ -1,0 +1,3 @@
+# Git operation approval contract
+
+The envelope is an inert preview, not an authorization token. Before enabling any remote writes, implement durable account-scoped storage, one-time atomic consumption, expiry and exact plan digest checks, explicit user approval, fresh default-branch and blob verification, and a separate scoped GitHub write credential. A new branch must be unique and prefixed heart-review/. Never force-push or update the default branch. Create a draft PR only; no merge endpoint. Handle partially completed remote operations without automatic retries. Production write operations remain disabled until these checks are implemented and certified.
