@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.6 — Release candidate
+
+- Release metadata for AI planning and internal mission integration cycle.
+- Production deployment and live MCP connectivity remain unverified.
+
 ## 2.0.0-rc.5 — Release candidate
 
 - Version synchronization for internal mission execution cycle.
