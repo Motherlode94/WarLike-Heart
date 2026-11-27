@@ -1,0 +1,1 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {appCapabilities} from '../lib/app-capabilities.mjs';test('application discovery never claims remote control',()=>{const a=appCapabilities();assert.equal(new Set(a.map(x=>x.id)).size,a.length);assert.ok(a.some(x=>x.id==='engine'));assert.ok(a.every(x=>!x.remoteControl&&x.requiresApproval));});
