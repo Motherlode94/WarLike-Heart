@@ -1,3 +1,4 @@
+import {mountModelComparison} from './model-comparison-panel.mjs';
 import {fetchCognitiveContext} from './lib/context-selection.mjs';
 import {contextQuery} from './lib/conversation-signals.mjs';
 import {createLocalModel,LOCAL_MODELS} from './lib/local-model.mjs';
@@ -8,13 +9,15 @@ export function createLocalChat({readLearning,readMemories,writeLearning,canReme
  const $=id=>doc.getElementById(id),feedback=$('localTeachingStatus');
  const modelSelect=$('localModelSelect'),load=$('localModelLoad'),stop=$('localModelStop');
  for(const model of LOCAL_MODELS){const option=doc.createElement('option');option.value=model.id;option.textContent=model.label+' — '+model.memory;modelSelect.append(option);}
+ let comparing=false,comparison=null;
  const model=modelFactory({onState:({state,detail})=>{
   const labels={idle:'Modèle non chargé.',loading:'Chargement du modèle…',ready:'Modèle local prêt.',generating:'Génération locale…',error:'Modèle indisponible : '+detail};
-  $('localModelStatus').textContent=labels[state];load.disabled=['loading','generating'].includes(state);modelSelect.disabled=['loading','generating'].includes(state);stop.disabled=state==='idle';
+  $('localModelStatus').textContent=labels[state];load.disabled=comparing||['loading','generating'].includes(state);modelSelect.disabled=comparing||['loading','generating'].includes(state);stop.disabled=state==='idle';
  },onProgress:progress=>{$('localModelStatus').textContent='Chargement : '+Math.round(Math.max(0,Math.min(1,Number(progress?.progress)||0))*100)+' % — '+String(progress?.text||'').slice(0,200);}});
  load.disabled=false;
  load.addEventListener('click',async()=>{try{await model.load(modelSelect.value);}catch(error){$('localModelStatus').textContent=error.message;}});
- stop.addEventListener('click',()=>model.stop());
+ stop.addEventListener('click',()=>{comparison?.stop();model.stop();});
+ if($('modelComparisonPanel')?.querySelector)comparison=mountModelComparison($('modelComparisonPanel'),{model,onBusy:value=>{comparing=value;load.disabled=value;modelSelect.disabled=value;}});
  $('localTeachingUseLast').addEventListener('click',()=>{
   if(!lastReply)return;
   $('localTeachingQuestion').value=lastReply.question.slice(0,240);$('localTeachingAnswer').value=lastReply.answer.slice(0,700);
@@ -33,6 +36,7 @@ export function createLocalChat({readLearning,readMemories,writeLearning,canReme
  function clearTeaching(){lastReply=null;$('localTeachingUseLast').disabled=true;$('localTeachingForm').reset();feedback.textContent='Aucun exemple enregistré automatiquement.';}
  return {
   async reply(history){
+   if(comparing)throw Error('Comparaison en cours : arrête-la avant de discuter.');
    if(model.status().state!=='ready')throw Error('Charge le modèle local avant de discuter.');
    const ticket=epoch;cloudRequest?.abort();cloudRequest=new AbortController();
    const cloud=await fetchCognitiveContext(contextQuery(history),{enabled:$('localCognitiveContext')?.checked===true,signal:AbortSignal.any([cloudRequest.signal,AbortSignal.timeout(10000)])});
@@ -44,6 +48,6 @@ export function createLocalChat({readLearning,readMemories,writeLearning,canReme
    return result.reply;
   },
   onReply({question,answer}){lastReply={question,answer};$('localTeachingUseLast').disabled=false;},
-  reset(){epoch++;cloudRequest?.abort();model.stop();clearTeaching();},clearTeaching,status:model.status
+  reset(){comparison?.stop();epoch++;cloudRequest?.abort();model.stop();clearTeaching();},clearTeaching,status:model.status
  };
 }

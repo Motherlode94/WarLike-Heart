@@ -81,7 +81,7 @@
 <p>Le premier chargement télécharge le moteur et les poids de Qwen depuis leurs hébergeurs : plusieurs centaines de Mo à quelques Go. Le navigateur peut les conserver en cache. WebGPU et une mémoire GPU suffisante sont requis. Tes messages restent sur cet appareil en mode local.</p>
 <label for="localModelSelect">Modèle</label><select id="localModelSelect"></select>
 <div class="controls"><button id="localModelLoad" type="button" disabled>Charger le modèle local</button><button id="localModelStop" type="button" disabled>Arrêter le modèle</button></div>
-<p id="localModelStatus" role="status" aria-live="polite">Modèle non chargé.</p></details></div>
+<p id="localModelStatus" role="status" aria-live="polite">Modèle non chargé.</p></details><details id="modelComparisonPanel"></details></div>
 <form class="composer" id="chatForm"><div class="emoji-wrap"><button type="button" id="emojiToggle" aria-label="Choisir un emoji" title="Ajouter un emoji" aria-expanded="false" aria-controls="emojiPicker">😊</button><div id="emojiPicker" class="emoji-picker" role="group" aria-label="Emojis" hidden></div></div><input id="message" autocomplete="off" maxlength="1000" aria-label="Ton message" placeholder="Écris un message…" required><button type="button" id="chatAiPlan" hidden>Planifier avec IA</button><button type="button" id="chatMissionDraft" hidden>Préparer une mission</button><button class="primary" type="submit">Envoyer</button></form>
 <details class="settings"><summary>Corriger et enseigner une réponse</summary>
 <p>Les exemples que tu approuves guident les prochaines réponses. Ils restent dans ta bibliothèque ; ils ne modifient pas les poids de Qwen.</p>
