@@ -1,5 +1,11 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.7 — Release candidate
+
+- R09 integration candidate: cognitive context, ranked retrieval, AI synthesis and controlled MCP inspection.
+- Candidate includes receipt tracking, recovery drafts and on-demand notices after related PR merges.
+- Stable release remains gated on actual deployment certification.
+
 ## 2.0.0-rc.6 — Release candidate
 
 - Release metadata for AI planning and internal mission integration cycle.
