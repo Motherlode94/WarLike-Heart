@@ -1,0 +1,4 @@
+import {authenticatedHeartUser} from './account.js';
+import {missionNotices} from '../../lib/mission-notices.mjs';
+const reply=(x,status=200)=>Response.json(x,{status,headers:{'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
+export async function onRequestGet({request,env}){const u=await authenticatedHeartUser(request,env);if(!u||!['owner','referent'].includes(u.role))return reply({error:'Accès opérateur requis'},403);if(!env.HEART_DB)return reply({error:'Base indisponible'},503);try{const r=await env.HEART_DB.prepare("SELECT run_id,seq,event,at FROM heart_agent_events WHERE member_id=? AND event IN ('done','failed','cancelled','execution_timeout','plugin_disabled') ORDER BY at DESC,seq DESC LIMIT 30").bind(u.id).all();return reply({notices:missionNotices(r.results),delivery:'in-app-pull'});}catch{return reply({error:'Notifications indisponibles'},503);}}
