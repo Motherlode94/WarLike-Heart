@@ -45,7 +45,7 @@
   const localBrain=window.WarLikeLocalBrain?.createEngine({
     readMemory:readMemories,writeMemory:writeMemories,canRemember:()=>state.remember
   });
-  const localChatReady=import('./local-chat.mjs?v=24.05').then(({createLocalChat})=>{
+  const localChatReady=import('./local-chat.mjs?v=25.05').then(({createLocalChat})=>{
     const chat=createLocalChat({readLearning,readMemories,readArchive:()=>archiveApi?.normalizeArchive(archive)||[],writeLearning,canRemember:()=>state.remember});
     window.WarLikeHeartLocalChat=chat;return chat;
   }).catch(()=>{ $("localModelStatus").textContent="Le module local n’a pas pu être chargé. Recharge la page.";return null; });
@@ -58,7 +58,7 @@
       :"⚠ Moteur local indisponible : vérifie le chargement de local-brain.js.";
   }
   if(localBrain)$("aiMode").textContent="Modèle local · chargement requis";
-  const safeHistory = (value) => Array.isArray(value) ? value.filter(x => x && ["user","assistant"].includes(x.role) && typeof x.text === "string" && x.text.length <= 4000).slice(-MAX) : null;
+  const safeHistory = (value) => Array.isArray(value) ? value.filter(x => x && ["user","assistant"].includes(x.role) && typeof x.text === "string" && x.text.length <= 4000).slice(-MAX).map(x=>({role:x.role,text:x.text})) : null;
   const render = () => {
     const area = $("messages"); area.replaceChildren();
     for (const [index,item] of history.entries()) {
@@ -66,6 +66,7 @@
       el.className = "bubble " + item.role;
       el.textContent = item.text;
       area.appendChild(el);
+      if(item.verification){const check=document.createElement('small');check.className='reply-check';check.textContent=({'native-verified':'Vérification native · données fournies','input-error':'Données à préciser','source-excerpts':'Extraits · exactitude non vérifiée','partial-checks-passed':'Contrôles partiels passés · faits non vérifiés','needs-review':'À vérifier · contrôle partiel en échec'})[item.verification.status]||'Réponse non vérifiée';area.append(check);}
       const question=item.role==='assistant'?history.slice(0,index).reverse().find(turn=>turn.role==='user')?.text:null;
       if(question){const action=document.createElement('button');action.type='button';action.className='reply-teach';action.textContent='Corriger et enseigner';action.setAttribute('aria-label','Corriger cette réponse de Heart');action.onclick=async()=>{const chat=await localChatReady;if(chat){chat.prepareTeaching({question,answer:item.text});$("localTeachingDialog").showModal();}};area.append(action);}
     }
@@ -100,8 +101,8 @@
     if (/sauvegard|memoire|export/.test(normalized)) return "Clique sur « Exporter JSON » pour conserver cette conversation. Le stockage local est facultatif et désactivé par défaut.";
     return "J'ai reçu ton message. Ce prototype ne génère pas encore de réponses IA. On pourra connecter un moteur conversationnel autorisé dans une prochaine version.";
   }
-  function append(role,text) {
-    history.push({role,text}); if(history.length>MAX)archive=archiveApi.archiveTurns(archive,history.slice(0,-MAX)); history=history.slice(-MAX); render(); persist();
+  function append(role,text,verification) {
+    history.push({role,text,...(verification?{verification}:{} )}); if(history.length>MAX)archive=archiveApi.archiveTurns(archive,history.slice(0,-MAX)); history=history.slice(-MAX); render(); persist();
   }
   // Clavier emoji local : aucun transfert réseau, insertion au curseur.
   const emojiToggle=$("emojiToggle"), emojiPicker=$("emojiPicker"),messageField=$("message");
@@ -152,16 +153,16 @@
     stopVoice();append("user",text);field.value="";
     window.WarLikeHeartLocalChat?.clearTeaching();
     const token=$("accessToken").value.trim();
-    let answer,canTeach=false;
+    let answer,verification=native?.verification,canTeach=false;
     try {
-    if(native){answer=(/^\/rappel\s+/i.test(text)?await window.WarLikeHeartLocalChat?.recall(text):null)||native.reply;$("aiMode").textContent='Outil natif · sur cet appareil';$("apiStatus").textContent=native.verification.status==='native-verified'?'Vérification native sur les données fournies.':native.verification.status==='source-excerpts'?'Extraits conservés, sans validation de leur exactitude.':'Précise les données à vérifier.';}else if(selected==='local-llm'){
+    if(native){answer=(/^\/rappel\s+/i.test(text)?await window.WarLikeHeartLocalChat?.recall(text,{history}):null)||native.reply;$("aiMode").textContent='Outil natif · sur cet appareil';$("apiStatus").textContent=native.verification.status==='native-verified'?'Vérification native sur les données fournies.':native.verification.status==='source-excerpts'?'Extraits conservés, sans validation de leur exactitude.':'Précise les données à vérifier.';}else if(selected==='local-llm'){
       $("aiMode").textContent="Modèle de langage local · sur cet appareil";
       try{
         if(explicitMemory&&localBrain){answer=localBrain.reply(text).text;$("apiStatus").textContent="Commande de mémoire locale traitée.";}
         else{
           const chat=await localChatReady;
           if(!chat)throw Error('Le module local n’a pas pu être chargé. Recharge la page.');
-          answer=await chat.reply(history);canTeach=true;
+          answer=await chat.reply(history);verification=chat.verification();canTeach=true;
           $("apiStatus").textContent="Réponse générée localement, sans envoi du chat à une API.";
         }
       }catch(error){answer=error.message;$("apiStatus").textContent="Modèle local indisponible. Utilise « Charger le modèle local » ou choisis un autre moteur.";}
@@ -207,7 +208,7 @@
         });
         const data=await result.json().catch(()=>({}));
         if(!result.ok||typeof data.reply!=="string") throw Error(data.error||"Serveur indisponible.");
-        answer=data.reply;
+        answer=data.reply;verification=data.verification;
         $("apiStatus").textContent="Connectée au moteur IA pour cette réponse.";
       } catch(error) {
         answer="La réponse IA n'a pas pu être obtenue : "+(error.name==="AbortError"?"délai dépassé.":error.message)+" Tu peux réessayer ou choisir un autre moteur de conversation.";
@@ -216,7 +217,7 @@
       } finally {clearTimeout(timeout);}
     }
     if(turnRevision!==conversationRevision)return;
-    append("assistant",answer);
+    append("assistant",answer,verification);
     if(canTeach)window.WarLikeHeartLocalChat?.onReply({question:text,answer});
     if(window.WarLikeHeart3D){const l=answer.toLowerCase();const next=/heureuse|content|bonjour|plaisir|♥|❤️/.test(l)?"happy":/désol|erreur|impossible/.test(l)?"sad":(/pourquoi|comment/.test(l)||l.includes("?"))?"curious":"neutral";window.WarLikeHeart3D.setMood(next);}
     // Do not speak technical error messages.

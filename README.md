@@ -355,3 +355,14 @@ Mon compte → Cerveau regroupe moteur, chargement et comparaison Qwen 1,5B/3B. 
 La conversation dispose d'une barre compacte et d'une saisie en bas. Chaque réponse permet d'ouvrir « Corriger et enseigner » ; seule l'approbation du formulaire enregistre un exemple. Un message reste dans le champ lorsqu'il faut d'abord charger un modèle.
 
 Les tests simulés vérifient le câblage et la confidentialité, pas la qualité réelle de Qwen. L'inférence GPU, la qualité linguistique et le raisonnement restent à évaluer sur le matériel cible. Voir docs/LOCAL_MODEL_VALIDATION.md.
+
+
+## Version v2.0.0-rc.18
+
+R25 ajoute les outils natifs au chat, sans chargement Qwen : opérations rationnelles exactes (affichage arrondi à dix décimales si nécessaire), pourcentages, budgets en euros, conversions à dimensions compatibles, contraintes numériques et preuves propositionnelles sur faits fournis. Aucun taux de change distant. Exemples et syntaxe dans Mon compte → Cerveau. La logique distingue inconnu, réfuté et contradictoire. Elle ne prétend pas comprendre tout problème formulé librement.
+
+La fenêtre visible conserve 100 messages ; les messages retirés alimentent une archive extractive de 160 extraits au maximum, 400 caractères chacun et 80 Ko au total. Les coupes sont signalées. `/résumé` reprend les derniers sujets, `/rappel sujet` retrouve des extraits. L’archive se conserve entre visites seulement avec la mémoire locale activée, suit l’export/import et la sauvegarde Cloud manuelle (limite globale existante de 190 Ko). Elle est effacée avec la conversation ou la désactivation de la mémoire. Un extrait de conversation, notamment une ancienne réponse générée, n’est jamais un fait approuvé.
+
+La recherche par mots reste disponible. Le chargement explicite du modèle sémantique MiniLM multilingue utilise Transformers.js 2.17.2, ONNX/WASM sur CPU, modèle à révision fixe. Téléchargements publics depuis Hugging Face et jsDelivr ; aucun texte n’est envoyé à un service d’inférence. Jusqu’à 1 200 extraits approuvés ou conversationnels sont indexés, vecteurs en mémoire vive seulement ; arrêter vide l’index, les poids publics peuvent rester en cache. Le chargement et la première indexation peuvent être longs. La similarité est un critère de récupération, jamais une preuve de vérité.
+
+Les réponses locales et distantes passent des contrôles partiels observables, avec au plus une tentative de réparation. Le rapport sous la réponse précise le périmètre ; les faits généraux, le raisonnement libre et la qualité linguistique ne sont pas certifiés. La certification exportable teste des cas fixes natifs, la récupération et le câblage de réparation. Le cas de paraphrase sémantique exige le modèle sémantique chargé ; sinon il est marqué non exécuté. Voir `docs/R25_VALIDATION.md`.

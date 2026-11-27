@@ -23,9 +23,9 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),
    }await route.continue();
   });
   await page.addInitScript(()=>{
-   window.__modelCalls=[];window.__slow=false;
+   window.__modelCalls=[];window.__semanticCalls=[];window.__replyQueue=[];window.__slow=false;
    Object.defineProperty(navigator,'gpu',{value:{},configurable:true});
-   window.Worker=class{constructor(){this.terminated=false;}postMessage(data){window.__modelCalls.push(data);setTimeout(()=>{if(!this.terminated)this.onmessage?.({data:{id:data.id,type:data.type==='load'?'loaded':'result',reply:'Génération locale testée.'}});},window.__slow&&data.type==='generate'?1000:0);}terminate(){this.terminated=true;}};
+   window.Worker=class{constructor(url){this.terminated=false;this.semantic=String(url).includes('semantic-worker');}postMessage(data){(this.semantic?window.__semanticCalls:window.__modelCalls).push(data);const reply=window.__replyQueue.length&&data.type==='generate'?window.__replyQueue.shift():'Génération locale testée.';setTimeout(()=>{if(!this.terminated)this.onmessage?.({data:{id:data.id,type:data.type==='load'?'loaded':'result',reply,rows:this.semantic&&data.type==='search'?data.records.filter(x=>/rémunération/.test(x.text)).map(x=>({...x,score:.8})):undefined}});},window.__slow&&data.type==='generate'?1000:0);}terminate(){this.terminated=true;}};
   });
   await page.goto(origin);await page.waitForFunction(()=>window.WarLikeHeartLocalChat);
   assert.equal(await page.locator('#localModelLoad').isVisible(),false);assert.equal(await page.locator('#openBrainSettings').isVisible(),true);
@@ -62,6 +62,29 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),
   await page.waitForFunction(()=>document.querySelector('#chatForm').getBoundingClientRect().bottom<=innerHeight-8);
   assert.equal(await page.locator('#chatForm button[type=submit]').evaluate(button=>{const r=button.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===button;}),true);
   await page.screenshot({path:path.join(os.tmpdir(),'heart-r24-mobile.png'),fullPage:true});assert.deepEqual(errors,[]);
-  console.log('PASS (simulated worker/Cloud): settings relocation, preserved draft, follow-up context, per-response correction, old memory, opt-in Cloud, cancellation, isolated model comparison, review export, desktop/mobile; no AI API POST.');
+  // R25: deterministic tools work before loading a conversational model.
+  await page.setViewportSize({width:1365,height:1000});await page.locator('#openBrainSettings').click();await page.locator('#clear').click();await page.locator('#backToChat').click();
+  const nativeStart=await page.evaluate(()=>window.__modelCalls.length);
+  await send('0,1+0,2');assert.match(await page.locator('.bubble.assistant').last().textContent(),/0,3/);
+  await send('/budget 18 ; 4*3+7');assert.match(await page.locator('.bubble.assistant').last().textContent(),/manque 1/);
+  await send('/contraintes x=10 ; x<=8');assert.match(await page.locator('.bubble.assistant').last().textContent(),/Non respectée/);
+  assert.equal(await page.evaluate(()=>window.__modelCalls.length),nativeStart);assert.equal(await page.locator('.reply-check').last().textContent(),'Vérification native · données fournies');
+  await page.locator('#openBrainSettings').click();await page.locator('#remember').check();
+  const longHistory=Array.from({length:100},(_,i)=>({role:i%2?'assistant':'user',text:i===0?'Le budget Aster est de 1800 euros.':'Ancien sujet '+i}));
+  await page.locator('#importFile').setInputFiles({name:'conversation.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({format:'warlike-heart-conversation',version:1,history:longHistory,memories:[],archive:[],learning:{dialogues:[],knowledge:[{subject:'Finances',content:'Ma rémunération est de 2200 euros chaque mois.'}]}}))});
+  await page.waitForFunction(()=>document.getElementById('status').textContent.startsWith('Conversation importée'));
+  await page.locator('#backToChat').click();await send('1+1');await send('/rappel budget Aster');assert.match(await page.locator('.bubble.assistant').last().textContent(),/1800/);
+  assert.match(await page.evaluate(()=>JSON.stringify(window.WarLikeHeartCloudBridge.snapshot().archive)),/1800/);
+  await page.reload();await page.waitForFunction(()=>window.WarLikeHeartLocalChat);await send('/rappel budget Aster');assert.match(await page.locator('.bubble.assistant').last().textContent(),/1800/);
+  await page.locator('#openBrainSettings').click();await page.locator('summary').filter({hasText:/^Recherche sémantique locale$/}).click();await page.locator('#semanticLoad').click();await page.waitForFunction(()=>document.getElementById('semanticStatus').textContent.includes('prête'));
+  await page.locator('#backToChat').click();await send('/rappel salaire mensuel');assert.match(await page.locator('.bubble.assistant').last().textContent(),/rémunération/);assert.match(await page.locator('.bubble.assistant').last().textContent(),/similarité sémantique/);
+  await page.locator('#openBrainSettings').click();await page.locator('summary').filter({hasText:/^Vérification et cas de certification$/}).click();await page.locator('#certificationRun').click();await page.waitForFunction(()=>!document.getElementById('certificationExport').disabled);
+  const certPending=page.waitForEvent('download');await page.locator('#certificationExport').click();const certDownload=await certPending,certStream=await certDownload.createReadStream(),certChunks=[];for await(const chunk of certStream)certChunks.push(chunk);const cert=JSON.parse(Buffer.concat(certChunks));assert.equal(cert.generativeModelCertified,false);assert.equal(cert.results.filter(x=>x.status==='passed').length,10);
+  await page.locator('#localModelLoad').click();await page.waitForFunction(()=>window.WarLikeHeartLocalChat.status().state==='ready');await page.locator('#backToChat').click();
+  await page.evaluate(()=>window.__replyQueue=['2+2 = 5','2+2 = 4']);const repairStart=await page.evaluate(()=>window.__modelCalls.filter(x=>x.type==='generate').length);await send('Donne une égalité numérique.');assert.equal(await page.locator('.bubble.assistant').last().textContent(),'2+2 = 4');assert.equal(await page.evaluate(()=>window.__modelCalls.filter(x=>x.type==='generate').length),repairStart+2);assert.match(await page.locator('.reply-check').last().textContent(),/Contrôles partiels/);
+  await page.evaluate(()=>window.__replyQueue=['2+2 = 5','2+2 = 5']);await send('Propose une autre égalité.');assert.match(await page.locator('.reply-check').last().textContent(),/À vérifier/);assert.deepEqual(posts,[]);
+  await page.locator('#openBrainSettings').click();await page.locator('#remember').uncheck();assert.equal(await page.evaluate(()=>localStorage.getItem('warlike-heart-demo-v1')),null);assert.deepEqual(await page.evaluate(()=>window.WarLikeHeartCloudBridge.snapshot().archive),[]);
+  assert.deepEqual(errors,[]);
+  console.log('PASS (simulated worker/Cloud): settings relocation, preserved draft, follow-up context, per-response correction, old memory, opt-in Cloud, cancellation, isolated model comparison, review export, desktop/mobile; R25 native tools, evicted context persisted, semantic adapter, one repair, failed repair label, fixed-case JSON; no AI API POST.');
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
 })().catch(error=>{console.error(error);process.exit(1);});
