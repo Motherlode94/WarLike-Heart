@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.8 — Release candidate
+
+- R11 candidate: bounded concurrent internal missions, shared evidence references, outcome critique and complementary drafts.
+- Production certification and model consumption of shared evidence remain pending.
+
 ## 2.0.0-rc.7 — Release candidate
 
 - R09 integration candidate: cognitive context, ranked retrieval, AI synthesis and controlled MCP inspection.
