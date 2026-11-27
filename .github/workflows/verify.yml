@@ -40,6 +40,12 @@ jobs:
           node --check goal-panel.js
           node --check agent-panel.js
           node --check agent-workspace.js
+          node --check chat-ai-planner.js
+          node --check internal-mission-panel.js
+          node --check mission-editor.js
+          node --check chat-mission-draft.js
+          node --check functions/api/ai-mission-plan.js
+          node --check functions/api/internal-mission-run.js
           node --check lib/agent-execution.mjs
           node --check lib/plugin-policy.mjs
           node --check lib/plugin-permissions.mjs
