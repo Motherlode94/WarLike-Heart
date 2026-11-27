@@ -291,3 +291,8 @@ Cycle R08.21–R08.25 : planification IA, transfert modifiable, synthèse locale
 ## Version v2.0.0-rc.7 — Préversion
 
 Cycle R09 : contexte cognitif, recherche classée, synthèse IA, inspection MCP, suivi des commandes, brouillons de reprise et notifications consultables. Fusion des PR correspondantes et certification réelle nécessaires. Le statut stable reste bloqué tant que les parcours navigateur, fournisseurs IA, D1 et MCP n'ont pas été vérifiés sur le déploiement.
+
+
+## Version v2.0.0-rc.8 — Préversion
+
+Cycle R11 : orchestration interne par vagues, références partagées, critique déterministe des résultats et propositions complémentaires. Les fonctionnalités dépendent de la fusion des PR correspondantes. Certification réelle et intégration complète du contexte partagé restent nécessaires.
