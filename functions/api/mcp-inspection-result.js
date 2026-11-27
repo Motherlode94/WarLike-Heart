@@ -1,0 +1,7 @@
+import {authenticatedHeartUser} from './account.js';
+import {pluginAllowed} from '../../lib/plugin-policy.mjs';
+import {pluginAvailability} from '../../lib/plugin-gateway.mjs';
+import {readPermissions} from '../../lib/plugin-permissions.mjs';
+import {inspectionReceipt,readInspectionResult} from '../../lib/mcp-result-tracking.mjs';
+const reply=(x,status=200)=>Response.json(x,{status,headers:{'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
+export async function onRequestGet({request,env}){const u=await authenticatedHeartUser(request,env);if(u?.role!=='owner')return reply({error:'Accès propriétaire requis'},403);const db=env.HEART_DB;if(!db)return reply({error:'Base indisponible'},503);const id=new URL(request.url).searchParams.get('run');if(!id||!/^[0-9a-f-]{36}$/i.test(id))return reply({error:'Identifiant invalide'},400);try{if(!await pluginAllowed(db,u.id,u.role,pluginAvailability(env),'warlike')||!(await readPermissions(db,u.id))['warlike.objects.inspect']?.read)return reply({error:'Permission requise'},403);const row=await db.prepare("SELECT action,query,status,result FROM heart_agent_runs WHERE member_id=? AND id=? AND action='warlike.objects.inspect'").bind(u.id,id).first();if(!row)return reply({error:'Mission absente'},404);const receipt=inspectionReceipt(row);return reply(await readInspectionResult(env,receipt));}catch{return reply({error:'Résultat indisponible'},503);}}
