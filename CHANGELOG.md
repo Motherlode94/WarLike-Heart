@@ -1,5 +1,11 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.14 — Release candidate
+
+- R21 multi-file proposal and pinned remote diff verification workspace.
+- Dependency candidates and isolated test planning, not a sandbox runner.
+- Restore missing R20 execution endpoint and enforce its presence in CI.
+
 ## 2.0.0-rc.13 — Release candidate
 
 - R20 supervised Git execution interface, reconciliation and receipt-linked CI inspection.
