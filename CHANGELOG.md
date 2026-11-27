@@ -1,5 +1,11 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.12 — Release candidate
+
+- R19 persistent Git operation metadata, approval lifecycle and restricted branch/draft PR adapters.
+- Preparation and approval UI; remote execution endpoint remains disabled pending integration certification.
+- D1 migration 0010 required.
+
 ## 2.0.0-rc.11 — Release candidate
 
 - R16/R17 developer diagnostics and coding workspace: source excerpts, local log review API, consent-gated AI critique and inert replacement proposals.
