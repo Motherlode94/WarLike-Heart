@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.4 — Release candidate
+
+- Restore local plum and rose palette for shared surfaces.
+- Remove stale version from newly generated welcome message; preserve saved conversations.
+
 ## 2.0.0-rc.3 — Release candidate
 
 - Release metadata for the R08 integration cycle. Feature availability depends on merged PRs and verified deployment.
