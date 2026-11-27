@@ -9,20 +9,22 @@ export function createLocalChat({readLearning,readMemories,writeLearning,canReme
  const $=id=>doc.getElementById(id),feedback=$('localTeachingStatus');
  const modelSelect=$('localModelSelect'),load=$('localModelLoad'),stop=$('localModelStop');
  for(const model of LOCAL_MODELS){const option=doc.createElement('option');option.value=model.id;option.textContent=model.label+' — '+model.memory;modelSelect.append(option);}
- let comparing=false,comparison=null;
+ let comparing=false,comparison=null,replying=false;
  const model=modelFactory({onState:({state,detail})=>{
+  const compact={idle:'À charger',loading:'Chargement…',ready:'Prête',generating:'Réponse en cours…',error:'Indisponible'};
+  if($('conversationStatus'))$('conversationStatus').textContent=compact[state];
   const labels={idle:'Modèle non chargé.',loading:'Chargement du modèle…',ready:'Modèle local prêt.',generating:'Génération locale…',error:'Modèle indisponible : '+detail};
   $('localModelStatus').textContent=labels[state];load.disabled=comparing||['loading','generating'].includes(state);modelSelect.disabled=comparing||['loading','generating'].includes(state);stop.disabled=state==='idle';
  },onProgress:progress=>{$('localModelStatus').textContent='Chargement : '+Math.round(Math.max(0,Math.min(1,Number(progress?.progress)||0))*100)+' % — '+String(progress?.text||'').slice(0,200);}});
  load.disabled=false;
  load.addEventListener('click',async()=>{try{await model.load(modelSelect.value);}catch(error){$('localModelStatus').textContent=error.message;}});
  stop.addEventListener('click',()=>{comparison?.stop();model.stop();});
- if($('modelComparisonPanel')?.querySelector)comparison=mountModelComparison($('modelComparisonPanel'),{model,onBusy:value=>{comparing=value;load.disabled=value;modelSelect.disabled=value;}});
- $('localTeachingUseLast').addEventListener('click',()=>{
-  if(!lastReply)return;
-  $('localTeachingQuestion').value=lastReply.question.slice(0,240);$('localTeachingAnswer').value=lastReply.answer.slice(0,700);
+ if($('modelComparisonPanel')?.querySelector)comparison=mountModelComparison($('modelComparisonPanel'),{model,canStart:()=>!replying&&!['loading','generating'].includes(model.status().state),onBusy:value=>{comparing=value;load.disabled=value;modelSelect.disabled=value;}});
+ function prepareTeaching({question,answer}){
+  $('localTeachingQuestion').value=question.slice(0,240);$('localTeachingAnswer').value=answer.slice(0,700);
   feedback.textContent='Vérifie et corrige cet exemple, puis valide son enregistrement.';
- });
+ }
+ $('localTeachingUseLast').addEventListener('click',()=>{if(lastReply)prepareTeaching(lastReply);});
  $('localTeachingForm').addEventListener('submit',event=>{
   event.preventDefault();
   try{
@@ -38,6 +40,8 @@ export function createLocalChat({readLearning,readMemories,writeLearning,canReme
   async reply(history){
    if(comparing)throw Error('Comparaison en cours : arrête-la avant de discuter.');
    if(model.status().state!=='ready')throw Error('Charge le modèle local avant de discuter.');
+   replying=true;
+   try{
    const ticket=epoch;cloudRequest?.abort();cloudRequest=new AbortController();
    const cloud=await fetchCognitiveContext(contextQuery(history),{enabled:$('localCognitiveContext')?.checked===true,signal:AbortSignal.any([cloudRequest.signal,AbortSignal.timeout(10000)])});
    if(ticket!==epoch)throw Error('Contexte de conversation modifié.');
@@ -46,7 +50,9 @@ export function createLocalChat({readLearning,readMemories,writeLearning,canReme
    const result=await model.generate(context.messages);
    $('localModelStatus').textContent='Réponse générée sur cet appareil.'+(context.contextCount?' Contexte approuvé : '+context.contextCount+' élément(s).':'')+(context.truncated?' Historique réduit pour la fenêtre du modèle.':'');
    return result.reply;
+   }finally{replying=false;}
   },
+  prepareTeaching,
   onReply({question,answer}){lastReply={question,answer};$('localTeachingUseLast').disabled=false;},
   reset(){comparison?.stop();epoch++;cloudRequest?.abort();model.stop();clearTeaching();},clearTeaching,status:model.status
  };

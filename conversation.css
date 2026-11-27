@@ -1,0 +1,34 @@
+/* R24: conversation first; the settings live in Account → Brain. */
+#homeView.layout{grid-template-columns:220px minmax(0,1fr)}
+#homeView .chat{height:var(--chat-height,calc(100dvh - 180px))!important;min-height:280px!important;display:flex;flex-direction:column}
+#homeView .chat header{flex-shrink:0}
+#homeView .messages{flex:1;min-height:0!important;max-height:none!important;height:auto!important}
+#homeView .composer{flex-shrink:0;margin-top:auto;background:var(--heart-panel,#171422)}
+#homeView #localBrainStatus{display:none}
+.chat-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.chat-toolbar [role=status]{font-size:12px;color:#d5cbd9}
+.chat-toolbar button{padding:6px 12px;font-size:12px}
+.reply-teach{align-self:flex-start;font-size:11px;padding:4px 8px;margin-top:-5px;background:transparent;border-color:transparent;color:#d7bdce}
+.reply-teach:hover{border-color:#72556f}
+#brainSettings{padding:16px;border:1px solid #59455d;border-radius:14px}
+#brainSettings>summary{cursor:pointer;font-weight:700;font-size:18px}
+#brainSettings .settings{padding:14px 0;border:0;background:none}
+#brainSettings :is(select,input:not([type=checkbox]),textarea){width:100%;min-width:0;max-width:100%}
+#brainSettings [type=checkbox]{flex-shrink:0}
+#modelComparisonPanel [data-results]{display:grid;gap:14px;margin-top:12px}
+#modelComparisonPanel [data-results] section{padding:12px;border:1px solid #59455d;border-radius:10px;overflow-wrap:anywhere}
+#modelComparisonPanel [data-results] p{white-space:pre-wrap}
+#modelComparisonPanel [data-results] small{display:block;margin:10px 0}
+#localTeachingDialog{width:min(560px,94vw);max-height:90dvh;overflow:auto;color:#f6eff8;background:#211a2a;border:1px solid #72556f;border-radius:16px;padding:20px}
+#localTeachingDialog::backdrop{background:#000a}
+#localTeachingDialog header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#localTeachingDialog header h2{font-size:20px;margin:0}
+#localTeachingDialog input,#localTeachingDialog textarea{width:100%;background:#171321;color:#f6eff8;border:1px solid #72556f;border-radius:10px;padding:10px}
+.conversation-privacy{margin-top:12px;font-size:12px;color:#c8bacb}
+.conversation-privacy summary{cursor:pointer}
+@media(max-width:900px){#homeView.layout{grid-template-columns:minmax(0,1fr)}#homeView .chat{height:var(--chat-height,calc(100dvh - 300px))!important;min-height:280px!important}#homeView .avatar p{max-width:none}#homeView .portrait{width:70px}#homeView .avatar{grid-template-columns:70px minmax(0,1fr);padding:10px 12px}#homeView #status{margin-top:4px}}
+@media(max-width:600px){#homeView .chat{height:var(--chat-height,calc(100dvh - 270px))!important;min-height:280px!important}.chat-toolbar{margin-top:5px}#brainSettings{padding:12px}#localTeachingDialog{padding:14px}}
+
+#homeView .avatar .controls:empty{display:none}
+.warlike-update-notice{position:static;width:fit-content;max-width:100%;margin:10px 0;box-shadow:none;font-size:12px}
+@media(max-width:900px){#homeView .avatar .controls{grid-column:2;gap:5px;margin-top:4px}#homeView .avatar .controls button{padding:6px 8px;font-size:11px;min-height:30px}}

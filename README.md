@@ -342,3 +342,16 @@ Le mode local ne transmet pas le chat au serveur IA. Le service distant et le mo
 Les corrections validées alimentent des exemples de contexte, sans fine-tuning des poids. La récupération de connaissances reste lexicale. Le budget de 3 200 octets UTF-8 laisse de la place aux délimiteurs et aux 512 tokens de réponse dans une fenêtre de 4 096 tokens ; l'interface signale la réduction de l'historique.
 
 Tests du runtime simulé, du contexte, des connaissances et des corrections : `node --test tests/*.test.mjs`. La génération GPU réelle et les huit P0 doivent être évalués avec `docs/LOCAL_MODEL_VALIDATION.md` avant toute déclaration de maturité.
+
+
+## Version v2.0.0-rc.17
+
+Le lot R24 harmonise la personnalité locale/distante : tutoiement, réponses directes et réduction des répétitions. Des indications bornées aident les reformulations, continuations et corrections. La génération reste produite par le modèle.
+
+Les souvenirs anciens sont sélectionnés selon leur pertinence lexicale. Une option séparée autorise la lecture de la mémoire cognitive du compte pour le modèle local, via les contrôles d'accès existants. Ces extraits ne sont pas transmis à un fournisseur IA distant dans ce mode et ne sont pas stockés dans la bibliothèque locale. La fenêtre du modèle reste bornée.
+
+Mon compte → Cerveau regroupe moteur, chargement et comparaison Qwen 1,5B/3B. Le comparateur utilise cinq cas synthétiques identiques et exporte les réponses, durées et appréciations humaines. Aucun score de qualité ni classement automatique. Les poids peuvent être téléchargés ; les conversations personnelles sont exclues de cet essai.
+
+La conversation dispose d'une barre compacte et d'une saisie en bas. Chaque réponse permet d'ouvrir « Corriger et enseigner » ; seule l'approbation du formulaire enregistre un exemple. Un message reste dans le champ lorsqu'il faut d'abord charger un modèle.
+
+Les tests simulés vérifient le câblage et la confidentialité, pas la qualité réelle de Qwen. L'inférence GPU, la qualité linguistique et le raisonnement restent à évaluer sur le matériel cible. Voir docs/LOCAL_MODEL_VALIDATION.md.

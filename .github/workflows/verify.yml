@@ -100,3 +100,20 @@ jobs:
           grep -q 'id="officialPortrait"' index.html
           grep -q 'id="modelFile"' index.html
           grep -q 'id="accessToken"' index.html
+
+  conversation-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install browser tools
+        run: |
+          npm install --prefix /tmp/heart-browser-tools --no-save playwright@1.56.1
+          /tmp/heart-browser-tools/node_modules/.bin/playwright install --with-deps chromium
+      - name: Conversation, memory, comparison and mobile regression
+        env:
+          NODE_PATH: /tmp/heart-browser-tools/node_modules
+        run: node tests/local-chat.browser.cjs
