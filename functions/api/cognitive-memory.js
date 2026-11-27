@@ -1,3 +1,4 @@
+import {rankKnowledge} from '../../lib/knowledge-ranking.mjs';
 import {reviewLearning} from '../../lib/learning-review.mjs';
 import {authenticatedHeartUser} from './account.js';
 import {KINDS,normalizeMemory,memoryExpiry,searchMemories,consolidationCandidates} from '../../lib/cognitive-memory.mjs';
@@ -13,8 +14,8 @@ async function purge(c,now){await c.db.prepare('DELETE FROM heart_cognitive_memo
 export async function onRequestGet({request,env}){
  const c=await context(request,env);if(c.error)return c.error;
  const params=new URL(request.url).searchParams,preview=params.get('consolidation')==='preview',mode=params.get('search')||'literal',kind=params.get('kind')||'',q=(params.get('q')||'').trim();
- if(!['literal','context'].includes(mode)||(kind&&!KINDS.includes(kind))||q.length>160)return reply({error:'Filtre invalide.'},400);
- try{const now=Date.now();await purge(c,now);const rows=await c.db.prepare('SELECT '+cols+' FROM heart_cognitive_memory WHERE member_id=? AND (expires_at IS NULL OR expires_at>?) AND (?=\'\' OR kind=?) AND (?=\'\' OR instr(lower(title||\' \'||content||\' \'||source),lower(?))>0) ORDER BY updated_at DESC,id LIMIT 200').bind(c.owner,now,kind,kind,mode==='context'?'':q,mode==='context'?'':q).all();const memories=mode==='context'&&q?searchMemories(rows.results,q):rows.results;return reply({memories,...(preview?{consolidation:consolidationCandidates(memories)}:{})});}catch{return reply({error:'Lecture indisponible.'},503);}
+ if(!['literal','context','ranked'].includes(mode)||(kind&&!KINDS.includes(kind))||q.length>160)return reply({error:'Filtre invalide.'},400);
+ try{const now=Date.now();await purge(c,now);const rows=await c.db.prepare('SELECT '+cols+' FROM heart_cognitive_memory WHERE member_id=? AND (expires_at IS NULL OR expires_at>?) AND (?=\'\' OR kind=?) AND (?=\'\' OR instr(lower(title||\' \'||content||\' \'||source),lower(?))>0) ORDER BY updated_at DESC,id LIMIT 200').bind(c.owner,now,kind,kind,mode==='literal'?q:'',mode==='literal'?q:'').all();const ranked=mode==='ranked'&&q?rankKnowledge(rows.results,q):null;const memories=ranked?ranked.map(x=>x.record):mode==='context'&&q?searchMemories(rows.results,q):rows.results;return reply({memories,...(ranked?{ranking:ranked.map(x=>({id:x.record.id,matched:x.matched,score:x.score})),method:'lexical-ranked'}:{}),...(preview?{consolidation:consolidationCandidates(memories)}:{})});}catch{return reply({error:'Lecture indisponible.'},503);}
 }
 export async function onRequestPost({request,env}){
  const url=new URL(request.url);if(url.protocol!=='https:'||request.headers.get('origin')!==url.origin||request.headers.get('sec-fetch-site')==='cross-site')return reply({error:'Origine refusée.'},403);
