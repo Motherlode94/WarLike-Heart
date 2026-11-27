@@ -1,3 +1,11 @@
+## 2.0.0-rc.18
+
+- R25.01 : calcul rationnel natif, pourcentages, budgets et conversions.
+- R25.02 : contraintes numériques et preuves propositionnelles bornées avec provenance.
+- R25.03 : archive extractive, rappel, synthèse et sauvegardes compatibles.
+- R25.04 : chargement sémantique multilingue explicite, inférence locale CPU et index éphémère.
+- R25.05 : contrôles partiels, réparation bornée et rapport de cas fixes exportable, sans certification globale du modèle génératif.
+
 ## 2.0.0-rc.17
 
 - R24 : personnalité française commune, continuité, souvenirs pertinents et mémoire Cloud locale optionnelle, comparaison des modèles et conversation simplifiée.

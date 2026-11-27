@@ -107,3 +107,13 @@ test("WarLike health refuses missing internal binding",async()=>{
  assert.equal(data.status,"binding_missing");
  assert.equal(data.accountConnected,false);
 });
+
+test('native tools preserve authentication boundaries and avoid provider inference',async t=>{
+ const original=globalThis.fetch;let calls=0;globalThis.fetch=async()=>{calls++;throw Error('No model call allowed');};t.after(()=>globalThis.fetch=original);
+ const bad=await onRequestPost(context(request([{role:'user',text:'2+2'}],{headers:{authorization:'Bearer fake'}})));assert.equal(bad.status,401);
+ const data=await (await onRequestPost(context(request([{role:'user',text:'0,1+0,2'}])))).json();assert.equal(data.reply,'0,1+0,2 = 0,3.');assert.equal(data.verification.status,'native-verified');assert.equal(calls,0);
+});
+test('remote responses share bounded repair and report unchecked factual accuracy',async t=>{
+ const original=globalThis.fetch;let calls=0;globalThis.fetch=async()=>new Response(JSON.stringify({output:[{content:[{type:'output_text',text:++calls===1?'2+2 = 5':'2+2 = 4'}]}]}));t.after(()=>globalThis.fetch=original);
+ const data=await (await onRequestPost(context(request([{role:'user',text:'Donne une égalité.'}])))).json();assert.equal(calls,2);assert.equal(data.reply,'2+2 = 4');assert.equal(data.verification.repairAttempted,true);assert.equal(data.verification.verifiedTruth,false);
+});

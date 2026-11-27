@@ -13,3 +13,8 @@ test('cloud snapshots retain optional archive and reject malformed or oversized 
  assert.equal(normalizeSnapshot({...old,archive:[{role:'system',text:'fake'}]}),null);
  assert.equal(normalizeSnapshot({...old,archive:[{role:'user',text:'a'.repeat(401)}]}),null);
 });
+
+test('direct recall searches the full retained archive alongside recent history',()=>{
+ const archive=archiveTurns([],[{role:'user',text:'Projet Zephyr : date prévue au 12 avril.'},...Array.from({length:159},(_,i)=>({role:'user',text:'Sujet '+i}))]);
+ const history=Array.from({length:100},(_,i)=>({role:'user',text:'Sujet récent '+i}));assert.match(recallReply('/rappel Zephyr',{archive,history}).reply,/12 avril/);
+});

@@ -32,3 +32,6 @@
 #homeView .avatar .controls:empty{display:none}
 .warlike-update-notice{position:static;width:fit-content;max-width:100%;margin:10px 0;box-shadow:none;font-size:12px}
 @media(max-width:900px){#homeView .avatar .controls{grid-column:2;gap:5px;margin-top:4px}#homeView .avatar .controls button{padding:6px 8px;font-size:11px;min-height:30px}}
+
+.reply-check{display:block;font-size:.75rem;opacity:.82;padding:.2rem .6rem;max-width:100%;overflow-wrap:anywhere;}
+.brain-settings code{white-space:normal;overflow-wrap:anywhere;}

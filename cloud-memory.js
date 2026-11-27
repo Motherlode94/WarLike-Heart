@@ -10,7 +10,7 @@ let remote=null;
 const message=x=>{status.textContent=x;};
 function label(snapshot,revision,updatedAt){
  if(!snapshot)return "Aucune sauvegarde Cloud pour ce compte.";
- const count=(snapshot.learning?.dialogues?.length||0)+" dialogues, "+(snapshot.learning?.knowledge?.length||0)+" fiches, "+(snapshot.memories?.length||0)+" souvenirs et "+(snapshot.history?.length||0)+" messages";
+ const count=(snapshot.learning?.dialogues?.length||0)+" dialogues, "+(snapshot.learning?.knowledge?.length||0)+" fiches, "+(snapshot.memories?.length||0)+" souvenirs et "+(snapshot.history?.length||0)+" messages et "+(snapshot.archive?.length||0)+" extraits anciens";
  return "Sauvegarde distante : "+count+" · révision "+revision+(updatedAt?" · "+new Date(updatedAt).toLocaleString("fr-FR"):"");
 }
 function setBusy(yes){for(const b of [upload,download,remove,check])b.disabled=yes;}
