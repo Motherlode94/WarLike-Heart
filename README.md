@@ -321,3 +321,8 @@ R19 : stockage D1 des opérations Git (migration 0010 à appliquer), approbation
 ## Version v2.0.0-rc.13 — Préversion
 
 R20 : orchestration d'opérations Git approuvées, API propriétaire, rapprochement distant en lecture seule et consultation des CI du commit publié. L'exécution exige la migration 0010, un connecteur autorisé, les variables d'écriture séparées et HEART_GITHUB_EXECUTION_CERTIFIED=true. Ne pas activer avant certification réelle sur un dépôt de test. Aucune fusion automatique.
+
+
+## Version v2.0.0-rc.14 — Préversion
+
+R21 : propositions IA multifichiers, vérification distante des diffs, analyse lexicale des dépendances et planification des tests isolés. Les propositions multifichiers sont uniquement des prévisualisations ; aucun exécuteur multifichier ni sandbox de tests n'est activé. Récupération de l'API R20 manquante dans main.
