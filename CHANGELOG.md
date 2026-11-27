@@ -1,3 +1,7 @@
+## 2.0.0-rc.16
+
+- Modèle local WebGPU Qwen, contexte de conversation, connaissances approuvées et corrections supervisées. Validation GPU et qualité conversationnelle encore requises.
+
 # Changelog — WarLike HEART
 
 ## 2.0.0-rc.15 — Release candidate

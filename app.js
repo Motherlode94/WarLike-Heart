@@ -8,6 +8,7 @@
   let history = [welcome];
   let recognition = null;
   let busy = false;
+  let conversationRevision=0;
   let portraitObjectUrl = null;
   const state = {voiceEnabled:false,remember:false};
   const MEMORY_KEY = "warlike-heart-explicit-memories-v1";
@@ -42,14 +43,19 @@
   const localBrain=window.WarLikeLocalBrain?.createEngine({
     readMemory:readMemories,writeMemory:writeMemories,canRemember:()=>state.remember
   });
+  const localChatReady=import('./local-chat.mjs?v=23.05').then(({createLocalChat})=>{
+    const chat=createLocalChat({readLearning,readMemories,writeLearning,canRemember:()=>state.remember});
+    window.WarLikeHeartLocalChat=chat;return chat;
+  }).catch(()=>{ $("localModelStatus").textContent="Le module local n’a pas pu être chargé. Recharge la page.";return null; });
+  const resetLocalContext=()=>{conversationRevision++;learningEngine?.resetContext();window.WarLikeHeartLocalChat?.reset();};
   const status = (text) => { $("status").textContent = text; };
   const brainStatus=$("localBrainStatus");
   if(brainStatus){
     brainStatus.textContent=localBrain
-      ?"✓ Learning Brain v2.0 chargé · dialogues et connaissances privés · sans API"
+      ?"Mode à règles disponible. Charge un modèle pour une conversation générative locale."
       :"⚠ Moteur local indisponible : vérifie le chargement de local-brain.js.";
   }
-  if(localBrain)$("aiMode").textContent="Learning Brain v2.0 · prêt sans API";
+  if(localBrain)$("aiMode").textContent="Modèle local · chargement requis";
   const safeHistory = (value) => Array.isArray(value) ? value.filter(x => x && ["user","assistant"].includes(x.role) && typeof x.text === "string" && x.text.length <= 4000).slice(-MAX) : null;
   const render = () => {
     const area = $("messages"); area.replaceChildren();
@@ -115,10 +121,27 @@
     if (!text || busy) return;
     busy=true; const sendButton=$("chatForm").querySelector("button[type=submit]");
     sendButton.disabled=true; field.disabled=true;
+    const turnRevision=conversationRevision;
     stopVoice();append("user",text);field.value="";
+    window.WarLikeHeartLocalChat?.clearTeaching();
     const token=$("accessToken").value.trim();
-    let answer;
-    if (!token) {
+    let answer,canTeach=false;
+    const selected=$("conversationEngine").value;
+    try {
+    if(selected==='local-llm'){
+      $("aiMode").textContent="Modèle de langage local · sur cet appareil";
+      try{
+        const words=window.WarLikeLocalBrain?.normalize(text)||'';
+        const memoryCommand=/^(?:(?:souviens toi|retiens|memorise|rappelle toi) que |(?:efface|supprime|oublie) (?:tous )?(?:tes |mes |nos )?(?:souvenirs|memoires)\b|que sais tu de moi|de quoi te souviens tu|rappelle moi (?:mes|tes) souvenirs|liste (?:mes|tes) souvenirs|(?:oublie|supprime) (?:que |le fait que ))/.test(words);
+        if(memoryCommand&&localBrain){answer=localBrain.reply(text).text;$("apiStatus").textContent="Commande de mémoire locale traitée.";}
+        else{
+          const chat=await localChatReady;
+          if(!chat)throw Error('Le module local n’a pas pu être chargé. Recharge la page.');
+          answer=await chat.reply(history);canTeach=true;
+          $("apiStatus").textContent="Réponse générée localement, sans envoi du chat à une API.";
+        }
+      }catch(error){answer=error.message;$("apiStatus").textContent="Modèle local indisponible. Utilise « Charger le modèle local » ou choisis un autre moteur.";}
+    } else if (selected==='rules') {
       const explicitWeb=text.match(/^(?:cherche|recherche|renseigne[- ]toi)(?: sur internet| sur le web| en ligne)?(?:\s*[:,-])?\s+(.+)$/i);
       const learned=explicitWeb?null:learningEngine?.answer(text);
       const local=explicitWeb?null:learned?null:localBrain?.reply(text);
@@ -163,16 +186,18 @@
         answer=data.reply;
         $("apiStatus").textContent="Connectée au moteur IA pour cette réponse.";
       } catch(error) {
-        answer="La réponse IA n'a pas pu être obtenue : "+(error.name==="AbortError"?"délai dépassé.":error.message)+" Tu peux réessayer ou retirer le jeton pour utiliser le mode démo.";
+        answer="La réponse IA n'a pas pu être obtenue : "+(error.name==="AbortError"?"délai dépassé.":error.message)+" Tu peux réessayer ou choisir un autre moteur de conversation.";
         $("apiStatus").textContent="Connexion IA en erreur.";
         status("Le serveur IA n'a pas répondu.");
       } finally {clearTimeout(timeout);}
     }
+    if(turnRevision!==conversationRevision)return;
     append("assistant",answer);
+    if(canTeach)window.WarLikeHeartLocalChat?.onReply({question:text,answer});
     if(window.WarLikeHeart3D){const l=answer.toLowerCase();const next=/heureuse|content|bonjour|plaisir|♥|❤️/.test(l)?"happy":/désol|erreur|impossible/.test(l)?"sad":(/pourquoi|comment/.test(l)||l.includes("?"))?"curious":"neutral";window.WarLikeHeart3D.setMood(next);}
     // Do not speak technical error messages.
-    if($("apiStatus").textContent==="Connectée au moteur IA pour cette réponse." || !token) speak(answer);
-    busy=false;sendButton.disabled=false;field.disabled=false;field.focus();
+    if($("apiStatus").textContent==="Connectée au moteur IA pour cette réponse." || canTeach || selected==='rules') speak(answer);
+    } finally {busy=false;sendButton.disabled=false;field.disabled=false;field.focus();}
   });
   $("threeMode").addEventListener("click",()=> $("modelFile").click());
   $("modelFile").addEventListener("change",async ev=>{
@@ -303,24 +328,32 @@
       if(!response.ok)throw Error("endpoint unavailable");
       const data=await response.json();
       if(data.aiConfigured===true){
-        $("aiMode").textContent="Service IA prêt — identification privée requise";
-        $("apiStatus").textContent="Serveur IA configuré. Saisis ton jeton privé pour discuter.";
+        if($("conversationEngine").value==='remote')$("aiMode").textContent="Service IA prêt — identification privée requise";
+        if($("conversationEngine").value==='remote')$("apiStatus").textContent="Serveur IA configuré. Saisis ton jeton privé pour discuter.";
       }else{
-        $("aiMode").textContent="Learning Brain v2.0 · service distant non configuré";
-        $("apiStatus").textContent="Les secrets de production Cloudflare sont absents. Voir DEPLOIEMENT.md.";
+        if($("conversationEngine").value==='remote')$("aiMode").textContent="Service distant non configuré";
+        if($("conversationEngine").value==='remote')$("apiStatus").textContent="Service IA distant non configuré.";
       }
     }catch{
-      $("aiMode").textContent="Learning Brain v2.0 · service distant non vérifié";
-      $("apiStatus").textContent="La vérification de l'API n'est pas disponible.";
+      if($("conversationEngine").value==='remote')$("aiMode").textContent="Service distant non vérifié";
+      if($("conversationEngine").value==='remote')$("apiStatus").textContent="La vérification de l'API n'est pas disponible.";
     }
   })();
   $("accessToken").addEventListener("input",()=>{
     const connected=Boolean($("accessToken").value.trim());
-    $("aiMode").textContent=connected?"Mode IA distant demandé · vérifier la connexion":"Learning Brain v2.0 · sans API";
-    $("apiStatus").textContent=connected?"Jeton présent en mémoire ; une requête sera envoyée au prochain message.":"Le mode démo reste accessible sans jeton.";
+    if($("conversationEngine").value==='remote')$("aiMode").textContent=connected?"Mode IA distant demandé · vérifier la connexion":"Service distant · jeton requis";
+    if($("conversationEngine").value==='remote')$("apiStatus").textContent=connected?"Jeton présent en mémoire pour le service distant.":"Jeton privé requis pour le service distant.";
+  });
+  $("conversationEngine").addEventListener("change",()=>{
+    const mode=$("conversationEngine").value;
+    $("aiMode").textContent=mode==='local-llm'?'Modèle de langage local':mode==='rules'?'Mode à règles · réponses limitées':'Service IA distant · jeton requis';
+    $("localModelPanel").hidden=mode!=='local-llm';
+    $("apiStatus").textContent=mode==='remote'?'Le prochain message sera envoyé au service distant avec le jeton privé.':'Les réponses restent sur cet appareil.';
   });
   $("voiceEnabled").addEventListener("change",ev => {state.voiceEnabled=ev.target.checked; if(!state.voiceEnabled) stopVoice();persist();});
   $("remember").addEventListener("change",ev => {
+    if(!ev.target.checked)resetLocalContext();
+    else {conversationRevision++;learningEngine?.resetContext();window.WarLikeHeartLocalChat?.clearTeaching();}
     state.remember=ev.target.checked;
     if(!state.remember){try{localStorage.removeItem(MEMORY_KEY);localStorage.removeItem(LEARNING_KEY);}catch{}}
     persist();
@@ -348,7 +381,7 @@
     if(file.size>1024*1024){status("Fichier trop volumineux (maximum 1 Mo).");return;}
     try {const data=JSON.parse(await file.text());if(data.format!=="warlike-heart-conversation"||data.version!==1)throw Error("format");
       const imported=safeHistory(data.history);if(!imported||!imported.length)throw Error("content");
-      history=imported;stopVoice();render();persist();
+      resetLocalContext();history=imported;stopVoice();render();persist();
       // Only restore explicit memories if the user has already opted into local storage.
       if(state.remember&&Array.isArray(data.memories)){
         const valid=data.memories.filter(x=>typeof x==="string"&&x.length>=3&&x.length<=300).slice(0,40);
@@ -361,7 +394,7 @@
     }catch{status("Import impossible : format ou contenu non valide.");}
   });
   $("clear").addEventListener("click",()=>{
-    stopVoice();history=[welcome];render();
+    resetLocalContext();stopVoice();history=[welcome];render();
     state.remember=false;$("remember").checked=false;
     try{localStorage.removeItem(KEY);localStorage.removeItem(MEMORY_KEY);localStorage.removeItem(LEARNING_KEY);}catch{}
     status("Conversation et souvenirs explicites locaux effacés.");
@@ -379,6 +412,7 @@
       if(!state.remember)return false;
       const imported=safeHistory(data?.history);
       if(!imported||!Array.isArray(data?.memories)||!data?.learning)return false;
+      resetLocalContext();
       const previous={history,memories:readMemories(),learning:readLearning()};
       if(!writeMemories(data.memories)||!writeLearning(data.learning))return false;
       history=imported.length?imported:[welcome];

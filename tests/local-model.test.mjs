@@ -30,3 +30,12 @@ test('failed model download is recoverable without a remote fallback',async()=>{
  const engine=createLocalModel({supported:()=>true,workerFactory:()=>({terminate(){},postMessage(x){queueMicrotask(()=>this.onmessage({data:{id:x.id,type:'error',error:'Téléchargement impossible'}}));}})});
  await assert.rejects(engine.load(model),/Téléchargement/);assert.equal(engine.status().state,'error');
 });
+test('a cancelled download cannot overwrite the state of a replacement load',async()=>{
+ const workers=[];
+ const engine=createLocalModel({supported:()=>true,workerFactory:()=>{const worker={postMessage(x){this.last=x;},terminate(){}};workers.push(worker);return worker;}});
+ const first=assert.rejects(engine.load(model),/arrêté/);
+ engine.stop();const second=engine.load(model);await first;
+ assert.equal(engine.status().state,'loading');
+ workers[1].onmessage({data:{id:workers[1].last.id,type:'loaded'}});await second;
+ assert.equal(engine.status().state,'ready');
+});

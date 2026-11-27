@@ -331,3 +331,14 @@ R21 : propositions IA multifichiers, vérification distante des diffs, analyse l
 ## Version v2.0.0-rc.15 — Préversion
 
 R22 : registre de spécialistes, prévisualisation des collaborations et dépendances, décomposition des objectifs explicites et préparation de reprise depuis les résultats D1. Agent Command Center intégré. Les missions internes restent limitées à cinq tâches de lecture, deux en parallèle. Les rôles consultatifs ne disposent pas de nouvelles permissions. La reprise ne restaure pas les requêtes ni les résultats précédents.
+
+
+## Version v2.0.0-rc.16
+
+Le chat propose un modèle Qwen 2.5 local via WebLLM 0.2.79 dans un worker. Choisir un modèle puis « Charger le modèle local » autorise le téléchargement des poids et du runtime. Le cache dépend du navigateur ; le fonctionnement intégral hors ligne n'est pas certifié. WebGPU en HTTPS et une mémoire GPU suffisante sont nécessaires. Les modèles disponibles sont 1,5B et 3B, pas un modèle entraîné par WarLike.
+
+Le mode local ne transmet pas le chat au serveur IA. Le service distant et le mode à règles restent des choix explicites, sans repli automatique. La mémoire locale facultative alimente le contexte récent et les connaissances approuvées ; la mémoire D1 n'est pas automatiquement récupérée dans ce mode.
+
+Les corrections validées alimentent des exemples de contexte, sans fine-tuning des poids. La récupération de connaissances reste lexicale. Le budget de 3 200 octets UTF-8 laisse de la place aux délimiteurs et aux 512 tokens de réponse dans une fenêtre de 4 096 tokens ; l'interface signale la réduction de l'historique.
+
+Tests du runtime simulé, du contexte, des connaissances et des corrections : `node --test tests/*.test.mjs`. La génération GPU réelle et les huit P0 doivent être évalués avec `docs/LOCAL_MODEL_VALIDATION.md` avant toute déclaration de maturité.
