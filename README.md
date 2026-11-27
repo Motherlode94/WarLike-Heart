@@ -266,3 +266,8 @@ Cette préversion établit le versionnement explicite de HEART et conserve les m
 ## Version v2.0.0-rc.2 — Préversion
 
 Espace agent : prévisualisation des missions, suivi des objectifs, inventaire des applications et diagnostic du routage IA. Aucune exécution autonome ni certification de production.
+
+
+## Version v2.0.0-rc.3 — Préversion
+
+Cycle R08 : intégration progressive de l’apprentissage supervisé, des initiatives, du journal et des objectifs. Voir les PR et leur état pour les fonctionnalités effectivement intégrées. Cette version ne certifie pas la production.
