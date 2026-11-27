@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.5 — Release candidate
+
+- Version synchronization for internal mission execution cycle.
+- Actual availability requires merged features, schema migration and deployment verification.
+
 ## 2.0.0-rc.4 — Release candidate
 
 - Restore local plum and rose palette for shared surfaces.
