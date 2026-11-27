@@ -271,3 +271,8 @@ Espace agent : prévisualisation des missions, suivi des objectifs, inventaire d
 ## Version v2.0.0-rc.3 — Préversion
 
 Cycle R08 : intégration progressive de l’apprentissage supervisé, des initiatives, du journal et des objectifs. Voir les PR et leur état pour les fonctionnalités effectivement intégrées. Cette version ne certifie pas la production.
+
+
+## Version v2.0.0-rc.4 — Préversion
+
+Correction de la palette locale HEART et suppression du numéro obsolète dans le nouveau message d’accueil. Les conversations enregistrées restent intactes. Déploiement non certifié.

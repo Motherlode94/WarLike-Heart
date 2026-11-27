@@ -1,0 +1,3 @@
+/* App-local palette: retain HEART identity without editing shared WarLike CSS. */
+:root[data-warlike-app="warlike-heart"]{--wl-bg:#17121f;--wl-surface:#241c2c;--wl-surface-alt:#34263d;--wl-text:#faf0f7;--wl-text-muted:#d8c4d9;--wl-border:#70546e;--wl-primary:#f4a6c1;--wl-primary-text:#291526;--wl-accent:#f4a6c1;--wl-focus:#ffd2e6;color-scheme:dark}
+:root[data-warlike-app="warlike-heart"][data-warlike-mode="light"],:root[data-warlike-app="warlike-heart"][data-warlike-theme="light"],:root[data-warlike-app="warlike-heart"]:has(body.light){--wl-bg:#fbf5f9;--wl-surface:#fff;--wl-surface-alt:#f3e6ef;--wl-text:#302038;--wl-text-muted:#62485f;--wl-border:#c5a6bd;--wl-primary:#824363;--wl-primary-text:#fff;--wl-accent:#824363;--wl-focus:#824363;color-scheme:light}
