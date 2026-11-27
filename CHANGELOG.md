@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.13 — Release candidate
+
+- R20 supervised Git execution interface, reconciliation and receipt-linked CI inspection.
+- Remote writes remain gated until explicit production certification; no automatic merge.
+
 ## 2.0.0-rc.12 — Release candidate
 
 - R19 persistent Git operation metadata, approval lifecycle and restricted branch/draft PR adapters.
