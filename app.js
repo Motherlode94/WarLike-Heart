@@ -141,6 +141,7 @@
     if (!text || busy) return;
     const selected=$("conversationEngine").value;
     const native=(await nativeReady).nativeReply(text);
+    if(busy)return;
     const explicitMemory=memoryCommandPattern.test(window.WarLikeLocalBrain?.normalize(text)||'');
     if(!native&&selected==='local-llm'&&!explicitMemory&&window.WarLikeHeartLocalChat?.status().state!=='ready'){status('Charge un modèle dans Cerveau pour commencer. Ton message est conservé.');openBrain();return;}
     if(!native&&selected==='remote'&&!$("accessToken").value.trim()){status('Configure le service distant dans Cerveau. Ton message est conservé.');openBrain();return;}
