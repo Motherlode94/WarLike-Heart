@@ -316,3 +316,8 @@ Cycle R16/R17 : diagnostics CI, inventaire et comparaison de commits, lecture de
 ## Version v2.0.0-rc.12 — Préversion
 
 R19 : stockage D1 des opérations Git (migration 0010 à appliquer), approbations expirantes, adaptateurs de branche et de PR en brouillon, gestionnaire de préparation. Les écritures distantes ne sont pas exposées par l'API de cette version : certification et orchestration atomique requises avant activation. Le code proposé reste dans le navigateur et n'est pas persisté.
+
+
+## Version v2.0.0-rc.13 — Préversion
+
+R20 : orchestration d'opérations Git approuvées, API propriétaire, rapprochement distant en lecture seule et consultation des CI du commit publié. L'exécution exige la migration 0010, un connecteur autorisé, les variables d'écriture séparées et HEART_GITHUB_EXECUTION_CERTIFIED=true. Ne pas activer avant certification réelle sur un dépôt de test. Aucune fusion automatique.
