@@ -1,5 +1,10 @@
 # Changelog — WarLike HEART
 
+## 2.0.0-rc.10 — Release candidate
+
+- R15 GitHub read-only audit dashboard for allowlisted repositories, observed PRs and workflows, and SHA-based recommendations.
+- Live deployment verification and required check certification remain pending.
+
 ## 2.0.0-rc.9 — Release candidate
 
 - R13 candidate: multisource reasoning UI, knowledge disagreement review, consent-gated AI critique API and supervised mission lessons.
