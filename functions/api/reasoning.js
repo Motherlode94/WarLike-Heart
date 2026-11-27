@@ -1,3 +1,4 @@
+import {evidenceCoverage} from '../../lib/evidence-coverage.mjs';
 import {authenticatedHeartUser} from './account.js';
 import {selectEvidence,compareOptions,contextualEvidence,explainDecision} from '../../lib/reasoning.mjs';
 const reply=(d,status=200)=>Response.json(d,{status,headers:{'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
@@ -19,6 +20,6 @@ export async function onRequestPost({request,env}){
  const evidence=(d.contextual===true?contextualEvidence:selectEvidence)(d.question,records).map(({steps,...r})=>({...r,content:r.content?.slice(0,500)}));
  const ids=new Set(evidence.filter(x=>x.type==='node').map(x=>x.id));
  const links=e.results.filter(x=>ids.has(x.from_id)||ids.has(x.to_id)).slice(0,30);
- return reply({evidence,links,ranking,...(decision?{decision}:{}),limitations:['Recherche lexicale, non sémantique','Sources déclaratives, non vérifiées','Scores fournis par utilisateur, pas des probabilités','Aucune action exécutée'],needsEvidence:!evidence.length});
+ return reply({evidence,links,coverage:evidenceCoverage(evidence,links),ranking,...(decision?{decision}:{}),limitations:['Recherche lexicale, non sémantique','Sources déclaratives, non vérifiées','Scores fournis par utilisateur, pas des probabilités','Aucune action exécutée'],needsEvidence:!evidence.length});
  }catch{return reply({error:'Analyse indisponible'},503);}
 }
